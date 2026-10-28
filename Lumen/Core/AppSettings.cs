@@ -156,6 +156,27 @@ namespace Lumen.Core
             set { Put("baseUrl", (value ?? "").Trim()); }
         }
 
+        /// <summary>Image-capable model used by the generate_image tool (auto-picked from the key's model list).</summary>
+        public static string ImageModel
+        {
+            get { return Get("imageModel", ""); }
+            set { Put("imageModel", value ?? ""); }
+        }
+
+        /// <summary>Let Gemini create images and files on request.</summary>
+        public static bool Creative
+        {
+            get { return Get("creative", true); }
+            set { Put("creative", value); }
+        }
+
+        /// <summary>Voice id for "Read aloud", empty = system default.</summary>
+        public static string VoiceId
+        {
+            get { return Get("voice", ""); }
+            set { Put("voice", value ?? ""); }
+        }
+
         // ------------------------------------------------------------ appearance
 
         public static int AccentIndex

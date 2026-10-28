@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace Lumen.Core
 {
@@ -70,14 +72,32 @@ namespace Lumen.Core
             var p = Current;
             var black = AppSettings.PureBlack;
 
+            // Dark: translucent "glass" over a pre-blurred aurora. Black: true black for AMOLED, near-opaque surfaces.
             SetBrush(res, "BgBrush", black ? Hex(0xFF000000) : Hex(0xFF0E0F13));
-            SetBrush(res, "SurfaceBrush", black ? Hex(0xFF0D0D0F) : Hex(0xFF181A21));
-            SetBrush(res, "Surface2Brush", black ? Hex(0xFF1A1A1E) : Hex(0xFF23262F));
-            SetBrush(res, "StrokeBrush", black ? Hex(0xFF222228) : Hex(0xFF2E323D));
+            SetBrush(res, "SurfaceBrush", black ? Hex(0xFF0E0E11) : Hex(0xB3181A21));
+            SetBrush(res, "Surface2Brush", black ? Hex(0xFF1A1A1F) : Hex(0xCC23262F));
+            SetBrush(res, "GlassBrush", black ? Hex(0xF0000000) : Hex(0x990F1016));
+            SetBrush(res, "PaneBrush", black ? Hex(0xFA0A0A0C) : Hex(0xF2121319));
+            SetBrush(res, "StrokeBrush", black ? Hex(0x26FFFFFF) : Hex(0x33FFFFFF));
             SetBrush(res, "AccentBrush", p.Solid);
+            SetBrush(res, "AccentSoftBrush", Color.FromArgb(0x33, p.Solid.R, p.Solid.G, p.Solid.B));
 
             SetGradient(res, "AccentGradient", p.A, p.B, p.C);
             SetGradient(res, "UserBubbleBrush", p.Bubble1, p.Bubble2, p.Bubble2);
+
+            var aurora = res["AuroraBrush"] as ImageBrush;
+            if (aurora != null)
+            {
+                if (black)
+                {
+                    aurora.ImageSource = null;
+                }
+                else
+                {
+                    var idx = Palettes.IndexOf(p);
+                    aurora.ImageSource = new BitmapImage(new Uri("ms-appx:///Assets/Backgrounds/Aurora" + idx + ".jpg")) { DecodePixelWidth = 540 };
+                }
+            }
 
             // Built-in controls (ToggleSwitch, Slider, selection borders) read this at startup: they follow a new accent after a restart.
             res["SystemAccentColor"] = p.B;

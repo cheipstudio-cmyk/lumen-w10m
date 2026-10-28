@@ -26,6 +26,12 @@ namespace Lumen.Core
         public override string ToString() { return Id; }
     }
 
+    public sealed class ToolOptions
+    {
+        public bool Wikipedia { get; set; }
+        public bool Creative { get; set; }
+    }
+
     public sealed class StreamResult
     {
         public string FinishReason { get; set; }
@@ -58,6 +64,7 @@ namespace Lumen.Core
         public async Task<List<ModelInfo>> ListModelsAsync(string apiKey, string baseUrl, CancellationToken ct)
         {
             var result = new List<ModelInfo>();
+            var images = new List<string>();
             string pageToken = null;
             do
             {
@@ -79,6 +86,7 @@ namespace Lumen.Core
                         var methods = o.GetNamedArray("supportedGenerationMethods", new JsonArray());
                         if (!methods.Any(m => m.ValueType == JsonValueType.String && m.GetString() == "generateContent")) continue;
                         var id = o.GetNamedString("name", "").Replace("models/", "");
+                        if (IsImageModel(id)) images.Add(id);
                         if (!IsChatModel(id)) continue;
                         result.Add(new ModelInfo { Id = id, DisplayName = o.GetNamedString("displayName", id) });
                     }
@@ -87,11 +95,26 @@ namespace Lumen.Core
                 }
             } while (pageToken != null);
 
+            // Remember the best image-capable model for the generate_image tool.
+            var best = images
+                .OrderByDescending(i => i.Contains("flash"))
+                .ThenByDescending(i => i.EndsWith("-latest"))
+                .ThenByDescending(i => !i.Contains("preview"))
+                .ThenByDescending(i => i, StringComparer.Ordinal)
+                .FirstOrDefault();
+            AppSettings.ImageModel = best ?? "";
+
             return result
                 .OrderByDescending(m => m.Id.EndsWith("-latest"))
                 .ThenByDescending(m => m.Id.Contains("flash"))
                 .ThenByDescending(m => m.Id, StringComparer.Ordinal)
                 .ToList();
+        }
+
+        private static bool IsImageModel(string id)
+        {
+            return id.StartsWith("gemini") && id.IndexOf("image", StringComparison.OrdinalIgnoreCase) >= 0
+                   && id.IndexOf("imagen", StringComparison.OrdinalIgnoreCase) < 0;
         }
 
         private static bool IsChatModel(string id)
@@ -107,22 +130,23 @@ namespace Lumen.Core
         private const int MaxToolRounds = 3;
 
         /// <summary>
-        /// Streams an answer. When <paramref name="wikipedia"/> is on, the model may call the
-        /// wikipedia_search function; we run it locally (free, no key) and continue the same answer.
+        /// Streams an answer. The model may call tools (Wikipedia, images, files); we run them locally
+        /// and continue the same answer, up to a few rounds.
         /// </summary>
         public async Task<StreamResult> StreamAsync(
-            string apiKey, string baseUrl, string model, string systemPrompt, double temperature, bool wikipedia,
-            IList<ChatMessage> history, Action<string> onDelta, Action<string> onStatus, CancellationToken ct)
+            string apiKey, string baseUrl, string model, string systemPrompt, double temperature, ToolOptions tools,
+            IList<ChatMessage> history, Action<string> onDelta, Action<string> onStatus, Action<Artifact> onArtifact, CancellationToken ct)
         {
             var contents = await BuildContentsAsync(history);
-            var system = systemPrompt + "\n\n" + DateLine() + (wikipedia ? "\n" + WikipediaClient.PromptHint : "");
+            var system = systemPrompt + "\n\n" + DateLine();
+            if (tools.Wikipedia) system += "\n" + WikipediaClient.PromptHint;
+            if (tools.Creative) system += "\n" + FileTools.PromptHint;
             var result = new StreamResult();
 
             for (int round = 0; round <= MaxToolRounds; round++)
             {
-                // On the last round calling is switched off (tool stays declared) so the model answers with what it has.
-                var allowCalls = round < MaxToolRounds;
-                var body = BuildBody(contents, system, temperature, wikipedia, allowCalls);
+                // On the last round calling is switched off (tools stay declared) so the model answers with what it has.
+                var body = BuildBody(contents, system, temperature, tools, round < MaxToolRounds);
                 var turn = new TurnState();
                 await StreamOnceAsync(apiKey, baseUrl, model, body, turn, onDelta, result, ct);
 
@@ -143,9 +167,22 @@ namespace Lumen.Core
                     if (name == WikipediaClient.ToolName)
                     {
                         var query = args.GetNamedString("query", "");
-                        var lang = args.GetNamedString("lang", "en");
-                        onStatus?.Invoke(query);
-                        output = await WikipediaClient.SearchAsync(query, lang, ct);
+                        onStatus?.Invoke(string.Format(S.LookingUp, query));
+                        output = await WikipediaClient.SearchAsync(query, args.GetNamedString("lang", "en"), ct);
+                    }
+                    else if (name == FileTools.ImageTool)
+                    {
+                        onStatus?.Invoke(S.CreatingImage);
+                        var r = await FileTools.GenerateImageAsync(this, apiKey, baseUrl, args, ct);
+                        output = r.Item1;
+                        if (r.Item2 != null) onArtifact?.Invoke(r.Item2);
+                    }
+                    else if (name == FileTools.FileTool)
+                    {
+                        onStatus?.Invoke(S.CreatingFile);
+                        var r = await FileTools.CreateFileAsync(args);
+                        output = r.Item1;
+                        if (r.Item2 != null) onArtifact?.Invoke(r.Item2);
                     }
                     else
                     {
@@ -170,6 +207,67 @@ namespace Lumen.Core
                 onStatus?.Invoke(null);
             }
             return result;
+        }
+
+        /// <summary>One non-streamed call to an image-capable model. Returns (mimeType, base64) or null.</summary>
+        public async Task<Tuple<string, string>> GenerateImageAsync(string apiKey, string baseUrl, string model, string prompt, CancellationToken ct)
+        {
+            var text = new JsonObject();
+            text["text"] = JsonValue.CreateStringValue(prompt);
+            var parts = new JsonArray();
+            parts.Add(text);
+            var content = new JsonObject();
+            content["role"] = JsonValue.CreateStringValue("user");
+            content["parts"] = parts;
+            var contents = new JsonArray();
+            contents.Add(content);
+
+            var modalities = new JsonArray();
+            modalities.Add(JsonValue.CreateStringValue("TEXT"));
+            modalities.Add(JsonValue.CreateStringValue("IMAGE"));
+            var gen = new JsonObject();
+            gen["responseModalities"] = modalities;
+
+            var body = new JsonObject();
+            body["contents"] = contents;
+            body["generationConfig"] = gen;
+
+            var url = baseUrl + "/v1beta/models/" + Uri.EscapeDataString(model) + ":generateContent";
+            var req = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
+            req.Headers.Add("x-goog-api-key", apiKey);
+            req.Content = new HttpStringContent(body.Stringify(), Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
+
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
+            {
+                cts.CancelAfter(TimeSpan.FromSeconds(90));
+                using (var resp = await _http.SendRequestAsync(req, HttpCompletionOption.ResponseContentRead).AsTask(cts.Token))
+                {
+                    var raw = await resp.Content.ReadAsStringAsync().AsTask(cts.Token);
+                    if (!resp.IsSuccessStatusCode) throw ToError((int)resp.StatusCode, raw);
+                    JsonObject root;
+                    if (!JsonObject.TryParse(raw, out root)) return null;
+                    var cands = root.GetNamedArray("candidates", new JsonArray());
+                    Tuple<string, string> last = null;
+                    foreach (var c in cands)
+                    {
+                        if (c.ValueType != JsonValueType.Object) continue;
+                        var cont = c.GetObject().GetNamedObject("content", null);
+                        var ps = cont?.GetNamedArray("parts", null);
+                        if (ps == null) continue;
+                        foreach (var p in ps)
+                        {
+                            if (p.ValueType != JsonValueType.Object) continue;
+                            var po = p.GetObject();
+                            if (po.GetNamedBoolean("thought", false)) continue; // draft images while "thinking"
+                            var inline = po.GetNamedObject("inlineData", null);
+                            if (inline == null) continue;
+                            var data = inline.GetNamedString("data", "");
+                            if (data.Length > 0) last = Tuple.Create(inline.GetNamedString("mimeType", "image/png"), data);
+                        }
+                    }
+                    return last;
+                }
+            }
         }
 
         private static string DateLine()
@@ -290,7 +388,7 @@ namespace Lumen.Core
             {
                 if (m.IsError) continue;
                 var parts = new JsonArray();
-                if (!string.IsNullOrEmpty(m.ImageFile))
+                if (!string.IsNullOrEmpty(m.ImageFile) && m.IsUser)
                 {
                     var b64 = await ImageHelper.ReadBase64Async("images", m.ImageFile);
                     if (b64 != null) parts.Add(InlinePart("image/jpeg", b64));
@@ -316,7 +414,7 @@ namespace Lumen.Core
             return contents;
         }
 
-        private static JsonObject BuildBody(JsonArray contents, string systemPrompt, double temperature, bool tools, bool allowCalls)
+        private static JsonObject BuildBody(JsonArray contents, string systemPrompt, double temperature, ToolOptions tools, bool allowCalls)
         {
             var body = new JsonObject();
             // Re-parse so each request owns its own copy (WinRT JSON values can't have two parents).
@@ -334,10 +432,11 @@ namespace Lumen.Core
             gen["temperature"] = JsonValue.CreateNumberValue(Math.Round(temperature, 2));
             body["generationConfig"] = gen;
 
-            if (tools)
+            var decls = new JsonArray();
+            if (tools.Wikipedia) decls.Add(WikipediaClient.Declaration());
+            if (tools.Creative) foreach (var d in FileTools.Declarations()) decls.Add(d);
+            if (decls.Count > 0)
             {
-                var decls = new JsonArray();
-                decls.Add(WikipediaClient.Declaration());
                 var tool = new JsonObject();
                 tool["functionDeclarations"] = decls;
                 var arr = new JsonArray();

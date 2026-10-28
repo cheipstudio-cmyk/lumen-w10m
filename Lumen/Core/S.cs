@@ -3,7 +3,7 @@ namespace Lumen.Core
     /// <summary>All user-facing runtime strings (English only).</summary>
     public static class S
     {
-        public const string AppVersion = "1.1";
+        public const string AppVersion = "1.2";
 
         public const string GreetMorning = "Good morning";
         public const string GreetAfternoon = "Good afternoon";
@@ -25,6 +25,8 @@ namespace Lumen.Core
         public const string MicDenied = "Microphone access is off. Turn it on in Settings > Privacy > Microphone.";
         public const string MicError = "Couldn't start the microphone";
         public const string TooShort = "Hold on a bit longer, that was too short";
+        public const string CreatingImage = "Creating the image";
+        public const string CreatingFile = "Writing the file";
         public const string LookingUp = "Looking up \"{0}\" on Wikipedia";
 
         public const string Verifying = "Checking your key...";

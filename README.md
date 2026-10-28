@@ -5,7 +5,12 @@ Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC
 
 ## Funzioni
 
-- Onboarding animato con un Lumia 735 che fa girare Lumen
+- Onboarding con un Lumia 735 in 3D (render three.js, video H.264 in loop) che fa girare Lumen
+- Look Fluent: icone Fluent System Icons, superfici traslucide su sfondo aurora sfocato per ogni accent
+- Immagini e file generati su richiesta (tool generate_image e create_file), con Salva, Apri, Condividi
+- Lista chat con ricerca, anteprime, chat fissate, rinomina; menu a pressione lunga con icone
+- Leggi ad alta voce, seleziona testo, elimina messaggio
+- Notifiche in-app animate e live tile con l'ultima chat
 - Risposte in streaming token per token, con pulsante stop
 - Messaggi vocali (WAV 16 kHz mono, max 2 minuti) che Gemini ascolta e a cui risponde
 - Foto dalla fotocamera o dalla galleria, ridimensionate a 1024 px prima dell'invio
@@ -23,7 +28,7 @@ Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC
 - Nessuna dipendenza NuGet oltre al runtime UWP: HTTP, JSON e immagini usano solo API WinRT
 - Durante lo streaming il testo viene aggiornato a circa 15 fps e il markdown viene elaborato una sola volta, a risposta finita
 - Liste virtualizzate (`ItemsStackPanel`), binding compilati (`x:Bind`), immagini decodificate alla dimensione mostrata
-- Nessun blur, acrylic o ombra
+- Nessun blur in tempo reale: l'effetto acrylic usa sfondi pre-sfocati, così la GPU del 735 non soffre
 - Compilazione .NET Native in Release
 
 ## La chiave gratuita
@@ -88,4 +93,9 @@ Lumen/
   Core/AudioRecorder.cs    registrazione vocale
   Core/ThemeManager.cs     temi live
   Core/Fx.cs               animazioni
+  Core/FileTools.cs        generazione immagini e file
+  Core/Speech.cs           lettura ad alta voce
+  Core/TileHelper.cs       live tile
+  Assets/Lumia735.mp4      video 3D dell'onboarding
+  Assets/Fonts/            Fluent System Icons (MIT), subset
 ```

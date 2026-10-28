@@ -43,12 +43,14 @@ namespace Lumen.Core
                     {
                         Id = o.GetNamedString("id", ""),
                         Title = o.GetNamedString("title", ""),
-                        Updated = FromUnix(o.GetNamedNumber("updated", 0))
+                        Updated = FromUnix(o.GetNamedNumber("updated", 0)),
+                        Preview = o.GetNamedString("preview", ""),
+                        Pinned = o.GetNamedBoolean("pinned", false)
                     });
                 }
             }
             catch (Exception) { }
-            return list.Where(c => c.Id.Length > 0).OrderByDescending(c => c.Updated).ToList();
+            return list.Where(c => c.Id.Length > 0).OrderByDescending(c => c.Pinned).ThenByDescending(c => c.Updated).ToList();
         }
 
         public static async Task SaveIndexAsync(IEnumerable<ConversationInfo> items)
@@ -60,6 +62,8 @@ namespace Lumen.Core
                 o["id"] = JsonValue.CreateStringValue(c.Id);
                 o["title"] = JsonValue.CreateStringValue(c.Title ?? "");
                 o["updated"] = JsonValue.CreateNumberValue(c.Updated.ToUnixTimeMilliseconds());
+                o["preview"] = JsonValue.CreateStringValue(c.Preview ?? "");
+                o["pinned"] = JsonValue.CreateBooleanValue(c.Pinned);
                 arr.Add(o);
             }
             await WriteAsync("index.json", arr.Stringify());
@@ -90,6 +94,8 @@ namespace Lumen.Core
                         ImageFile = img.Length > 0 ? img : null,
                         AudioFile = audio.Length > 0 ? audio : null,
                         AudioSeconds = (int)o.GetNamedNumber("audioSec", 0),
+                        DocFile = Nullable(o.GetNamedString("doc", "")),
+                        DocSize = (long)o.GetNamedNumber("docSize", 0),
                         Time = FromUnix(o.GetNamedNumber("time", 0))
                     });
                 }
@@ -109,6 +115,11 @@ namespace Lumen.Core
                 o["role"] = JsonValue.CreateStringValue(m.Role);
                 o["text"] = JsonValue.CreateStringValue(m.Text ?? "");
                 if (!string.IsNullOrEmpty(m.ImageFile)) o["image"] = JsonValue.CreateStringValue(m.ImageFile);
+                if (!string.IsNullOrEmpty(m.DocFile))
+                {
+                    o["doc"] = JsonValue.CreateStringValue(m.DocFile);
+                    o["docSize"] = JsonValue.CreateNumberValue(m.DocSize);
+                }
                 if (!string.IsNullOrEmpty(m.AudioFile))
                 {
                     o["audio"] = JsonValue.CreateStringValue(m.AudioFile);
@@ -125,6 +136,7 @@ namespace Lumen.Core
             var conv = await LoadAsync(info);
             await ImageHelper.DeleteAsync(conv.Messages.Select(m => m.ImageFile));
             await AudioRecorder.DeleteAsync(conv.Messages.Select(m => m.AudioFile));
+            await FileTools.DeleteAsync(conv.Messages.Select(m => m.DocFile));
             try
             {
                 var folder = await ChatsFolderAsync();
@@ -140,7 +152,7 @@ namespace Lumen.Core
             try
             {
                 var local = ApplicationData.Current.LocalFolder;
-                foreach (var name in new[] { "chats", "images", "audio" })
+                foreach (var name in new[] { "chats", "images", "audio", "files" })
                 {
                     var f = await local.TryGetItemAsync(name);
                     if (f != null) await f.DeleteAsync(StorageDeleteOption.PermanentDelete);
@@ -164,6 +176,8 @@ namespace Lumen.Core
             catch (Exception) { }
             finally { Gate.Release(); }
         }
+
+        private static string Nullable(string s) { return string.IsNullOrEmpty(s) ? null : s; }
 
         private static DateTimeOffset FromUnix(double ms)
         {

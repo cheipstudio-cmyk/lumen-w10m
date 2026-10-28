@@ -6,23 +6,27 @@
 
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Palette -->
-            <Color x:Key="BgColor">#FF0E0F13</Color>
-            <Color x:Key="SurfaceColor">#FF181A21</Color>
-            <Color x:Key="Surface2Color">#FF23262F</Color>
-            <Color x:Key="StrokeColor">#FF2E323D</Color>
-            <Color x:Key="TextPrimaryColor">#FFECEEF3</Color>
-            <Color x:Key="TextSecondaryColor">#FF9AA0B0</Color>
-            <Color x:Key="AccentColor">#FF8AB4FF</Color>
-            <Color x:Key="SystemAccentColor">#FF7C83FF</Color>
+            <!-- Fluent System Icons (MIT), subset to the glyphs Lumen uses -->
+            <FontFamily x:Key="IconFont">ms-appx:///Assets/Fonts/FluentIcons.ttf#FluentSystemIcons-Regular</FontFamily>
 
-            <SolidColorBrush x:Key="BgBrush" Color="{StaticResource BgColor}"/>
-            <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
-            <SolidColorBrush x:Key="Surface2Brush" Color="{StaticResource Surface2Color}"/>
-            <SolidColorBrush x:Key="StrokeBrush" Color="{StaticResource StrokeColor}"/>
-            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
-            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
-            <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+            <Color x:Key="SystemAccentColor">#FF9B6BFF</Color>
+
+            <!-- Palette. ThemeManager recolors these brush objects in place at runtime. -->
+            <SolidColorBrush x:Key="BgBrush" Color="#FF0E0F13"/>
+            <SolidColorBrush x:Key="SurfaceBrush" Color="#B3181A21"/>
+            <SolidColorBrush x:Key="Surface2Brush" Color="#CC23262F"/>
+            <SolidColorBrush x:Key="GlassBrush" Color="#990F1016"/>
+            <SolidColorBrush x:Key="PaneBrush" Color="#F2121319"/>
+            <SolidColorBrush x:Key="StrokeBrush" Color="#33FFFFFF"/>
+            <SolidColorBrush x:Key="HighlightBrush" Color="#14FFFFFF"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFECEEF3"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF9AA0B0"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF8AB4FF"/>
+            <SolidColorBrush x:Key="AccentSoftBrush" Color="#338AB4FF"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#FFFF8A80"/>
+
+            <!-- Pre-blurred aurora behind every page: the "acrylic" look without any GPU blur -->
+            <ImageBrush x:Key="AuroraBrush" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Top"/>
 
             <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#FF4F8BFF" Offset="0"/>
@@ -36,10 +40,52 @@
                 <GradientStop Color="#FF6A4CF0" Offset="1"/>
             </LinearGradientBrush>
 
-            <!-- Icons never pick up the phone accent by accident -->
-            <Style TargetType="FontIcon">
+            <!-- Glass top edge highlight used on bars and cards -->
+            <LinearGradientBrush x:Key="GlassEdgeBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#2EFFFFFF" Offset="0"/>
+                <GradientStop Color="#0AFFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Our icons use the Fluent font. Keyed, so system control templates keep their own glyph font. -->
+            <Style x:Key="Icon" TargetType="FontIcon">
+                <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            </Style>
+
+            <!-- Rounded, translucent context menus -->
+            <Style TargetType="MenuFlyoutPresenter">
+                <Setter Property="Background" Value="{StaticResource PaneBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="0,6,0,6"/>
+                <Setter Property="MinWidth" Value="220"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="MenuFlyoutPresenter">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="14">
+                                <ScrollViewer x:Name="MenuFlyoutPresenterScrollViewer"
+                                              HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
+                                              VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto"
+                                              ZoomMode="Disabled">
+                                    <ItemsPresenter Margin="{TemplateBinding Padding}"/>
+                                </ScrollViewer>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="MenuFlyoutItem">
+                <Setter Property="Padding" Value="16,13,20,13"/>
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
+            <Style TargetType="ToggleMenuFlyoutItem">
+                <Setter Property="Padding" Value="16,13,20,13"/>
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
+            <Style TargetType="MenuFlyoutSeparator">
+                <Setter Property="Background" Value="{StaticResource StrokeBrush}"/>
+                <Setter Property="Padding" Value="12,4,12,4"/>
             </Style>
 
             <!-- Flat round icon button: no hover chrome, cheap to render -->
@@ -54,19 +100,26 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="22">
+                            <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="22" RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform><ScaleTransform x:Name="Scale"/></Border.RenderTransform>
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.18"/>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.18"/>
+                                            </Storyboard>
+                                        </VisualState>
                                         <VisualState x:Name="PointerOver">
                                             <VisualState.Setters>
-                                                <Setter Target="Root.Opacity" Value="0.85"/>
+                                                <Setter Target="Root.Opacity" Value="0.9"/>
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Target="Root.Opacity" Value="0.6"/>
-                                            </VisualState.Setters>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="0.86" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="0.86" Duration="0:0:0.08"/>
+                                            </Storyboard>
                                         </VisualState>
                                         <VisualState x:Name="Disabled">
                                             <VisualState.Setters>
@@ -84,7 +137,7 @@
                 </Setter>
             </Style>
 
-            <!-- Suggestion card -->
+            <!-- Pill / card button with tilt-like press -->
             <Style x:Key="ChipButton" TargetType="Button">
                 <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
@@ -96,47 +149,128 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="14"
-                                    BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"
-                                    Padding="{TemplateBinding Padding}">
+                            <Grid x:Name="Root" RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform><ScaleTransform x:Name="Scale"/></Grid.RenderTransform>
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </VisualState>
                                         <VisualState x:Name="PointerOver">
                                             <VisualState.Setters>
-                                                <Setter Target="Root.Background" Value="{StaticResource Surface2Brush}"/>
+                                                <Setter Target="Glow.Opacity" Value="1"/>
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Pressed">
                                             <VisualState.Setters>
-                                                <Setter Target="Root.Background" Value="{StaticResource Surface2Brush}"/>
-                                                <Setter Target="Root.Opacity" Value="0.8"/>
+                                                <Setter Target="Glow.Opacity" Value="1"/>
                                             </VisualState.Setters>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="0.97" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="0.97" Duration="0:0:0.08"/>
+                                            </Storyboard>
                                         </VisualState>
                                         <VisualState x:Name="Disabled"/>
                                     </VisualStateGroup>
                                 </VisualStateManager.VisualStateGroups>
-                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                <Border Background="{TemplateBinding Background}" CornerRadius="16"
+                                        BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"/>
+                                <Border x:Name="Glow" Opacity="0" CornerRadius="16" Background="{StaticResource HighlightBrush}"
+                                        BorderBrush="{StaticResource AccentBrush}" BorderThickness="1"/>
+                                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                   Content="{TemplateBinding Content}"
                                                   Foreground="{TemplateBinding Foreground}"/>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Primary gradient pill -->
+            <Style x:Key="AccentButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource AccentGradient}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Padding" Value="20,10"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="22" Padding="{TemplateBinding Padding}"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform><ScaleTransform x:Name="Scale"/></Border.RenderTransform>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2"/>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="PointerOver"/>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="0.94" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="0.94" Duration="0:0:0.08"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <VisualState.Setters>
+                                                <Setter Target="Root.Opacity" Value="0.45"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"/>
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
 
+            <!-- Settings card -->
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource StrokeBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="16"/>
+                <Setter Property="Padding" Value="16,14,16,14"/>
+                <Setter Property="Margin" Value="0,0,0,12"/>
+            </Style>
+
+            <!-- Round icon badge used in cards and lists -->
+            <Style x:Key="IconBadge" TargetType="Border">
+                <Setter Property="Width" Value="36"/>
+                <Setter Property="Height" Value="36"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Background" Value="{StaticResource AccentGradient}"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+                <Setter Property="Margin" Value="0,0,14,0"/>
+            </Style>
+
             <Style x:Key="SectionHeader" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontSize" Value="12.5"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="CharacterSpacing" Value="60"/>
                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-                <Setter Property="Margin" Value="0,24,0,8"/>
+                <Setter Property="Margin" Value="4,22,0,10"/>
+            </Style>
+
+            <Style x:Key="CardTitle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
             </Style>
 
             <Style x:Key="HintText" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="13"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
-                <Setter Property="Margin" Value="0,0,0,8"/>
+                <Setter Property="Margin" Value="0,2,0,6"/>
             </Style>
         </ResourceDictionary>
     </Application.Resources>

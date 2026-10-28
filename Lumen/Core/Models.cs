@@ -35,12 +35,38 @@ namespace Lumen.Core
         public string Role { get; set; } = RoleUser;
         public DateTimeOffset Time { get; set; } = DateTimeOffset.Now;
 
-        /// <summary>JPEG file name inside LocalFolder\images, or null.</summary>
-        public string ImageFile { get; set; }
+        /// <summary>Image file name inside LocalFolder\images (a user photo, or an image the model generated), or null.</summary>
+        private string _imageFile;
+        public string ImageFile
+        {
+            get { return _imageFile; }
+            set
+            {
+                if (Set(ref _imageFile, value))
+                {
+                    _thumb = null;
+                    Raise(nameof(ImageVisibility));
+                    Raise(nameof(Thumb));
+                }
+            }
+        }
 
         /// <summary>WAV file name inside LocalFolder\audio, or null.</summary>
         public string AudioFile { get; set; }
         public int AudioSeconds { get; set; }
+
+        /// <summary>File created by the model (create_file tool), inside LocalFolder\files.</summary>
+        private string _docFile;
+        public string DocFile
+        {
+            get { return _docFile; }
+            set { if (Set(ref _docFile, value)) { Raise(nameof(DocVisibility)); Raise(nameof(DocName)); } }
+        }
+        public string DocName { get { return string.IsNullOrEmpty(_docFile) ? "" : _docFile.Substring(_docFile.IndexOf('_') + 1); } }
+        private long _docSize;
+        public long DocSize { get { return _docSize; } set { if (Set(ref _docSize, value)) Raise(nameof(DocSizeLabel)); } }
+        public string DocSizeLabel { get { return DocSize < 1024 ? DocSize + " B" : (DocSize / 1024.0).ToString("0.#") + " KB"; } }
+        public Visibility DocVisibility { get { return string.IsNullOrEmpty(_docFile) ? Visibility.Collapsed : Visibility.Visible; } }
 
         public bool IsUser { get { return Role == RoleUser; } }
 
@@ -118,7 +144,7 @@ namespace Lumen.Core
         public Visibility TextVisibility { get { return string.IsNullOrEmpty(_text) ? Visibility.Collapsed : Visibility.Visible; } }
 
         public string AudioLabel { get { return string.Format("{0}:{1:00}", AudioSeconds / 60, AudioSeconds % 60); } }
-        public string PlayGlyph { get { return _isPlaying ? "" : ""; } }
+        public string PlayGlyph { get { return _isPlaying ? Icons.Pause : Icons.Play; } }
 
         private BitmapImage _thumb;
         /// <summary>Lazy, downscaled thumbnail. Created on first binding (UI thread).</summary>
@@ -128,7 +154,7 @@ namespace Lumen.Core
             {
                 if (_thumb == null && !string.IsNullOrEmpty(ImageFile))
                 {
-                    _thumb = new BitmapImage { DecodePixelWidth = 440 };
+                    _thumb = new BitmapImage { DecodePixelWidth = IsUser ? 440 : 600 };
                     _thumb.UriSource = new Uri("ms-appdata:///local/images/" + ImageFile);
                 }
                 return _thumb;
@@ -142,13 +168,35 @@ namespace Lumen.Core
         public string Id { get; set; } = Guid.NewGuid().ToString("N");
 
         private string _title = "";
-        public string Title { get { return _title; } set { Set(ref _title, value); } }
+        public string Title { get { return _title; } set { if (Set(ref _title, value ?? "")) Raise(nameof(Initial)); } }
 
         private DateTimeOffset _updated = DateTimeOffset.Now;
         public DateTimeOffset Updated
         {
             get { return _updated; }
             set { if (Set(ref _updated, value)) Raise(nameof(UpdatedLabel)); }
+        }
+
+        private string _preview = "";
+        public string Preview { get { return _preview; } set { Set(ref _preview, value ?? ""); } }
+
+        private bool _pinned;
+        public bool Pinned
+        {
+            get { return _pinned; }
+            set { if (Set(ref _pinned, value)) { Raise(nameof(PinVisibility)); Raise(nameof(PinLabel)); } }
+        }
+        public string PinLabel { get { return _pinned ? "Unpin" : "Pin to top"; } }
+        public Visibility PinVisibility { get { return _pinned ? Visibility.Visible : Visibility.Collapsed; } }
+
+        /// <summary>First letter for the avatar.</summary>
+        public string Initial
+        {
+            get
+            {
+                foreach (var ch in _title) if (char.IsLetterOrDigit(ch)) return char.ToUpperInvariant(ch).ToString();
+                return "L";
+            }
         }
 
         public string UpdatedLabel
