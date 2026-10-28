@@ -1,5 +1,4 @@
 using System;
-using System.Security;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
@@ -12,8 +11,8 @@ namespace Lumen.Core
         {
             try
             {
-                var t = SecurityElement.Escape(Trim(title, 60));
-                var p = SecurityElement.Escape(Trim(preview, 140));
+                var t = Escape(Trim(title, 60));
+                var p = Escape(Trim(preview, 140));
                 var xml =
                     "<tile><visual branding='nameAndLogo' displayName='Lumen'>" +
                     "<binding template='TileMedium'>" +
@@ -39,6 +38,12 @@ namespace Lumen.Core
         public static void Clear()
         {
             try { TileUpdateManager.CreateTileUpdaterForApplication().Clear(); } catch (Exception) { }
+        }
+
+        // System.Security.SecurityElement isn't part of the UWP .NET surface.
+        private static string Escape(string s)
+        {
+            return s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
         }
 
         private static string Trim(string s, int max)
