@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
+using Windows.Media.Capture;
 using Windows.Security.Cryptography;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -33,6 +34,16 @@ namespace Lumen.Core
             picker.FileTypeFilter.Add(".bmp");
             picker.FileTypeFilter.Add(".gif");
             return await picker.PickSingleFileAsync();
+        }
+
+        /// <summary>System camera UI. Returns null if the user backs out; throws if there is no camera API.</summary>
+        public static async Task<StorageFile> CaptureAsync()
+        {
+            var ui = new CameraCaptureUI();
+            ui.PhotoSettings.Format = CameraCaptureUIPhotoFormat.Jpeg;
+            ui.PhotoSettings.AllowCropping = false;
+            ui.PhotoSettings.MaxResolution = CameraCaptureUIMaxPhotoResolution.MediumXga;
+            return await ui.CaptureFileAsync(CameraCaptureUIMode.Photo);
         }
 
         /// <summary>Re-encodes the image as JPEG (max 1024 px, EXIF orientation applied) into LocalFolder\images. Returns the file name.</summary>
@@ -73,11 +84,12 @@ namespace Lumen.Core
             }
         }
 
-        public static async Task<string> ReadBase64Async(string fileName)
+        /// <summary>Base64 of a file in LocalFolder\{folderName}, or null.</summary>
+        public static async Task<string> ReadBase64Async(string folderName, string fileName)
         {
             try
             {
-                var folder = await ImagesFolderAsync();
+                var folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(folderName, CreationCollisionOption.OpenIfExists);
                 var file = await folder.GetFileAsync(fileName);
                 IBuffer buf = await FileIO.ReadBufferAsync(file);
                 return CryptographicBuffer.EncodeToBase64String(buf);

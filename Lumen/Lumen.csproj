@@ -84,11 +84,18 @@
     <Compile Include="Views\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\OnboardingPage.xaml.cs">
+      <DependentUpon>OnboardingPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Core\AppSettings.cs" />
+    <Compile Include="Core\AudioRecorder.cs" />
+    <Compile Include="Core\Fx.cs" />
+    <Compile Include="Core\S.cs" />
+    <Compile Include="Core\ThemeManager.cs" />
+    <Compile Include="Core\WikipediaClient.cs" />
     <Compile Include="Core\ChatStore.cs" />
     <Compile Include="Core\GeminiClient.cs" />
     <Compile Include="Core\ImageHelper.cs" />
-    <Compile Include="Core\Loc.cs" />
     <Compile Include="Core\Markdown.cs" />
     <Compile Include="Core\Models.cs" />
     <Compile Include="Core\MessageTemplateSelector.cs" />
@@ -111,15 +118,15 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="Strings\en-US\Resources.resw" />
-    <PRIResource Include="Strings\it-IT\Resources.resw" />
-  </ItemGroup>
-  <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\OnboardingPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

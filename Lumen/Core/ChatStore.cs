@@ -81,12 +81,15 @@ namespace Lumen.Core
                     if (v.ValueType != JsonValueType.Object) continue;
                     var o = v.GetObject();
                     var img = o.GetNamedString("image", "");
+                    var audio = o.GetNamedString("audio", "");
                     conv.Messages.Add(new ChatMessage
                     {
                         Id = o.GetNamedString("id", Guid.NewGuid().ToString("N")),
                         Role = o.GetNamedString("role", ChatMessage.RoleUser),
                         Text = o.GetNamedString("text", ""),
                         ImageFile = img.Length > 0 ? img : null,
+                        AudioFile = audio.Length > 0 ? audio : null,
+                        AudioSeconds = (int)o.GetNamedNumber("audioSec", 0),
                         Time = FromUnix(o.GetNamedNumber("time", 0))
                     });
                 }
@@ -106,6 +109,11 @@ namespace Lumen.Core
                 o["role"] = JsonValue.CreateStringValue(m.Role);
                 o["text"] = JsonValue.CreateStringValue(m.Text ?? "");
                 if (!string.IsNullOrEmpty(m.ImageFile)) o["image"] = JsonValue.CreateStringValue(m.ImageFile);
+                if (!string.IsNullOrEmpty(m.AudioFile))
+                {
+                    o["audio"] = JsonValue.CreateStringValue(m.AudioFile);
+                    o["audioSec"] = JsonValue.CreateNumberValue(m.AudioSeconds);
+                }
                 o["time"] = JsonValue.CreateNumberValue(m.Time.ToUnixTimeMilliseconds());
                 arr.Add(o);
             }
@@ -116,6 +124,7 @@ namespace Lumen.Core
         {
             var conv = await LoadAsync(info);
             await ImageHelper.DeleteAsync(conv.Messages.Select(m => m.ImageFile));
+            await AudioRecorder.DeleteAsync(conv.Messages.Select(m => m.AudioFile));
             try
             {
                 var folder = await ChatsFolderAsync();
@@ -131,7 +140,7 @@ namespace Lumen.Core
             try
             {
                 var local = ApplicationData.Current.LocalFolder;
-                foreach (var name in new[] { "chats", "images" })
+                foreach (var name in new[] { "chats", "images", "audio" })
                 {
                     var f = await local.TryGetItemAsync(name);
                     if (f != null) await f.DeleteAsync(StorageDeleteOption.PermanentDelete);

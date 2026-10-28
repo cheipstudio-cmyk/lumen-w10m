@@ -23,8 +23,9 @@ namespace Lumen.Core
         public static string GetSource(DependencyObject o) { return (string)o.GetValue(SourceProperty); }
         public static void SetSource(DependencyObject o, string v) { o.SetValue(SourceProperty, v); }
 
-        private static FontFamily _mono;
-        private static SolidColorBrush _codeBrush, _quoteBrush, _linkBrush;
+        // XAML objects are bound to the thread that created them; the share window runs on its own thread.
+        [ThreadStatic] private static FontFamily _mono;
+        [ThreadStatic] private static Brush _codeBrush, _quoteBrush, _linkBrush;
 
         private static void EnsureBrushes()
         {
@@ -32,7 +33,8 @@ namespace Lumen.Core
             _mono = new FontFamily("Consolas");
             _codeBrush = new SolidColorBrush(Color.FromArgb(255, 0xF0, 0xB4, 0x7A));
             _quoteBrush = new SolidColorBrush(Color.FromArgb(255, 0x9A, 0xA0, 0xB0));
-            _linkBrush = new SolidColorBrush(Color.FromArgb(255, 0x8A, 0xB4, 0xFF));
+            // Shared theme brush: links follow the accent color live.
+            _linkBrush = (Application.Current.Resources["AccentBrush"] as Brush) ?? new SolidColorBrush(Color.FromArgb(255, 0x8A, 0xB4, 0xFF));
         }
 
         private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

@@ -5,15 +5,18 @@ Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC
 
 ## Funzioni
 
+- Onboarding animato con un Lumia 735 che fa girare Lumen
 - Risposte in streaming token per token, con pulsante stop
-- Foto dalla galleria o dalla fotocamera: ridimensionate a 1024 px prima dell'invio
+- Messaggi vocali (WAV 16 kHz mono, max 2 minuti) che Gemini ascolta e a cui risponde
+- Foto dalla fotocamera o dalla galleria, ridimensionate a 1024 px prima dell'invio
+- Ricerca automatica su Wikipedia via function calling (gratis, senza chiave) e data di oggi in ogni richiesta
+- Temi: 8 colori accent, sfondo nero AMOLED, dimensione testo, animazioni on/off
+- Modelli solo da lista, caricata dalla tua chiave, con cambio rapido dal titolo della chat
 - Markdown: titoli, elenchi, grassetto, corsivo, codice, link
 - Storico chat salvato sul telefono, menu laterale, eliminazione con pressione lunga
 - Pressione lunga su un messaggio: copia, condividi, rigenera, modifica
 - Condivisione da altre app (testo, link, immagini) direttamente in una nuova chat
-- Ricerca Google opzionale per risposte aggiornate
-- Scelta del modello con lista caricata dalla tua chiave
-- Interfaccia in italiano e inglese
+- Interfaccia in inglese
 
 ## Ottimizzazioni per i Lumia
 
@@ -29,7 +32,7 @@ Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC
 2. Crea una chiave (non serve la carta)
 3. In Lumen: Impostazioni, incolla la chiave, tocca "Verifica e carica modelli"
 
-Il modello predefinito è `gemini-flash-latest`, un alias che punta sempre al Flash gratuito più recente. Se finisci la quota giornaliera, passa a un modello Flash-Lite.
+Il modello predefinito è `gemini-flash-lite-latest`, l'alias del Flash-Lite gratuito più recente. La Ricerca Google non fa parte del piano gratuito, per questo Lumen usa Wikipedia.
 
 ## Build
 
@@ -80,5 +83,9 @@ Lumen/
   Core/ImageHelper.cs      picker, ridimensionamento JPEG
   Core/Markdown.cs         renderer markdown per RichTextBlock
   Core/AppSettings.cs      impostazioni + chiave nel PasswordVault
-  Strings/                 en-US, it-IT
+  Views/OnboardingPage     tour iniziale con il Lumia 735 animato
+  Core/WikipediaClient.cs  ricerca Wikipedia esposta a Gemini come funzione
+  Core/AudioRecorder.cs    registrazione vocale
+  Core/ThemeManager.cs     temi live
+  Core/Fx.cs               animazioni
 ```

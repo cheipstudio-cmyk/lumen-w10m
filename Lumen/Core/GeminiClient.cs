@@ -38,6 +38,8 @@ namespace Lumen.Core
     /// </summary>
     public sealed class GeminiClient : IDisposable
     {
+        public static readonly GeminiClient Shared = new GeminiClient();
+
         private readonly HttpClient _http;
 
         public GeminiClient()
@@ -102,18 +104,96 @@ namespace Lumen.Core
 
         // ---------------------------------------------------------------- chat
 
-        public async Task<StreamResult> StreamAsync(
-            string apiKey, string baseUrl, string model, string systemPrompt, double temperature, bool webSearch,
-            IList<ChatMessage> history, Action<string> onDelta, CancellationToken ct)
-        {
-            var body = await BuildBodyAsync(systemPrompt, temperature, webSearch, history);
-            var url = baseUrl + "/v1beta/models/" + Uri.EscapeDataString(model) + ":streamGenerateContent?alt=sse";
+        private const int MaxToolRounds = 3;
 
+        /// <summary>
+        /// Streams an answer. When <paramref name="wikipedia"/> is on, the model may call the
+        /// wikipedia_search function; we run it locally (free, no key) and continue the same answer.
+        /// </summary>
+        public async Task<StreamResult> StreamAsync(
+            string apiKey, string baseUrl, string model, string systemPrompt, double temperature, bool wikipedia,
+            IList<ChatMessage> history, Action<string> onDelta, Action<string> onStatus, CancellationToken ct)
+        {
+            var contents = await BuildContentsAsync(history);
+            var system = systemPrompt + "\n\n" + DateLine() + (wikipedia ? "\n" + WikipediaClient.PromptHint : "");
+            var result = new StreamResult();
+
+            for (int round = 0; round <= MaxToolRounds; round++)
+            {
+                // On the last round calling is switched off (tool stays declared) so the model answers with what it has.
+                var allowCalls = round < MaxToolRounds;
+                var body = BuildBody(contents, system, temperature, wikipedia, allowCalls);
+                var turn = new TurnState();
+                await StreamOnceAsync(apiKey, baseUrl, model, body, turn, onDelta, result, ct);
+
+                if (turn.Calls.Count == 0) break;
+
+                // Echo the model turn verbatim (Gemini 3 needs its thought signatures back), then the results.
+                var modelTurn = new JsonObject();
+                modelTurn["role"] = JsonValue.CreateStringValue("model");
+                modelTurn["parts"] = turn.RawParts;
+                contents.Add(modelTurn);
+
+                var responses = new JsonArray();
+                foreach (var call in turn.Calls)
+                {
+                    var name = call.GetNamedString("name", "");
+                    var args = call.GetNamedObject("args", new JsonObject());
+                    string output;
+                    if (name == WikipediaClient.ToolName)
+                    {
+                        var query = args.GetNamedString("query", "");
+                        var lang = args.GetNamedString("lang", "en");
+                        onStatus?.Invoke(query);
+                        output = await WikipediaClient.SearchAsync(query, lang, ct);
+                    }
+                    else
+                    {
+                        output = "Unknown function.";
+                    }
+
+                    var resp = new JsonObject();
+                    resp["name"] = JsonValue.CreateStringValue(name);
+                    var id = call.GetNamedString("id", "");
+                    if (id.Length > 0) resp["id"] = JsonValue.CreateStringValue(id);
+                    var payload = new JsonObject();
+                    payload["result"] = JsonValue.CreateStringValue(output);
+                    resp["response"] = payload;
+                    var part = new JsonObject();
+                    part["functionResponse"] = resp;
+                    responses.Add(part);
+                }
+                var userTurn = new JsonObject();
+                userTurn["role"] = JsonValue.CreateStringValue("user");
+                userTurn["parts"] = responses;
+                contents.Add(userTurn);
+                onStatus?.Invoke(null);
+            }
+            return result;
+        }
+
+        private static string DateLine()
+        {
+            var now = DateTimeOffset.Now;
+            return "Current date and time: " + now.ToString("dddd d MMMM yyyy, HH:mm", System.Globalization.CultureInfo.InvariantCulture) +
+                   " (UTC" + (now.Offset < TimeSpan.Zero ? "-" : "+") + now.Offset.ToString("hh\\:mm") + "). " +
+                   "Your training data may be older than this date: never claim something doesn't exist yet just because you don't know it.";
+        }
+
+        private sealed class TurnState
+        {
+            public readonly JsonArray RawParts = new JsonArray();
+            public readonly List<JsonObject> Calls = new List<JsonObject>();
+        }
+
+        private async Task StreamOnceAsync(string apiKey, string baseUrl, string model, JsonObject body,
+            TurnState turn, Action<string> onDelta, StreamResult result, CancellationToken ct)
+        {
+            var url = baseUrl + "/v1beta/models/" + Uri.EscapeDataString(model) + ":streamGenerateContent?alt=sse";
             var req = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
             req.Headers.Add("x-goog-api-key", apiKey);
             req.Content = new HttpStringContent(body.Stringify(), Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
 
-            var result = new StreamResult();
             using (var resp = await _http.SendRequestAsync(req, HttpCompletionOption.ResponseHeadersRead).AsTask(ct))
             {
                 if (!resp.IsSuccessStatusCode)
@@ -144,13 +224,12 @@ namespace Lumen.Core
                         {
                             var line = pending.ToString(0, nl).TrimEnd('\r');
                             pending.Remove(0, nl + 1);
-                            HandleSseLine(line, onDelta, result);
+                            HandleSseLine(line, onDelta, result, turn);
                         }
                     }
-                    if (pending.Length > 0) HandleSseLine(pending.ToString().TrimEnd('\r'), onDelta, result);
+                    if (pending.Length > 0) HandleSseLine(pending.ToString().TrimEnd('\r'), onDelta, result, turn);
                 }
             }
-            return result;
         }
 
         private static int IndexOf(StringBuilder sb, char c)
@@ -159,7 +238,7 @@ namespace Lumen.Core
             return -1;
         }
 
-        private static void HandleSseLine(string line, Action<string> onDelta, StreamResult result)
+        private static void HandleSseLine(string line, Action<string> onDelta, StreamResult result, TurnState turn)
         {
             if (!line.StartsWith("data:")) return;
             var json = line.Substring(5).Trim();
@@ -175,7 +254,7 @@ namespace Lumen.Core
             }
 
             var feedback = chunk.GetNamedObject("promptFeedback", null);
-            if (feedback != null) result.BlockReason = feedback.GetNamedString("blockReason", result.BlockReason);
+            if (feedback != null) result.BlockReason = feedback.GetNamedString("blockReason", "");
 
             var candidates = chunk.GetNamedArray("candidates", null);
             if (candidates == null || candidates.Count == 0) return;
@@ -193,6 +272,10 @@ namespace Lumen.Core
             {
                 if (p.ValueType != JsonValueType.Object) continue;
                 var po = p.GetObject();
+                turn.RawParts.Add(JsonObject.Parse(po.Stringify()));
+
+                var call = po.GetNamedObject("functionCall", null);
+                if (call != null) { turn.Calls.Add(call); continue; }
                 if (po.GetNamedBoolean("thought", false)) continue; // hide thinking summaries
                 var t = po.GetNamedString("text", "");
                 if (t.Length > 0) sb.Append(t);
@@ -200,7 +283,7 @@ namespace Lumen.Core
             if (sb.Length > 0) onDelta(sb.ToString());
         }
 
-        private static async Task<JsonObject> BuildBodyAsync(string systemPrompt, double temperature, bool webSearch, IList<ChatMessage> history)
+        private static async Task<JsonArray> BuildContentsAsync(IList<ChatMessage> history)
         {
             var contents = new JsonArray();
             foreach (var m in history)
@@ -209,16 +292,13 @@ namespace Lumen.Core
                 var parts = new JsonArray();
                 if (!string.IsNullOrEmpty(m.ImageFile))
                 {
-                    var b64 = await ImageHelper.ReadBase64Async(m.ImageFile);
-                    if (b64 != null)
-                    {
-                        var inline = new JsonObject();
-                        inline["mimeType"] = JsonValue.CreateStringValue("image/jpeg");
-                        inline["data"] = JsonValue.CreateStringValue(b64);
-                        var part = new JsonObject();
-                        part["inlineData"] = inline;
-                        parts.Add(part);
-                    }
+                    var b64 = await ImageHelper.ReadBase64Async("images", m.ImageFile);
+                    if (b64 != null) parts.Add(InlinePart("image/jpeg", b64));
+                }
+                if (!string.IsNullOrEmpty(m.AudioFile))
+                {
+                    var b64 = await ImageHelper.ReadBase64Async("audio", m.AudioFile);
+                    if (b64 != null) parts.Add(InlinePart("audio/wav", b64));
                 }
                 if (!string.IsNullOrWhiteSpace(m.Text))
                 {
@@ -233,34 +313,57 @@ namespace Lumen.Core
                 c["parts"] = parts;
                 contents.Add(c);
             }
+            return contents;
+        }
 
+        private static JsonObject BuildBody(JsonArray contents, string systemPrompt, double temperature, bool tools, bool allowCalls)
+        {
             var body = new JsonObject();
-            body["contents"] = contents;
+            // Re-parse so each request owns its own copy (WinRT JSON values can't have two parents).
+            body["contents"] = JsonArray.Parse(contents.Stringify());
 
-            if (!string.IsNullOrWhiteSpace(systemPrompt))
-            {
-                var sp = new JsonObject();
-                sp["text"] = JsonValue.CreateStringValue(systemPrompt);
-                var spParts = new JsonArray();
-                spParts.Add(sp);
-                var si = new JsonObject();
-                si["parts"] = spParts;
-                body["systemInstruction"] = si;
-            }
+            var sp = new JsonObject();
+            sp["text"] = JsonValue.CreateStringValue(systemPrompt);
+            var spParts = new JsonArray();
+            spParts.Add(sp);
+            var si = new JsonObject();
+            si["parts"] = spParts;
+            body["systemInstruction"] = si;
 
             var gen = new JsonObject();
             gen["temperature"] = JsonValue.CreateNumberValue(Math.Round(temperature, 2));
             body["generationConfig"] = gen;
 
-            if (webSearch)
+            if (tools)
             {
+                var decls = new JsonArray();
+                decls.Add(WikipediaClient.Declaration());
                 var tool = new JsonObject();
-                tool["google_search"] = new JsonObject();
-                var tools = new JsonArray();
-                tools.Add(tool);
-                body["tools"] = tools;
+                tool["functionDeclarations"] = decls;
+                var arr = new JsonArray();
+                arr.Add(tool);
+                body["tools"] = arr;
+
+                if (!allowCalls)
+                {
+                    var fcc = new JsonObject();
+                    fcc["mode"] = JsonValue.CreateStringValue("NONE");
+                    var tc = new JsonObject();
+                    tc["functionCallingConfig"] = fcc;
+                    body["toolConfig"] = tc;
+                }
             }
             return body;
+        }
+
+        private static JsonObject InlinePart(string mime, string b64)
+        {
+            var inline = new JsonObject();
+            inline["mimeType"] = JsonValue.CreateStringValue(mime);
+            inline["data"] = JsonValue.CreateStringValue(b64);
+            var part = new JsonObject();
+            part["inlineData"] = inline;
+            return part;
         }
 
         private static GeminiException ToError(int status, string body)
@@ -275,6 +378,15 @@ namespace Lumen.Core
             return new GeminiException(status, string.IsNullOrEmpty(message) ? ("HTTP " + status) : message);
         }
 
+        /// <summary>Google's own wording, trimmed, so the user can tell e.g. a search quota from a model quota.</summary>
+        private static string Detail(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw) || raw.StartsWith("HTTP ")) return "";
+            var t = raw.Replace("\n", " ").Trim();
+            if (t.Length > 220) t = t.Substring(0, 220).TrimEnd() + "...";
+            return "\n\nGoogle: " + t;
+        }
+
         /// <summary>Human-friendly message for any failure, localized.</summary>
         public static string Describe(Exception ex)
         {
@@ -284,25 +396,25 @@ namespace Lumen.Core
                 switch (g.Status)
                 {
                     case 400:
-                        if (g.Message.IndexOf("API key", StringComparison.OrdinalIgnoreCase) >= 0) return Loc.Get("ErrKey");
-                        return Loc.Get("ErrBadRequest") + "\n" + g.Message;
+                        if (g.Message.IndexOf("API key", StringComparison.OrdinalIgnoreCase) >= 0) return S.ErrKey;
+                        return S.ErrBadRequest + "\n" + g.Message;
                     case 401:
-                    case 403: return Loc.Get("ErrKey") + "\n" + g.Message;
-                    case 404: return Loc.Get("ErrModel");
-                    case 429: return Loc.Get("ErrQuota");
+                    case 403: return S.ErrKey + "\n" + g.Message;
+                    case 404: return S.ErrModel + Detail(g.Message);
+                    case 429: return S.ErrQuota + Detail(g.Message);
                     case 500:
-                    case 503: return Loc.Get("ErrBusy");
+                    case 503: return S.ErrBusy + Detail(g.Message);
                     default: return "HTTP " + g.Status + ": " + g.Message;
                 }
             }
             var hr = (uint)ex.HResult;
             // Certificate / TLS failures: old root store or missing cipher suites.
             if (hr == 0x80072F8F || hr == 0x80072F0D || hr == 0x80072F06 || hr == 0x80072F7D || hr == 0x80072F05)
-                return Loc.Get("ErrTls") + string.Format(" (0x{0:X8})", hr);
+                return S.ErrTls + string.Format(" (0x{0:X8})", hr);
             // No connection, DNS, timeout.
             if (hr == 0x80072EE7 || hr == 0x80072EFD || hr == 0x80072EE2 || hr == 0x80072EFE || hr == 0x80072F78)
-                return Loc.Get("ErrNetwork") + string.Format(" (0x{0:X8})", hr);
-            return Loc.Get("ErrGeneric") + "\n" + ex.Message + string.Format(" (0x{0:X8})", hr);
+                return S.ErrNetwork + string.Format(" (0x{0:X8})", hr);
+            return S.ErrGeneric + "\n" + ex.Message + string.Format(" (0x{0:X8})", hr);
         }
     }
 }

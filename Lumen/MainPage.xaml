@@ -7,34 +7,42 @@
     NavigationCacheMode="Required">
 
     <Page.Resources>
-        <!-- User message: gradient bubble on the right -->
+        <!-- User message: gradient bubble on the right (photo, voice note and/or text) -->
         <DataTemplate x:Key="UserTemplate" x:DataType="core:ChatMessage">
             <Grid Margin="56,6,12,6" HorizontalAlignment="Right">
-                <Border CornerRadius="18,18,4,18" Background="{StaticResource UserBubbleBrush}" Padding="12,9,12,10">
+                <Border CornerRadius="20,20,6,20" Background="{StaticResource UserBubbleBrush}" Padding="12,9,12,10">
                     <Border.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Uid="MenuCopy" Text="Copy" Click="CopyMessage_Click"/>
-                            <MenuFlyoutItem x:Uid="MenuEdit" Text="Edit" Click="EditMessage_Click"/>
+                            <MenuFlyoutItem Text="Copy" Click="CopyMessage_Click"/>
+                            <MenuFlyoutItem Text="Edit and resend" Click="EditMessage_Click"/>
                         </MenuFlyout>
                     </Border.ContextFlyout>
                     <StackPanel>
-                        <Image Source="{x:Bind Thumb}" Visibility="{x:Bind ImageVisibility}"
-                               MaxHeight="240" MaxWidth="240" Stretch="Uniform" Margin="0,3,0,6"/>
-                        <TextBlock Text="{x:Bind Text}" Visibility="{x:Bind TextVisibility}"
-                                   TextWrapping="Wrap" Foreground="White" FontSize="15" IsTextScaleFactorEnabled="True"/>
+                        <Border CornerRadius="12" Margin="0,3,0,6" Visibility="{x:Bind ImageVisibility}">
+                            <Image Source="{x:Bind Thumb}" MaxHeight="240" MaxWidth="240" Stretch="Uniform"/>
+                        </Border>
+                        <Button Visibility="{x:Bind AudioVisibility}" Click="PlayAudio_Click" Background="#33FFFFFF"
+                                BorderThickness="0" Padding="10,6" Margin="0,2,0,4" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal">
+                                <FontIcon Glyph="{x:Bind PlayGlyph, Mode=OneWay}" FontSize="14" Foreground="White" Margin="0,0,10,0"/>
+                                <FontIcon Glyph="&#xE720;" FontSize="13" Foreground="#CCFFFFFF" Margin="0,0,6,0"/>
+                                <TextBlock Text="{x:Bind AudioLabel}" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="{x:Bind Text}" Visibility="{x:Bind TextVisibility}" TextWrapping="Wrap" Foreground="White"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </DataTemplate>
 
-        <!-- Model message: no bubble, full width, orb avatar. Plain TextBlock while streaming, markdown when done. -->
+        <!-- Model message: no bubble, full width, orb avatar. Plain text while streaming, markdown when done. -->
         <DataTemplate x:Key="ModelTemplate" x:DataType="core:ChatMessage">
             <Grid Margin="12,10,16,10" Background="Transparent">
                 <Grid.ContextFlyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem x:Uid="MenuCopy" Text="Copy" Click="CopyMessage_Click"/>
-                        <MenuFlyoutItem x:Uid="MenuShare" Text="Share" Click="ShareMessage_Click"/>
-                        <MenuFlyoutItem x:Uid="MenuRegenerate" Text="Regenerate" Click="Regenerate_Click"/>
+                        <MenuFlyoutItem Text="Copy" Click="CopyMessage_Click"/>
+                        <MenuFlyoutItem Text="Share" Click="ShareMessage_Click"/>
+                        <MenuFlyoutItem Text="Regenerate" Click="Regenerate_Click"/>
                     </MenuFlyout>
                 </Grid.ContextFlyout>
                 <Grid.ColumnDefinitions>
@@ -47,14 +55,16 @@
                     </Image.Source>
                 </Image>
                 <StackPanel Grid.Column="1">
-                    <ProgressBar IsIndeterminate="True" Margin="0,10,0,0"
-                                 Foreground="{StaticResource AccentGradient}" Background="Transparent"
-                                 Visibility="{x:Bind ThinkingVisibility, Mode=OneWay}"/>
+                    <core:TypingIndicator Visibility="{x:Bind ThinkingVisibility, Mode=OneWay}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,6" Visibility="{x:Bind StatusVisibility, Mode=OneWay}">
+                        <FontIcon Glyph="&#xE774;" FontSize="13" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0"/>
+                        <TextBlock Text="{x:Bind Status, Mode=OneWay}" FontSize="13" FontStyle="Italic"
+                                   Foreground="{StaticResource AccentBrush}" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
                     <TextBlock Text="{x:Bind Text, Mode=OneWay}" Visibility="{x:Bind StreamingVisibility, Mode=OneWay}"
-                               TextWrapping="Wrap" FontSize="15" Foreground="{StaticResource TextPrimaryBrush}"/>
+                               TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}"/>
                     <RichTextBlock core:Markdown.Source="{Binding RenderedText}" Visibility="{x:Bind RenderedVisibility, Mode=OneWay}"
-                                   FontSize="15" Foreground="{StaticResource TextPrimaryBrush}"
-                                   IsTextSelectionEnabled="False" TextWrapping="Wrap"/>
+                                   Foreground="{StaticResource TextPrimaryBrush}" IsTextSelectionEnabled="False" TextWrapping="Wrap"/>
                     <TextBlock Text="{x:Bind Text, Mode=OneWay}" Visibility="{x:Bind ErrorVisibility, Mode=OneWay}"
                                TextWrapping="Wrap" FontSize="14" Foreground="#FFFF8A80"/>
                 </StackPanel>
@@ -85,13 +95,14 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Padding="16,12,8,4">
-                    <TextBlock x:Uid="DrawerTitle" Text="Chats" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                </Grid>
-                <Button Grid.Row="1" Style="{StaticResource ChipButton}" Margin="12,8,12,8" Click="NewChat_Click">
+                <StackPanel Orientation="Horizontal" Padding="16,16,8,4">
+                    <Image Width="26" Height="26" Source="ms-appx:///Assets/Orb.png" Margin="0,0,10,0"/>
+                    <TextBlock Text="Chats" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button Grid.Row="1" Style="{StaticResource ChipButton}" Margin="12,10,12,8" Click="NewChat_Click">
                     <StackPanel Orientation="Horizontal">
                         <FontIcon Glyph="&#xE710;" FontSize="14" Margin="0,0,10,0"/>
-                        <TextBlock x:Uid="NewChatButton" Text="New chat"/>
+                        <TextBlock Text="New chat"/>
                     </StackPanel>
                 </Button>
                 <ListView x:Name="ConversationsList" Grid.Row="2" SelectionMode="Single"
@@ -108,7 +119,7 @@
                             <Grid Background="Transparent">
                                 <Grid.ContextFlyout>
                                     <MenuFlyout>
-                                        <MenuFlyoutItem x:Uid="MenuDelete" Text="Delete" Click="DeleteConversation_Click"/>
+                                        <MenuFlyoutItem Text="Delete" Click="DeleteConversation_Click"/>
                                     </MenuFlyout>
                                 </Grid.ContextFlyout>
                                 <Grid.ColumnDefinitions>
@@ -133,7 +144,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
+            <!-- Header: tap the title to switch model -->
             <Grid Height="56" Padding="4,0,4,0" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -144,11 +155,16 @@
                 <Button Style="{StaticResource IconButton}" Click="Menu_Click">
                     <FontIcon Glyph="&#xE700;" FontSize="18"/>
                 </Button>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
-                    <TextBlock Text="Lumen" FontSize="18" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="ModelLabel" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
-                               TextTrimming="CharacterEllipsis"/>
-                </StackPanel>
+                <Button x:Name="ModelButton" Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="6,4"
+                        HorizontalAlignment="Left" HorizontalContentAlignment="Left" Click="ModelButton_Click">
+                    <StackPanel>
+                        <TextBlock Text="Lumen" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="ModelLabel" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+                            <FontIcon Glyph="&#xE70D;" FontSize="9" Margin="5,2,0,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
                 <Button Grid.Column="2" Style="{StaticResource IconButton}" Click="NewChat_Click">
                     <FontIcon Glyph="&#xE710;" FontSize="18"/>
                 </Button>
@@ -162,7 +178,7 @@
                       ItemTemplateSelector="{StaticResource MessageSelector}"
                       ItemContainerStyle="{StaticResource FlatListItem}"
                       SelectionMode="None" IsItemClickEnabled="False"
-                      ShowsScrollingPlaceholders="False" Padding="0,8,0,12">
+                      ShowsScrollingPlaceholders="False" Padding="0,8,0,12" FontSize="15">
                 <ListView.Resources>
                     <SolidColorBrush x:Key="ListViewItemBackgroundPointerOver" Color="Transparent"/>
                     <SolidColorBrush x:Key="ListViewItemBackgroundPressed" Color="Transparent"/>
@@ -177,6 +193,7 @@
                 <ListView.ItemContainerTransitions>
                     <TransitionCollection>
                         <AddDeleteThemeTransition/>
+                        <EntranceThemeTransition FromVerticalOffset="36" IsStaggeringEnabled="True"/>
                     </TransitionCollection>
                 </ListView.ItemContainerTransitions>
             </ListView>
@@ -184,23 +201,23 @@
             <!-- Empty state -->
             <ScrollViewer x:Name="EmptyState" Grid.Row="1" VerticalScrollBarVisibility="Hidden">
                 <StackPanel VerticalAlignment="Center" Padding="20,24,20,24" MaxWidth="520">
-                    <Image Width="64" Height="64" HorizontalAlignment="Left" Margin="0,0,0,18">
+                    <Image x:Name="EmptyOrb" Width="68" Height="68" HorizontalAlignment="Left" Margin="0,0,0,18">
                         <Image.Source>
-                            <BitmapImage UriSource="ms-appx:///Assets/Orb.png" DecodePixelWidth="128"/>
+                            <BitmapImage UriSource="ms-appx:///Assets/Orb.png" DecodePixelWidth="136"/>
                         </Image.Source>
                     </Image>
-                    <TextBlock x:Name="GreetingText" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource AccentGradient}"/>
-                    <TextBlock x:Uid="EmptySubtitle" Text="What can I help with today?" FontSize="22"
+                    <TextBlock x:Name="GreetingText" FontSize="32" FontWeight="SemiBold" Foreground="{StaticResource AccentGradient}"/>
+                    <TextBlock x:Name="EmptySubtitle" Text="What can I help with today?" FontSize="22"
                                Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,24"/>
 
                     <!-- Missing API key card -->
                     <Border x:Name="NoKeyCard" Background="{StaticResource SurfaceBrush}" CornerRadius="16" Padding="16"
                             BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1" Margin="0,0,0,16" Visibility="Collapsed">
                         <StackPanel>
-                            <TextBlock x:Uid="NoKeyTitle" Text="You need a free API key" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                            <TextBlock x:Uid="NoKeyBody" Style="{StaticResource HintText}" Margin="0,6,0,12"
-                                       Text="Create one in a minute on Google AI Studio, then paste it in Settings."/>
-                            <Button x:Uid="NoKeyButton" Content="Set up" Click="Settings_Click"
+                            <TextBlock Text="Add your free API key" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <TextBlock Style="{StaticResource HintText}" Margin="0,6,0,12"
+                                       Text="Create one in a minute on Google AI Studio, then paste it in Settings. No credit card needed."/>
+                            <Button Content="Set up" Click="Settings_Click"
                                     Background="{StaticResource AccentGradient}" Foreground="White" Padding="18,8"/>
                         </StackPanel>
                     </Border>
@@ -240,10 +257,17 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="AttachButton" Style="{StaticResource IconButton}" VerticalAlignment="Bottom" Click="Attach_Click">
-                            <FontIcon Glyph="&#xE722;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Button x:Name="AttachButton" Style="{StaticResource IconButton}" VerticalAlignment="Bottom">
+                            <FontIcon Glyph="&#xE710;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Button.Flyout>
+                                <MenuFlyout Placement="Top">
+                                    <MenuFlyoutItem Text="Take a photo" Click="Camera_Click"/>
+                                    <MenuFlyoutItem Text="Choose from gallery" Click="Gallery_Click"/>
+                                </MenuFlyout>
+                            </Button.Flyout>
                         </Button>
-                        <TextBox x:Name="InputBox" x:Uid="InputBox" Grid.Column="1" PlaceholderText="Ask Lumen"
+
+                        <TextBox x:Name="InputBox" Grid.Column="1" PlaceholderText="Ask Lumen"
                                  TextWrapping="Wrap" AcceptsReturn="True" MaxHeight="132" FontSize="15"
                                  VerticalAlignment="Center" BorderThickness="0" Padding="6,10,6,10"
                                  TextChanged="InputBox_TextChanged"
@@ -268,18 +292,34 @@
                                 <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#FF9AA0B0"/>
                             </TextBox.Resources>
                         </TextBox>
+
+                        <!-- Recording bar, replaces the text box while the mic is on -->
+                        <Grid x:Name="RecordingBar" Grid.Column="1" Visibility="Collapsed" Padding="6,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse x:Name="RecordDot" Width="10" Height="10" Fill="#FFFF453A" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="RecordTime" Grid.Column="1" Text="0:00" FontSize="15" VerticalAlignment="Center"/>
+                            <Button Grid.Column="2" Style="{StaticResource IconButton}" Click="CancelRecording_Click">
+                                <FontIcon Glyph="&#xE74D;" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Button>
+                        </Grid>
+
+                        <!-- Mic when empty, send when there's something to send, stop while answering -->
                         <Button x:Name="SendButton" Grid.Column="2" Style="{StaticResource IconButton}" VerticalAlignment="Bottom"
-                                Background="{StaticResource AccentGradient}" Foreground="White" Click="Send_Click" IsEnabled="False">
-                            <FontIcon x:Name="SendGlyph" Glyph="&#xE724;" FontSize="16"/>
+                                Background="{StaticResource AccentGradient}" Click="Send_Click">
+                            <FontIcon x:Name="SendGlyph" Glyph="&#xE720;" FontSize="16" Foreground="White"/>
                         </Button>
                     </Grid>
                 </Border>
             </Grid>
 
             <!-- Lightweight toast -->
-            <Border x:Name="Toast" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,12,0,0"
+            <Border x:Name="Toast" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="16,12,16,0"
                     Background="{StaticResource Surface2Brush}" CornerRadius="16" Padding="14,7" Visibility="Collapsed">
-                <TextBlock x:Name="ToastText" FontSize="13"/>
+                <TextBlock x:Name="ToastText" FontSize="13" TextWrapping="Wrap"/>
             </Border>
         </Grid>
     </SplitView>

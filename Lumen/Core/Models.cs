@@ -35,8 +35,12 @@ namespace Lumen.Core
         public string Role { get; set; } = RoleUser;
         public DateTimeOffset Time { get; set; } = DateTimeOffset.Now;
 
-        /// <summary>File name inside LocalFolder\images (JPEG), or null.</summary>
+        /// <summary>JPEG file name inside LocalFolder\images, or null.</summary>
         public string ImageFile { get; set; }
+
+        /// <summary>WAV file name inside LocalFolder\audio, or null.</summary>
+        public string AudioFile { get; set; }
+        public int AudioSeconds { get; set; }
 
         public bool IsUser { get { return Role == RoleUser; } }
 
@@ -50,6 +54,7 @@ namespace Lumen.Core
                 {
                     Raise(nameof(ThinkingVisibility));
                     Raise(nameof(TextVisibility));
+                    Raise(nameof(StreamingVisibility));
                 }
             }
         }
@@ -85,15 +90,35 @@ namespace Lumen.Core
             }
         }
 
+        private string _status;
+        /// <summary>Transient line shown while a tool runs, e.g. a Wikipedia lookup.</summary>
+        public string Status
+        {
+            get { return _status; }
+            set { if (Set(ref _status, value)) Raise(nameof(StatusVisibility)); }
+        }
+        public Visibility StatusVisibility { get { return string.IsNullOrEmpty(_status) ? Visibility.Collapsed : Visibility.Visible; } }
+
+        private bool _isPlaying;
+        public bool IsPlaying
+        {
+            get { return _isPlaying; }
+            set { if (Set(ref _isPlaying, value)) Raise(nameof(PlayGlyph)); }
+        }
+
         /// <summary>Text pushed to the markdown renderer: only once streaming is over, so long answers are parsed once.</summary>
         public string RenderedText { get { return (_isStreaming || _isError) ? null : _text; } }
 
-        public Visibility StreamingVisibility { get { return _isStreaming ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility StreamingVisibility { get { return _isStreaming && _text.Length > 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility RenderedVisibility { get { return (_isStreaming || _isError) ? Visibility.Collapsed : Visibility.Visible; } }
         public Visibility ThinkingVisibility { get { return _isStreaming && _text.Length == 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility ErrorVisibility { get { return _isError ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility ImageVisibility { get { return string.IsNullOrEmpty(ImageFile) ? Visibility.Collapsed : Visibility.Visible; } }
+        public Visibility AudioVisibility { get { return string.IsNullOrEmpty(AudioFile) ? Visibility.Collapsed : Visibility.Visible; } }
         public Visibility TextVisibility { get { return string.IsNullOrEmpty(_text) ? Visibility.Collapsed : Visibility.Visible; } }
+
+        public string AudioLabel { get { return string.Format("{0}:{1:00}", AudioSeconds / 60, AudioSeconds % 60); } }
+        public string PlayGlyph { get { return _isPlaying ? "" : ""; } }
 
         private BitmapImage _thumb;
         /// <summary>Lazy, downscaled thumbnail. Created on first binding (UI thread).</summary>
@@ -109,8 +134,6 @@ namespace Lumen.Core
                 return _thumb;
             }
         }
-
-        public string TimeLabel { get { return Time.ToLocalTime().ToString("HH:mm"); } }
     }
 
     [Windows.UI.Xaml.Data.Bindable]
@@ -133,7 +156,7 @@ namespace Lumen.Core
             get
             {
                 var local = _updated.ToLocalTime();
-                return local.Date == DateTimeOffset.Now.Date ? local.ToString("HH:mm") : local.ToString("dd/MM");
+                return local.Date == DateTimeOffset.Now.Date ? local.ToString("HH:mm") : local.ToString("MMM d");
             }
         }
     }
