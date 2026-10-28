@@ -41,7 +41,6 @@ namespace Lumen
         private ScrollViewer _scroller;
         private DispatcherTimer _toastTimer;
         private Storyboard _toastHide;
-        private Storyboard _orbBreath;
 
         // voice in / voice out
         private readonly AudioRecorder _recorder = new AudioRecorder();
@@ -53,6 +52,7 @@ namespace Lumen
         public MainPage()
         {
             InitializeComponent();
+            AppBar.RequestedTheme = ThemeManager.Theme;
             ConversationsList.ItemsSource = _conversations;
             _conversations.CollectionChanged += (s, e) => UpdateDrawerEmpty();
             // handledEventsToo: the multi-line TextBox would otherwise swallow Enter.
@@ -63,23 +63,45 @@ namespace Lumen
             Suggest3.Content = SuggestionContent(Icons.ImageSparkle, S.Suggest3); Suggest3.Tag = S.Suggest3;
             Suggest4.Content = SuggestionContent(Icons.Globe, S.Suggest4); Suggest4.Tag = S.Suggest4;
 
-            DataTransferManager.GetForCurrentView().DataRequested += OnShareRequested;
+            // Subscribed only while on screen: pages rebuilt by a language/theme switch must not answer share requests.
+            Loaded += (s, a) => DataTransferManager.GetForCurrentView().DataRequested += OnShareRequested;
+            Unloaded += (s, a) => DataTransferManager.GetForCurrentView().DataRequested -= OnShareRequested;
+            SuggestionsPanel.SizeChanged += (s, a) =>
+            {
+                // Square live tiles.
+                var side = Math.Max(110, Math.Min(190, a.NewSize.Width / 2 - 8));
+                foreach (var child in SuggestionsPanel.Children) ((FrameworkElement)child).Height = side;
+            };
             StartNewConversation();
         }
 
-        private static UIElement SuggestionContent(string glyph, string text)
+        /// <summary>True while any MainPage is streaming an answer (language/theme switches wait for it).</summary>
+        public static bool IsBusy { get; private set; }
+
+        /// <summary>Live tile content: icon top-left, text bottom-left, like the Start screen.</summary>
+        private static UIElement SuggestionContent(Uri icon, string text)
         {
-            var sp = new StackPanel { Orientation = Orientation.Horizontal };
-            sp.Children.Add(new FontIcon
+            var g = new Grid();
+            g.Children.Add(new BitmapIcon
             {
-                Style = (Style)Application.Current.Resources["Icon"],
-                Glyph = glyph,
-                FontSize = 18,
-                Margin = new Thickness(0, 0, 12, 0),
-                Foreground = (Brush)Application.Current.Resources["AccentBrush"]
+                UriSource = icon,
+                Width = 30,
+                Height = 30,
+                Foreground = new SolidColorBrush(Windows.UI.Colors.White),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
             });
-            sp.Children.Add(new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, MaxWidth = 380, VerticalAlignment = VerticalAlignment.Center });
-            return sp;
+            g.Children.Add(new TextBlock
+            {
+                Text = text,
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 14,
+                Foreground = new SolidColorBrush(Windows.UI.Colors.White),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                MaxLines = 4,
+                TextTrimming = TextTrimming.CharacterEllipsis
+            });
+            return g;
         }
 
         // ================================================================ navigation
@@ -121,7 +143,7 @@ namespace Lumen
 
         public bool HandleBack()
         {
-            if (Drawer.IsPaneOpen) { Drawer.IsPaneOpen = false; return true; }
+            if (MainPivot.SelectedIndex != 0) { MainPivot.SelectedIndex = 0; return true; }
             if (_recorder.IsRecording) { var t = FinishRecordingAsync(false); return true; }
             if (_share != null)
             {
@@ -140,7 +162,7 @@ namespace Lumen
             GreetingText.Text = Greeting();
             MessagesList.FontSize = ThemeManager.MessageFontSize;
             MessagesList.ItemContainerTransitions = Fx.Enabled
-                ? new TransitionCollection { new AddDeleteThemeTransition(), new EntranceThemeTransition { FromVerticalOffset = 36, IsStaggeringEnabled = true } }
+                ? new TransitionCollection { new AddDeleteThemeTransition() }
                 : new TransitionCollection();
             UpdateEmptyState();
             UpdateSendState();
@@ -184,18 +206,12 @@ namespace Lumen
             var wasVisible = EmptyState.Visibility == Visibility.Visible;
             EmptyState.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
 
-            if (empty && (!wasVisible || _orbBreath == null))
+            if (empty && !wasVisible)
             {
-                // Greeting slides in, chips cascade, the orb breathes.
+                // Greeting slides in, then the live tiles cascade.
                 Fx.FadeInUp(GreetingText, 80, 20, 500);
                 Fx.FadeInUp(EmptySubtitle, 160, 20, 500);
                 for (int i = 0; i < SuggestionsPanel.Children.Count; i++) Fx.FadeInUp(SuggestionsPanel.Children[i], 260 + i * 80, 24, 480);
-                if (_orbBreath == null) _orbBreath = Fx.Breathe(EmptyOrb);
-                else _orbBreath.Begin();
-            }
-            else if (!empty && _orbBreath != null)
-            {
-                _orbBreath.Stop();
             }
         }
 
@@ -204,7 +220,7 @@ namespace Lumen
             var list = ConversationsList.ItemsSource as System.Collections.ICollection;
             var none = list == null || list.Count == 0;
             NoChats.Visibility = none ? Visibility.Visible : Visibility.Collapsed;
-            NoChatsText.Text = string.IsNullOrWhiteSpace(SearchBox.Text) ? "No chats yet" : "Nothing found";
+            NoChatsText.Text = string.IsNullOrWhiteSpace(SearchBox.Text) ? S.NoChatsYet : S.NothingFound;
         }
 
         private async Task PersistAsync()
@@ -228,11 +244,11 @@ namespace Lumen
 
         private static string PreviewOf(ChatMessage m)
         {
-            if (!string.IsNullOrEmpty(m.DocFile)) return "File: " + m.DocName;
-            if (!string.IsNullOrEmpty(m.ImageFile) && !m.IsUser) return "Image created";
+            if (!string.IsNullOrEmpty(m.DocFile)) return string.Format(S.FilePreview, m.DocName);
+            if (!string.IsNullOrEmpty(m.ImageFile) && !m.IsUser) return S.ImageCreated;
             var t = (m.Text ?? "").Replace("\n", " ").Replace("**", "").Replace("#", "").Trim();
             if (t.Length == 0) return m.AudioFile != null ? S.VoiceOnly : S.ImageOnly;
-            return (m.IsUser ? "You: " : "") + (t.Length > 80 ? t.Substring(0, 80) : t);
+            return (m.IsUser ? S.You : "") + (t.Length > 80 ? t.Substring(0, 80) : t);
         }
 
         private static string MakeTitle(string text, bool hasAudio)
@@ -349,8 +365,8 @@ namespace Lumen
                 {
                     if (result.FinishReason == "MAX_TOKENS") final += "\n\n_" + S.Truncated + "_";
                     reply.Text = final;
-                    if (!string.IsNullOrEmpty(reply.ImageFile)) ShowToast(Icons.ImageSparkle, "Image ready");
-                    else if (!string.IsNullOrEmpty(reply.DocFile)) ShowToast(Icons.Document, "File ready: " + reply.DocName);
+                    if (!string.IsNullOrEmpty(reply.ImageFile)) ShowToast(Icons.ImageSparkle, S.ImageReady);
+                    else if (!string.IsNullOrEmpty(reply.DocFile)) ShowToast(Icons.Document, string.Format(S.FileReady, reply.DocName));
                 }
             }
             catch (Exception ex)
@@ -391,23 +407,27 @@ namespace Lumen
         private void SetBusy(bool busy)
         {
             _busy = busy;
-            AttachButton.IsEnabled = !busy;
+            IsBusy = busy;
+            ModelButton.IsEnabled = !busy;
+            UpdateBarState();
+            BusyBar.IsIndeterminate = busy;
+            BusyBar.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
             UpdateSendState();
         }
 
         /// <summary>One button, three jobs: stop (answering), send (recording or something typed), mic (empty).</summary>
         private void UpdateSendState()
         {
-            string glyph;
+            Uri glyph;
             if (_busy) glyph = Icons.Stop;
             else if (_recorder.IsRecording) glyph = Icons.Send;
             else if (InputBox.Text.Trim().Length > 0 || _pendingImage != null) glyph = Icons.Send;
             else glyph = Icons.Mic;
 
-            if (SendGlyph.Glyph != glyph)
+            if (SendGlyph.UriSource != glyph)
             {
-                SendGlyph.Glyph = glyph;
-                Fx.Pop(SendGlyph, 0.5, 300);
+                SendGlyph.UriSource = glyph;
+                SendButton.Label = _busy ? S.LabelStop : glyph == Icons.Mic ? S.LabelVoice : S.LabelSend;
             }
         }
 
@@ -516,11 +536,11 @@ namespace Lumen
             {
                 Player.Source = await Speech.SynthesizeAsync(msg.Text);
                 Player.Play();
-                ShowToast(Icons.Speak, "Reading aloud. Tap here to stop.");
+                ShowToast(Icons.Speak, S.ReadingAloud);
             }
             catch (Exception)
             {
-                ShowToast(Icons.Speak, "No voice available. Add one in Settings > Time & language > Speech.", true);
+                ShowToast(Icons.Speak, S.NoVoice, true);
             }
         }
 
@@ -554,8 +574,9 @@ namespace Lumen
                 if (_conv.Messages.Count > 0) MessagesList.ScrollIntoView(_conv.Messages[_conv.Messages.Count - 1]);
                 return;
             }
-            sv.UpdateLayout();
-            sv.ChangeView(null, sv.ScrollableHeight, null, !animate || !Fx.Enabled);
+            // Let layout catch up first instead of forcing a synchronous UpdateLayout on every tick.
+            var instant = !animate || !Fx.Enabled;
+            var ignore = Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => sv.ChangeView(null, sv.ScrollableHeight, null, instant));
         }
 
         private static T FindChild<T>(DependencyObject root) where T : DependencyObject
@@ -643,20 +664,21 @@ namespace Lumen
             else if (!string.IsNullOrEmpty(_shareText))
             {
                 args.Request.Data.SetText(_shareText);
+                _shareText = null;
             }
         }
 
         // ================================================================ notifications
 
         /// <summary>Animated in-app notification: slides down with a little overshoot, then slides back up.</summary>
-        private void ShowToast(string glyph, string text, bool warning = false)
+        private void ShowToast(Uri glyph, string text, bool warning = false)
         {
             // A hide animation still running (or holding its end values) must not swallow this toast.
             _toastHide?.Stop();
             _toastHide = null;
             Toast.Opacity = 1;
             ToastMove.Y = 0;
-            ToastIcon.Glyph = glyph;
+            ToastIcon.UriSource = glyph;
             ToastText.Text = text;
             Toast.Visibility = Visibility.Visible;
 
@@ -768,12 +790,12 @@ namespace Lumen
 
         private void AskImage_Click(object sender, RoutedEventArgs e)
         {
-            Prefill("Create an image of ");
+            Prefill(S.AskImagePrefix);
         }
 
         private void AskFile_Click(object sender, RoutedEventArgs e)
         {
-            Prefill("Create a file with ");
+            Prefill(S.AskFilePrefix);
         }
 
         private void Prefill(string text)
@@ -790,15 +812,32 @@ namespace Lumen
 
         // ================================================================ header & drawer
 
-        private void Menu_Click(object sender, RoutedEventArgs e)
+        private void MainPivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Drawer.IsPaneOpen = !Drawer.IsPaneOpen;
+            if (Composer == null || SendButton == null) return;
+            var chat = MainPivot.SelectedIndex == 0;
+            Composer.Visibility = chat ? Visibility.Visible : Visibility.Collapsed;
+            UpdateBarState();
+        }
+
+        /// <summary>Send/attach only make sense on the chat pivot, but Stop must stay reachable everywhere.</summary>
+        private void UpdateBarState()
+        {
+            var chat = MainPivot.SelectedIndex == 0;
+            SendButton.IsEnabled = chat || _busy;
+            AttachButton.IsEnabled = chat && !_busy;
+        }
+
+        private void Tour_Click(object sender, RoutedEventArgs e)
+        {
+            if (_busy) return;
+            Frame.Navigate(typeof(OnboardingPage));
         }
 
         private void ModelButton_Click(object sender, RoutedEventArgs e)
         {
             // Quick model switch without going to Settings.
-            var flyout = new MenuFlyout();
+            var flyout = ThemeManager.Themed(new MenuFlyout());
             var current = AppSettings.Model;
             foreach (var m in AppSettings.Models)
             {
@@ -807,7 +846,7 @@ namespace Lumen
                 {
                     AppSettings.Model = (string)((FrameworkElement)s).Tag;
                     ModelLabel.Text = AppSettings.ModelDisplayName;
-                    ShowToast(Icons.Model, "Now using " + AppSettings.ModelDisplayName);
+                    ShowToast(Icons.Model, string.Format(S.NowUsing, AppSettings.ModelDisplayName));
                 };
                 flyout.Items.Add(item);
             }
@@ -816,7 +855,7 @@ namespace Lumen
 
         private void NewChat_Click(object sender, RoutedEventArgs e)
         {
-            Drawer.IsPaneOpen = false;
+            MainPivot.SelectedIndex = 0;
             if (_busy) return;
             StopPlayback();
             StartNewConversation();
@@ -829,7 +868,7 @@ namespace Lumen
 
         private async void Conversation_ItemClick(object sender, ItemClickEventArgs e)
         {
-            Drawer.IsPaneOpen = false;
+            MainPivot.SelectedIndex = 0;
             var info = e.ClickedItem as ConversationInfo;
             if (info != null) await OpenConversationAsync(info);
         }
@@ -856,7 +895,7 @@ namespace Lumen
             var target = info.Pinned ? 0 : Math.Max(0, _conversations.Count(c => c.Pinned));
             if (idx >= 0 && idx != target && target < _conversations.Count) _conversations.Move(idx, target);
             await ChatStore.SaveIndexAsync(_conversations);
-            ShowToast(Icons.Pin, info.Pinned ? "Pinned to top" : "Unpinned");
+            ShowToast(Icons.Pin, info.Pinned ? S.Pinned : S.Unpinned);
         }
 
         private async void RenameConversation_Click(object sender, RoutedEventArgs e)
@@ -866,9 +905,10 @@ namespace Lumen
             var box = new TextBox { Text = info.Title, SelectionStart = 0, SelectionLength = info.Title.Length };
             var dialog = new ContentDialog
             {
-                Title = "Rename chat",
+                RequestedTheme = ThemeManager.Theme,
+                Title = S.RenameChat,
                 Content = box,
-                PrimaryButtonText = "Rename",
+                PrimaryButtonText = S.Rename,
                 SecondaryButtonText = S.Cancel
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
@@ -889,10 +929,79 @@ namespace Lumen
             await ChatStore.DeleteAsync(info);
             await ChatStore.SaveIndexAsync(_conversations);
             if (_conv.Info.Id == info.Id) StartNewConversation();
-            ShowToast(Icons.Delete, "Chat deleted");
+            ShowToast(Icons.Delete, S.ChatDeleted);
         }
 
-        // ================================================================ message menu
+        // ================================================================ context menus (built on demand: none per list item)
+
+        private static MenuFlyoutItem MenuItem(string text, Uri icon, object context, RoutedEventHandler click, bool danger = false)
+        {
+            var item = new MenuFlyoutItem { Text = text, DataContext = context };
+            var bi = new BitmapIcon { UriSource = icon, Width = 20, Height = 20 };
+            if (danger)
+            {
+                var red = (Brush)Application.Current.Resources["DangerBrush"];
+                item.Foreground = red;
+                bi.Foreground = red;
+            }
+            item.Icon = bi;
+            item.Click += click;
+            return item;
+        }
+
+        private static void ShowMenu(MenuFlyout menu, FrameworkElement target, RightTappedRoutedEventArgs e)
+        {
+            e.Handled = true;
+            try { menu.ShowAt(target, e.GetPosition(target)); }
+            catch (Exception) { menu.ShowAt(target); }
+        }
+
+        private void UserMessage_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            var el = (FrameworkElement)sender;
+            var msg = el.DataContext as ChatMessage;
+            if (msg == null) return;
+            var menu = ThemeManager.Themed(new MenuFlyout());
+            if (!string.IsNullOrEmpty(msg.Text)) menu.Items.Add(MenuItem(S.Copy, Icons.Copy, msg, CopyMessage_Click));
+            menu.Items.Add(MenuItem(S.EditResend, Icons.Edit, msg, EditMessage_Click));
+            menu.Items.Add(new MenuFlyoutSeparator());
+            menu.Items.Add(MenuItem(S.Delete, Icons.Delete, msg, DeleteMessage_Click, true));
+            ShowMenu(menu, el, e);
+        }
+
+        private void ModelMessage_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            var el = (FrameworkElement)sender;
+            var msg = el.DataContext as ChatMessage;
+            if (msg == null || msg.IsStreaming) return;
+            var menu = ThemeManager.Themed(new MenuFlyout());
+            if (!string.IsNullOrEmpty(msg.Text))
+            {
+                menu.Items.Add(MenuItem(S.Copy, Icons.Copy, msg, CopyMessage_Click));
+                menu.Items.Add(MenuItem(S.SelectText, Icons.SelectText, msg, SelectText_Click));
+                menu.Items.Add(MenuItem(S.ReadAloud, Icons.Speak, msg, ReadAloud_Click));
+                menu.Items.Add(MenuItem(S.Share, Icons.Share, msg, ShareMessage_Click));
+            }
+            menu.Items.Add(MenuItem(S.Regenerate, Icons.Regenerate, msg, Regenerate_Click));
+            menu.Items.Add(new MenuFlyoutSeparator());
+            menu.Items.Add(MenuItem(S.Delete, Icons.Delete, msg, DeleteMessage_Click, true));
+            ShowMenu(menu, el, e);
+        }
+
+        private void Conversation_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            var el = (FrameworkElement)sender;
+            var info = el.DataContext as ConversationInfo;
+            if (info == null) return;
+            var menu = ThemeManager.Themed(new MenuFlyout());
+            menu.Items.Add(MenuItem(info.PinLabel, info.Pinned ? Icons.Unpin : Icons.Pin, info, PinConversation_Click));
+            menu.Items.Add(MenuItem(S.Rename, Icons.Rename, info, RenameConversation_Click));
+            menu.Items.Add(new MenuFlyoutSeparator());
+            menu.Items.Add(MenuItem(S.Delete, Icons.Delete, info, DeleteConversation_Click, true));
+            ShowMenu(menu, el, e);
+        }
+
+        // ================================================================ message actions
 
         private static ChatMessage Msg(object sender)
         {
@@ -922,7 +1031,7 @@ namespace Lumen
                 MaxHeight = 420
             };
             ScrollViewer.SetVerticalScrollBarVisibility(box, ScrollBarVisibility.Auto);
-            var dialog = new ContentDialog { Title = "Select text", Content = box, PrimaryButtonText = "Done" };
+            var dialog = new ContentDialog { RequestedTheme = ThemeManager.Theme, Title = S.SelectText, Content = box, PrimaryButtonText = S.Done };
             await dialog.ShowAsync();
         }
 
@@ -998,7 +1107,7 @@ namespace Lumen
             {
                 var file = await FileTools.GetImageAsync(msg.ImageFile);
                 if (await FileTools.SaveAsAsync(file, "Lumen " + DateTime.Now.ToString("yyyy-MM-dd HHmm") + file.FileType))
-                    ShowToast(Icons.Save, "Saved");
+                    ShowToast(Icons.Save, S.Saved);
             }
             catch (Exception) { ShowToast(Icons.Warning, S.ErrGeneric, true); }
         }
@@ -1020,7 +1129,7 @@ namespace Lumen
             var msg = Msg(sender);
             if (msg == null || string.IsNullOrEmpty(msg.DocFile)) return;
             try { await FileTools.OpenAsync(await FileTools.GetDocAsync(msg.DocFile)); }
-            catch (Exception) { ShowToast(Icons.Warning, "No app on this phone opens this file type. Use Save or Share.", true); }
+            catch (Exception) { ShowToast(Icons.Warning, S.NoAppForFile, true); }
         }
 
         private async void SaveDoc_Click(object sender, RoutedEventArgs e)
@@ -1030,7 +1139,7 @@ namespace Lumen
             try
             {
                 if (await FileTools.SaveAsAsync(await FileTools.GetDocAsync(msg.DocFile), msg.DocName))
-                    ShowToast(Icons.Save, "Saved " + msg.DocName);
+                    ShowToast(Icons.Save, string.Format(S.SavedFile, msg.DocName));
             }
             catch (Exception) { ShowToast(Icons.Warning, S.ErrGeneric, true); }
         }

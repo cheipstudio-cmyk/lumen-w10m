@@ -1,28 +1,35 @@
 using System;
 using System.Collections.Generic;
 using Windows.UI;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace Lumen.Core
 {
-    public sealed class AccentPalette
+    [Windows.UI.Xaml.Data.Bindable]
+    public sealed class AccentPalette : Observable
     {
         public string Name { get; set; }
-        public Color A { get; set; }       // gradient start
-        public Color B { get; set; }       // gradient middle
-        public Color C { get; set; }       // gradient end
-        public Color Solid { get; set; }   // links, headers, toggles
-        public Color Bubble1 { get; set; } // user bubble start
-        public Color Bubble2 { get; set; } // user bubble end
+        public Color Color { get; set; }
+        public SolidColorBrush SwatchBrush { get { return new SolidColorBrush(Name == "phone" ? ThemeManager.PhoneAccentColor : Color); } }
 
-        public SolidColorBrush SwatchBrush { get { return new SolidColorBrush(B); } }
+        /// <summary>Only the "phone accent" tile carries a caption.</summary>
+        public string Label { get { return Name == "phone" ? S.PhoneAccent : ""; } }
+
+        private bool _selected;
+        public bool Selected
+        {
+            get { return _selected; }
+            set { if (Set(ref _selected, value)) { Raise(nameof(SelectedVisibility)); } }
+        }
+        public Visibility SelectedVisibility { get { return _selected ? Visibility.Visible : Visibility.Collapsed; } }
     }
 
     /// <summary>
-    /// Live theming without reloading pages: every page references the same brush objects
-    /// from App.xaml via StaticResource, so we just recolor those objects in place.
+    /// Windows Phone style theming: one flat accent colour (the classic 20, or the phone's own accent)
+    /// on a black or white background. Pages share the brush objects from App.xaml, recoloured in place.
     /// </summary>
     public static class ThemeManager
     {
@@ -31,17 +38,63 @@ namespace Lumen.Core
             return Color.FromArgb((byte)(argb >> 24), (byte)(argb >> 16), (byte)(argb >> 8), (byte)argb);
         }
 
+        /// <summary>Index 0 is "phone accent"; the rest are the Windows Phone accent colours.</summary>
         public static readonly List<AccentPalette> Palettes = new List<AccentPalette>
         {
-            new AccentPalette { Name = "Aurora",  A = Hex(0xFF4F8BFF), B = Hex(0xFF9B6BFF), C = Hex(0xFFFF6FB5), Solid = Hex(0xFF8AB4FF), Bubble1 = Hex(0xFF3E63F2), Bubble2 = Hex(0xFF6A4CF0) },
-            new AccentPalette { Name = "Lime",    A = Hex(0xFF2E9E2A), B = Hex(0xFF60C13A), C = Hex(0xFFB4E06A), Solid = Hex(0xFF8BD65A), Bubble1 = Hex(0xFF2E8B2A), Bubble2 = Hex(0xFF4BA83A) },
-            new AccentPalette { Name = "Cyan",    A = Hex(0xFF0078D7), B = Hex(0xFF1BA1E2), C = Hex(0xFF63D8F5), Solid = Hex(0xFF5CC8F2), Bubble1 = Hex(0xFF0A6EC4), Bubble2 = Hex(0xFF1793D1) },
-            new AccentPalette { Name = "Magenta", A = Hex(0xFFA4006A), B = Hex(0xFFE3008C), C = Hex(0xFFFF6FBF), Solid = Hex(0xFFFF6FBF), Bubble1 = Hex(0xFFB0006F), Bubble2 = Hex(0xFFD6007F) },
-            new AccentPalette { Name = "Orange",  A = Hex(0xFFE04A00), B = Hex(0xFFFA6800), C = Hex(0xFFFFB347), Solid = Hex(0xFFFF9A3C), Bubble1 = Hex(0xFFD45200), Bubble2 = Hex(0xFFF07000) },
-            new AccentPalette { Name = "Red",     A = Hex(0xFFB3141B), B = Hex(0xFFE51400), C = Hex(0xFFFF7A6E), Solid = Hex(0xFFFF7A6E), Bubble1 = Hex(0xFFB5121B), Bubble2 = Hex(0xFFD9261C) },
-            new AccentPalette { Name = "Violet",  A = Hex(0xFF4B1FA8), B = Hex(0xFF7A3FE0), C = Hex(0xFFC59BFF), Solid = Hex(0xFFB48CFF), Bubble1 = Hex(0xFF4F2AB8), Bubble2 = Hex(0xFF6E3BD6) },
-            new AccentPalette { Name = "Teal",    A = Hex(0xFF00695C), B = Hex(0xFF00ABA9), C = Hex(0xFF7FE3D4), Solid = Hex(0xFF5FD9CB), Bubble1 = Hex(0xFF00796B), Bubble2 = Hex(0xFF00968A) },
+            new AccentPalette { Name = "phone", Color = PhoneAccent() },
+            new AccentPalette { Name = "lime", Color = Hex(0xFFA4C400) },
+            new AccentPalette { Name = "green", Color = Hex(0xFF60A917) },
+            new AccentPalette { Name = "emerald", Color = Hex(0xFF008A00) },
+            new AccentPalette { Name = "teal", Color = Hex(0xFF00ABA9) },
+            new AccentPalette { Name = "cyan", Color = Hex(0xFF1BA1E2) },
+            new AccentPalette { Name = "cobalt", Color = Hex(0xFF0050EF) },
+            new AccentPalette { Name = "indigo", Color = Hex(0xFF6A00FF) },
+            new AccentPalette { Name = "violet", Color = Hex(0xFFAA00FF) },
+            new AccentPalette { Name = "pink", Color = Hex(0xFFF472D0) },
+            new AccentPalette { Name = "magenta", Color = Hex(0xFFD80073) },
+            new AccentPalette { Name = "crimson", Color = Hex(0xFFA20025) },
+            new AccentPalette { Name = "red", Color = Hex(0xFFE51400) },
+            new AccentPalette { Name = "orange", Color = Hex(0xFFFA6800) },
+            new AccentPalette { Name = "amber", Color = Hex(0xFFF0A30A) },
+            new AccentPalette { Name = "yellow", Color = Hex(0xFFE3C800) },
+            new AccentPalette { Name = "brown", Color = Hex(0xFF825A2C) },
+            new AccentPalette { Name = "olive", Color = Hex(0xFF6D8764) },
+            new AccentPalette { Name = "steel", Color = Hex(0xFF647687) },
+            new AccentPalette { Name = "mauve", Color = Hex(0xFF76608A) },
+            new AccentPalette { Name = "taupe", Color = Hex(0xFF87794E) },
         };
+
+        public static Color PhoneAccentColor { get { return PhoneAccent(); } }
+
+        /// <summary>Marks the current accent tile as selected (for the swatch grids).</summary>
+        public static void SyncSelection(IList<AccentPalette> list)
+        {
+            for (int i = 0; i < list.Count; i++) list[i].Selected = i == AppSettings.AccentIndex;
+        }
+
+        /// <summary>Fresh swatch items for one page: bound objects must never be shared across windows (share target).</summary>
+        public static List<AccentPalette> NewSwatches()
+        {
+            var list = new List<AccentPalette>();
+            foreach (var p in Palettes) list.Add(new AccentPalette { Name = p.Name, Color = p.Color });
+            SyncSelection(list);
+            return list;
+        }
+
+        /// <summary>Menus built in code follow the app theme chosen in settings, even before a restart.</summary>
+        public static MenuFlyout Themed(MenuFlyout menu)
+        {
+            var style = new Style(typeof(MenuFlyoutPresenter));
+            style.Setters.Add(new Setter(FrameworkElement.RequestedThemeProperty, Theme));
+            menu.MenuFlyoutPresenterStyle = style;
+            return menu;
+        }
+
+        private static Color PhoneAccent()
+        {
+            try { return new UISettings().GetColorValue(UIColorType.Accent); }
+            catch (Exception) { return Hex(0xFF1BA1E2); }
+        }
 
         public static AccentPalette Current
         {
@@ -51,6 +104,13 @@ namespace Lumen.Core
                 return Palettes[i >= 0 && i < Palettes.Count ? i : 0];
             }
         }
+
+        public static Color Accent
+        {
+            get { return AppSettings.AccentIndex == 0 ? PhoneAccent() : Current.Color; }
+        }
+
+        public static ElementTheme Theme { get { return AppSettings.LightTheme ? ElementTheme.Light : ElementTheme.Dark; } }
 
         public static double MessageFontSize
         {
@@ -65,53 +125,57 @@ namespace Lumen.Core
             }
         }
 
+        private static Color Mix(Color a, Color b, double t)
+        {
+            return Color.FromArgb(255,
+                (byte)(a.R + (b.R - a.R) * t),
+                (byte)(a.G + (b.G - a.G) * t),
+                (byte)(a.B + (b.B - a.B) * t));
+        }
+
         /// <summary>Call once at startup (before any page) and again after every change.</summary>
         public static void Apply()
         {
             var res = Application.Current.Resources;
-            var p = Current;
-            var black = AppSettings.PureBlack;
+            var accent = Accent;
+            var light = AppSettings.LightTheme;
+            var black = Hex(0xFF000000);
+            var white = Hex(0xFFFFFFFF);
 
-            // Dark: translucent "glass" over a pre-blurred aurora. Black: true black for AMOLED, near-opaque surfaces.
-            SetBrush(res, "BgBrush", black ? Hex(0xFF000000) : Hex(0xFF0E0F13));
-            SetBrush(res, "SurfaceBrush", black ? Hex(0xFF0E0E11) : Hex(0xB3181A21));
-            SetBrush(res, "Surface2Brush", black ? Hex(0xFF1A1A1F) : Hex(0xCC23262F));
-            SetBrush(res, "GlassBrush", black ? Hex(0xF0000000) : Hex(0x990F1016));
-            SetBrush(res, "PaneBrush", black ? Hex(0xFA0A0A0C) : Hex(0xF2121319));
-            SetBrush(res, "StrokeBrush", black ? Hex(0x26FFFFFF) : Hex(0x33FFFFFF));
-            SetBrush(res, "AccentBrush", p.Solid);
-            SetBrush(res, "AccentSoftBrush", Color.FromArgb(0x33, p.Solid.R, p.Solid.G, p.Solid.B));
+            SetBrush(res, "BgBrush", light ? white : black);
+            SetBrush(res, "SurfaceBrush", light ? Hex(0xFFF0F0F0) : Hex(0xFF1F1F1F));
+            SetBrush(res, "Surface2Brush", light ? Hex(0xFFE2E2E2) : Hex(0xFF2B2B2B));
+            SetBrush(res, "PaneBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF171717));
+            SetBrush(res, "GlassBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF171717));
+            SetBrush(res, "StrokeBrush", light ? Hex(0x33000000) : Hex(0x40FFFFFF));
+            SetBrush(res, "HighlightBrush", light ? Hex(0x14000000) : Hex(0x14FFFFFF));
+            SetBrush(res, "TextPrimaryBrush", light ? black : white);
+            SetBrush(res, "TextSecondaryBrush", light ? Hex(0xFF6B6B6B) : Hex(0xFF9A9A9A));
+            SetBrush(res, "AccentBrush", accent);
+            SetBrush(res, "AccentSoftBrush", Color.FromArgb(0x33, accent.R, accent.G, accent.B));
+            // Messaging-style bubbles: yours in the accent, Lumen's in a deeper shade of it.
+            SetBrush(res, "UserBubbleSolid", accent);
+            SetBrush(res, "ModelBubbleSolid", Mix(accent, black, light ? 0.18 : 0.55));
 
-            SetGradient(res, "AccentGradient", p.A, p.B, p.C);
-            SetGradient(res, "UserBubbleBrush", p.Bubble1, p.Bubble2, p.Bubble2);
+            SetGradient(res, "AccentGradient", accent, accent, accent);
+            SetGradient(res, "UserBubbleBrush", accent, accent, accent);
 
-            var aurora = res["AuroraBrush"] as ImageBrush;
-            if (aurora != null)
-            {
-                if (black)
-                {
-                    aurora.ImageSource = null;
-                }
-                else
-                {
-                    var idx = Palettes.IndexOf(p);
-                    aurora.ImageSource = new BitmapImage(new Uri("ms-appx:///Assets/Backgrounds/Aurora" + idx + ".jpg")) { DecodePixelWidth = 540 };
-                }
-            }
-
-            // Built-in controls (ToggleSwitch, Slider, selection borders) read this at startup: they follow a new accent after a restart.
-            res["SystemAccentColor"] = p.B;
+            res["SystemAccentColor"] = accent;
         }
 
         private static void SetBrush(ResourceDictionary res, string key, Color c)
         {
-            var b = res[key] as SolidColorBrush;
+            object o;
+            if (!res.TryGetValue(key, out o)) return;
+            var b = o as SolidColorBrush;
             if (b != null) b.Color = c;
         }
 
         private static void SetGradient(ResourceDictionary res, string key, Color a, Color b, Color c)
         {
-            var g = res[key] as LinearGradientBrush;
+            object o;
+            if (!res.TryGetValue(key, out o)) return;
+            var g = o as LinearGradientBrush;
             if (g == null || g.GradientStops.Count < 3) return;
             g.GradientStops[0].Color = a;
             g.GradientStops[1].Color = b;

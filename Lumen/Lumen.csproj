@@ -24,6 +24,8 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <LangVersion>7.3</LangVersion>
+    <AppxBundleAutoResourcePackageQualifiers>Scale|DXFeatureLevel</AppxBundleAutoResourcePackageQualifiers>
+    <AppxDefaultResourceQualifiers>Language=en-US;it-IT;es-ES;fr-FR;de-DE;pt-BR</AppxDefaultResourceQualifiers>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -115,22 +117,84 @@
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\Orb.png" />
     <Content Include="Assets\Lumia735.mp4" />
-    <Content Include="Assets\Fonts\FluentIcons.ttf" />
     <Content Include="Assets\Fonts\FluentIcons-LICENSE.txt" />
-    <Content Include="Assets\Backgrounds\Aurora0.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora1.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora2.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora3.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora4.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora5.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora6.jpg" />
-    <Content Include="Assets\Backgrounds\Aurora7.jpg" />
+    <Content Include="Assets\Icons\Menu.png" />
+    <Content Include="Assets\Icons\Add.png" />
+    <Content Include="Assets\Icons\Settings.png" />
+    <Content Include="Assets\Icons\Send.png" />
+    <Content Include="Assets\Icons\Mic.png" />
+    <Content Include="Assets\Icons\Stop.png" />
+    <Content Include="Assets\Icons\Camera.png" />
+    <Content Include="Assets\Icons\Image.png" />
+    <Content Include="Assets\Icons\Copy.png" />
+    <Content Include="Assets\Icons\Share.png" />
+    <Content Include="Assets\Icons\Regenerate.png" />
+    <Content Include="Assets\Icons\Delete.png" />
+    <Content Include="Assets\Icons\Pin.png" />
+    <Content Include="Assets\Icons\Unpin.png" />
+    <Content Include="Assets\Icons\Rename.png" />
+    <Content Include="Assets\Icons\Edit.png" />
+    <Content Include="Assets\Icons\Search.png" />
+    <Content Include="Assets\Icons\Chat.png" />
+    <Content Include="Assets\Icons\Speak.png" />
+    <Content Include="Assets\Icons\SelectText.png" />
+    <Content Include="Assets\Icons\Globe.png" />
+    <Content Include="Assets\Icons\Back.png" />
+    <Content Include="Assets\Icons\Save.png" />
+    <Content Include="Assets\Icons\Document.png" />
+    <Content Include="Assets\Icons\Sparkle.png" />
+    <Content Include="Assets\Icons\Color.png" />
+    <Content Include="Assets\Icons\DarkTheme.png" />
+    <Content Include="Assets\Icons\TextSize.png" />
+    <Content Include="Assets\Icons\Info.png" />
+    <Content Include="Assets\Icons\Key.png" />
+    <Content Include="Assets\Icons\Model.png" />
+    <Content Include="Assets\Icons\Shield.png" />
+    <Content Include="Assets\Icons\Storage.png" />
+    <Content Include="Assets\Icons\Play.png" />
+    <Content Include="Assets\Icons\Pause.png" />
+    <Content Include="Assets\Icons\Check.png" />
+    <Content Include="Assets\Icons\Dismiss.png" />
+    <Content Include="Assets\Icons\Open.png" />
+    <Content Include="Assets\Icons\ImageSparkle.png" />
+    <Content Include="Assets\Icons\DocumentAdd.png" />
+    <Content Include="Assets\Icons\ChevronDown.png" />
+    <Content Include="Assets\Icons\ChevronRight.png" />
+    <Content Include="Assets\Icons\Person.png" />
+    <Content Include="Assets\Icons\Bot.png" />
+    <Content Include="Assets\Icons\Lightbulb.png" />
+    <Content Include="Assets\Icons\Book.png" />
+    <Content Include="Assets\Icons\History.png" />
+    <Content Include="Assets\Icons\Warning.png" />
+    <Content Include="Assets\Icons\Error.png" />
+    <Content Include="Assets\Icons\CheckCircle.png" />
+    <Content Include="Assets\Icons\Link.png" />
+    <Content Include="Assets\Icons\Phone.png" />
+    <Content Include="Assets\Icons\Temperature.png" />
+    <Content Include="Assets\Icons\Lock.png" />
+    <Content Include="Assets\Icons\Flash.png" />
+    <Content Include="Assets\Icons\Eye.png" />
+    <Content Include="Assets\Icons\Folder.png" />
+    <Content Include="Assets\Icons\Wand.png" />
+    <Content Include="Assets\Icons\Paint.png" />
+    <Content Include="Assets\Icons\Options.png" />
+    <Content Include="Assets\Icons\More.png" />
+    <Content Include="Assets\Icons\Cloud.png" />
+    <Content Include="Assets\Icons\Language.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\it-IT\Resources.resw" />
+    <PRIResource Include="Strings\es-ES\Resources.resw" />
+    <PRIResource Include="Strings\fr-FR\Resources.resw" />
+    <PRIResource Include="Strings\de-DE\Resources.resw" />
+    <PRIResource Include="Strings\pt-BR\Resources.resw" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

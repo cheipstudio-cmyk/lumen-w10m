@@ -6,291 +6,118 @@
     Background="{StaticResource BgBrush}">
 
     <Page.Resources>
-        <Style x:Key="RowGrid" TargetType="Grid">
-            <Setter Property="MinHeight" Value="44"/>
-        </Style>
-        <Style x:Key="RowToggle" TargetType="ToggleSwitch">
-            <Setter Property="OnContent" Value=""/>
-            <Setter Property="OffContent" Value=""/>
+        <!-- Square accent tiles, Windows Phone style: white frame + check on the selected one -->
+        <DataTemplate x:Key="SwatchTemplate" x:DataType="core:AccentPalette">
+            <Grid Width="58" Height="58" Background="{x:Bind SwatchBrush}">
+                <TextBlock Text="{x:Bind Label}" FontSize="10" Foreground="White" VerticalAlignment="Bottom" Margin="4,0,2,3" TextWrapping="Wrap"/>
+                <Border BorderBrush="{StaticResource TextPrimaryBrush}" BorderThickness="3" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
+                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="16" Height="16" Foreground="White"
+                            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
+            </Grid>
+        </DataTemplate>
+        <Style x:Key="SwatchItem" TargetType="GridViewItem">
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="Padding" Value="0"/>
             <Setter Property="MinWidth" Value="0"/>
-            <Setter Property="Width" Value="56"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="MinHeight" Value="0"/>
         </Style>
     </Page.Resources>
 
-    <Grid Background="{StaticResource AuroraBrush}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="Root" Padding="14,70,14,32" MaxWidth="560">
-
-                <!-- Hero -->
-                <Border Style="{StaticResource Card}" Padding="16,18">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <Image x:Name="HeroOrb" Width="64" Height="64" Source="ms-appx:///Assets/Orb.png" Margin="0,0,14,0"/>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock x:Name="HeroTitle" Text="Lumen" FontSize="22" FontWeight="SemiBold"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <FontIcon Style="{StaticResource Icon}" x:Name="KeyStateIcon" Glyph="&#xF299;" FontSize="15" Foreground="{StaticResource AccentBrush}" Margin="0,0,6,0"/>
-                                <TextBlock x:Name="KeyStateText" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- ===== Account ===== -->
-                <TextBlock Text="ACCOUNT" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF4B7;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Gemini API key" Style="{StaticResource CardTitle}"/>
-                                <TextBlock Style="{StaticResource HintText}" Text="Free from Google AI Studio, or a paid key for bigger models and image creation. Stored in the Windows credential locker."/>
-                            </StackPanel>
-                        </Grid>
-                        <PasswordBox x:Name="ApiKeyBox" PlaceholderText="AIza..." Margin="0,8,0,10"/>
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="VerifyButton" Click="Verify_Click" Style="{StaticResource AccentButton}" Padding="16,9">
-                                <StackPanel Orientation="Horizontal">
-                                    <FontIcon Style="{StaticResource Icon}" Glyph="&#xF299;" FontSize="16" Foreground="White" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Check key" Foreground="White"/>
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource ChipButton}" Click="GetKey_Click" Margin="8,0,0,0" Padding="14,9" HorizontalAlignment="Left">
-                                <StackPanel Orientation="Horizontal">
-                                    <FontIcon Style="{StaticResource Icon}" Glyph="&#xF583;" FontSize="15" Margin="0,0,8,0" Foreground="{StaticResource AccentBrush}"/>
-                                    <TextBlock Text="Get a free key"/>
-                                </StackPanel>
-                            </Button>
-                            <ProgressRing x:Name="VerifyRing" Width="20" Height="20" Margin="12,0,0,0" Foreground="{StaticResource AccentBrush}"/>
-                        </StackPanel>
-                        <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,10,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- ===== Model ===== -->
-                <TextBlock Text="MODEL" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF83B;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Chat model" Style="{StaticResource CardTitle}"/>
-                                <TextBlock Style="{StaticResource HintText}" Text="Flash-Lite is the fastest with the biggest free quota. Check your key to list every model it can use."/>
-                            </StackPanel>
-                        </Grid>
-                        <ComboBox x:Name="ModelsCombo" HorizontalAlignment="Stretch" Margin="0,8,0,0" SelectionChanged="ModelsCombo_SelectionChanged">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate x:DataType="core:ModelInfo">
-                                    <StackPanel Padding="0,2">
-                                        <TextBlock Text="{x:Bind DisplayName}"/>
-                                        <TextBlock Text="{x:Bind Id}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <Grid Margin="0,14,0,0">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <FontIcon Style="{StaticResource Icon}" Glyph="&#xF01F2;" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="2,0,10,0" VerticalAlignment="Top"/>
-                            <TextBlock x:Name="ImageModelText" Grid.Column="1" Style="{StaticResource HintText}" Margin="0"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- ===== Appearance ===== -->
-                <TextBlock Text="APPEARANCE" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF2F6;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Accent color" Style="{StaticResource CardTitle}"/>
-                                <TextBlock Style="{StaticResource HintText}" Text="Background glow, bubbles and buttons follow it."/>
-                            </StackPanel>
-                        </Grid>
-                        <GridView x:Name="Swatches" SelectionMode="Single" SelectionChanged="Swatches_SelectionChanged" Padding="0" Margin="0,8,0,0">
-                            <GridView.ItemTemplate>
-                                <DataTemplate x:DataType="core:AccentPalette">
-                                    <StackPanel Width="62" Margin="0,0,0,6">
-                                        <Ellipse Width="40" Height="40" Fill="{x:Bind SwatchBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="{x:Bind Name}" FontSize="11" HorizontalAlignment="Center" Margin="0,4,0,0"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridView.ItemTemplate>
-                        </GridView>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid Style="{StaticResource RowGrid}">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" VerticalAlignment="Center"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF33C;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Pure black" FontWeight="SemiBold"/>
-                                <TextBlock Text="Black pixels are off on AMOLED: saves battery" Style="{StaticResource HintText}" Margin="0"/>
-                            </StackPanel>
-                            <ToggleSwitch x:Name="BlackToggle" Grid.Column="2" Style="{StaticResource RowToggle}" Toggled="BlackToggle_Toggled"/>
-                        </Grid>
-                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="50,10,0,10"/>
-                        <Grid Style="{StaticResource RowGrid}">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" VerticalAlignment="Center"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF412;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Animations" FontWeight="SemiBold"/>
-                                <TextBlock Text="Turn off for maximum speed" Style="{StaticResource HintText}" Margin="0"/>
-                            </StackPanel>
-                            <ToggleSwitch x:Name="AnimToggle" Grid.Column="2" Style="{StaticResource RowToggle}" Toggled="AnimToggle_Toggled"/>
-                        </Grid>
-                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="50,10,0,10"/>
-                        <Grid Style="{StaticResource RowGrid}">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" VerticalAlignment="Center"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF7E7;" FontSize="18" Foreground="White"/></Border>
-                            <TextBlock Grid.Column="1" Text="Text size" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="TextSizeCombo" Grid.Column="2" Width="120" VerticalAlignment="Center" SelectionChanged="TextSizeCombo_SelectionChanged">
-                                <x:String>Small</x:String>
-                                <x:String>Normal</x:String>
-                                <x:String>Large</x:String>
-                            </ComboBox>
-                        </Grid>
-                        <TextBlock Style="{StaticResource HintText}" Margin="50,10,0,0" Text="Switches and sliders pick up a new color, and page transitions follow the animation setting, the next time you open Lumen."/>
-                    </StackPanel>
-                </Border>
-
-                <!-- ===== Assistant ===== -->
-                <TextBlock Text="ASSISTANT" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid Style="{StaticResource RowGrid}">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" VerticalAlignment="Center"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF8FE;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Wikipedia lookups" FontWeight="SemiBold"/>
-                                <TextBlock Text="Free fresh facts. Google Search isn't in the free plan." Style="{StaticResource HintText}" Margin="0"/>
-                            </StackPanel>
-                            <ToggleSwitch x:Name="WikiToggle" Grid.Column="2" Style="{StaticResource RowToggle}" Toggled="WikiToggle_Toggled"/>
-                        </Grid>
-                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="50,10,0,10"/>
-                        <Grid Style="{StaticResource RowGrid}">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" VerticalAlignment="Center"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF01F2;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Images and files" FontWeight="SemiBold"/>
-                                <TextBlock Text="Ask for a picture or a document and get it in the chat" Style="{StaticResource HintText}" Margin="0"/>
-                            </StackPanel>
-                            <ToggleSwitch x:Name="CreativeToggle" Grid.Column="2" Style="{StaticResource RowToggle}" Toggled="CreativeToggle_Toggled"/>
-                        </Grid>
-                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="50,10,0,10"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF790;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <Grid>
-                                    <TextBlock Text="Creativity" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="TempValue" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                </Grid>
-                                <Slider x:Name="TempSlider" Minimum="0" Maximum="2" StepFrequency="0.1" ValueChanged="TempSlider_ValueChanged"/>
-                            </StackPanel>
-                        </Grid>
-                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="50,4,0,10"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xEB43;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Read-aloud voice" FontWeight="SemiBold"/>
-                                <ComboBox x:Name="VoiceCombo" HorizontalAlignment="Stretch" Margin="0,8,0,0" SelectionChanged="VoiceCombo_SelectionChanged"/>
-                            </StackPanel>
-                        </Grid>
-                        <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="50,14,0,10"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF3DE;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Custom instructions" FontWeight="SemiBold"/>
-                                <TextBox x:Name="PromptBox" AcceptsReturn="True" TextWrapping="Wrap" Height="100" Margin="0,8,0,0"
-                                         PlaceholderText="Empty = default: concise answers in your language."/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- ===== Advanced ===== -->
-                <TextBlock Text="ADVANCED" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF2E5;" FontSize="18" Foreground="White"/></Border>
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="API endpoint" FontWeight="SemiBold"/>
-                            <TextBlock Style="{StaticResource HintText}" Text="Only change it to go through your own proxy (e.g. a Cloudflare Worker)."/>
-                            <TextBox x:Name="BaseUrlBox" IsSpellCheckEnabled="False" InputScope="Url" Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- ===== Data ===== -->
-                <TextBlock Text="DATA" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF72C;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock Text="Storage" FontWeight="SemiBold"/>
-                                <TextBlock x:Name="UsageText" Style="{StaticResource HintText}" Text="Calculating..."/>
-                            </StackPanel>
-                        </Grid>
-                        <StackPanel Orientation="Horizontal" Margin="50,6,0,0">
-                            <Button Style="{StaticResource ChipButton}" Click="DeleteAll_Click" Padding="14,9" HorizontalAlignment="Left" Margin="0,0,8,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <FontIcon Style="{StaticResource Icon}" Glyph="&#xF34D;" FontSize="15" Foreground="{StaticResource DangerBrush}" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Delete all chats" Foreground="{StaticResource DangerBrush}"/>
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource ChipButton}" Click="Tour_Click" Padding="14,9" HorizontalAlignment="Left" Margin="0">
-                                <StackPanel Orientation="Horizontal">
-                                    <FontIcon Style="{StaticResource Icon}" Glyph="&#xF5E1;" FontSize="15" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Welcome tour"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- ===== About ===== -->
-                <TextBlock Text="ABOUT" Style="{StaticResource SectionHeader}"/>
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><FontIcon Style="{StaticResource Icon}" Glyph="&#xF4A4;" FontSize="18" Foreground="White"/></Border>
-                            <StackPanel Grid.Column="1">
-                                <TextBlock x:Name="AboutTitle" FontWeight="SemiBold"/>
-                                <TextBlock Style="{StaticResource HintText}" Text="Unofficial client, not affiliated with Google. Gemini is a trademark of Google LLC. Icons: Fluent System Icons (MIT)."/>
-                            </StackPanel>
-                        </Grid>
-                        <StackPanel Orientation="Horizontal" Margin="50,6,0,0">
-                            <HyperlinkButton Content="Source on GitHub" NavigateUri="https://github.com/cheipstudio-cmyk/lumen-w10m" Foreground="{StaticResource AccentBrush}" Margin="0,0,16,0"/>
-                            <HyperlinkButton Content="@second_dream___" NavigateUri="https://www.instagram.com/second_dream___" Foreground="{StaticResource AccentBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel x:Name="Root" Padding="12,14,12,40" MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}"/>
+            <TextBlock x:Uid="XlSettings" Text="settings" Style="{StaticResource PageTitle}"/>
+            <StackPanel Orientation="Horizontal" Margin="0,-6,0,4">
+                <BitmapIcon x:Name="KeyStateIcon" UriSource="ms-appx:///Assets/Icons/CheckCircle.png" Width="16" Height="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0"/>
+                <TextBlock x:Name="KeyStateText" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
             </StackPanel>
-        </ScrollViewer>
 
-        <!-- Glass header over the scrolling content -->
-        <Grid Height="56" Padding="4,0,4,0" Background="{StaticResource GlassBrush}" VerticalAlignment="Top">
-            <Border BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1"/>
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource IconButton}" Click="Back_Click">
-                    <FontIcon Style="{StaticResource Icon}" Glyph="&#xF15C;" FontSize="22"/>
-                </Button>
-                <TextBlock Text="Settings" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0"/>
+            <!-- ===== account ===== -->
+            <TextBlock x:Uid="XlAccount" Text="account" Style="{StaticResource SectionHeader}"/>
+            <PasswordBox x:Uid="XGeminiApiKeyHeader" x:Name="ApiKeyBox" Header="Gemini API key" PlaceholderText="AIza..."/>
+            <TextBlock x:Uid="XFreeFromGoogleAiStudioOrAPaidKeyForBigge" Style="{StaticResource HintText}" Text="Free from Google AI Studio, or a paid key for bigger models and image creation. Stored in the Windows credential locker."/>
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                <Button x:Uid="XCheckKeyContent" x:Name="VerifyButton" Content="Check key" Click="Verify_Click" Style="{StaticResource AccentButton}"/>
+                <ProgressRing x:Name="VerifyRing" Width="22" Height="22" Margin="12,0,0,0" Foreground="{StaticResource AccentBrush}"/>
             </StackPanel>
-        </Grid>
-    </Grid>
+            <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,8,0,0"/>
+            <HyperlinkButton x:Uid="XGetAFreeKeyContent" Content="Get a free key" Click="GetKey_Click" Foreground="{StaticResource AccentBrush}" Padding="0,4"/>
+
+            <!-- ===== model ===== -->
+            <TextBlock x:Uid="XlModel" Text="model" Style="{StaticResource SectionHeader}"/>
+            <ComboBox x:Uid="XChatModelHeader" x:Name="ModelsCombo" Header="Chat model" HorizontalAlignment="Stretch" SelectionChanged="ModelsCombo_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="core:ModelInfo">
+                        <StackPanel Padding="0,2">
+                            <TextBlock Text="{x:Bind DisplayName}"/>
+                            <TextBlock Text="{x:Bind Id}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock x:Uid="XFlashLiteIsTheFastestWithTheBiggestFreeQ" Style="{StaticResource HintText}" Margin="0,6,0,0"
+                       Text="Flash-Lite is the fastest with the biggest free quota. Check your key to list every model it can use."/>
+            <TextBlock x:Name="ImageModelText" Style="{StaticResource HintText}"/>
+
+            <!-- ===== appearance ===== -->
+            <TextBlock x:Uid="XlAppearance" Text="appearance" Style="{StaticResource SectionHeader}"/>
+            <ComboBox x:Uid="XLanguageHeader" x:Name="LanguageCombo" Header="Language" HorizontalAlignment="Stretch" SelectionChanged="LanguageCombo_SelectionChanged"/>
+            <ToggleSwitch x:Uid="XLightThemeHeader" x:Name="ThemeToggle" Header="Light theme" Toggled="ThemeToggle_Toggled" Margin="0,12,0,0"/>
+            <TextBlock x:Uid="XAccentColor" Text="Accent color" Margin="0,12,0,8"/>
+            <GridView x:Name="Swatches" ItemTemplate="{StaticResource SwatchTemplate}" ItemContainerStyle="{StaticResource SwatchItem}"
+                      SelectionMode="None" IsItemClickEnabled="True" ItemClick="Swatches_ItemClick" Padding="0"
+                      ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            <ComboBox x:Uid="XTextSizeHeader" x:Name="TextSizeCombo" Header="Text size" Width="200" HorizontalAlignment="Left" Margin="0,8,0,0" SelectionChanged="TextSizeCombo_SelectionChanged"/>
+            <ToggleSwitch x:Uid="XAnimationsHeader" x:Name="AnimToggle" Header="Animations" Toggled="AnimToggle_Toggled" Margin="0,12,0,0"/>
+
+            <!-- ===== assistant ===== -->
+            <TextBlock x:Uid="XlAssistant" Text="assistant" Style="{StaticResource SectionHeader}"/>
+            <ToggleSwitch x:Uid="XWikipediaLookupsHeader" x:Name="WikiToggle" Header="Wikipedia lookups" Toggled="WikiToggle_Toggled"/>
+            <TextBlock x:Uid="XFreeFreshFactsGoogleSearchIsnTInTheFreeP" Style="{StaticResource HintText}" Text="Free fresh facts. Google Search isn't in the free plan."/>
+            <ToggleSwitch x:Uid="XImagesAndFilesHeader" x:Name="CreativeToggle" Header="Images and files" Toggled="CreativeToggle_Toggled" Margin="0,8,0,0"/>
+            <TextBlock x:Uid="XAskForAPictureOrADocumentAndGetItInTheCh" Style="{StaticResource HintText}" Text="Ask for a picture or a document and get it in the chat"/>
+            <Grid Margin="0,12,0,0">
+                <TextBlock x:Uid="XCreativity" Text="Creativity"/>
+                <TextBlock x:Name="TempValue" HorizontalAlignment="Right" Foreground="{StaticResource AccentBrush}"/>
+            </Grid>
+            <Slider x:Name="TempSlider" Minimum="0" Maximum="2" StepFrequency="0.1" ValueChanged="TempSlider_ValueChanged"/>
+            <ComboBox x:Uid="XReadAloudVoiceHeader" x:Name="VoiceCombo" Header="Read-aloud voice" HorizontalAlignment="Stretch" SelectionChanged="VoiceCombo_SelectionChanged"/>
+            <TextBox x:Uid="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText" x:Name="PromptBox" Header="Custom instructions" AcceptsReturn="True" TextWrapping="Wrap" Height="110" Margin="0,12,0,0"
+                     PlaceholderText="Empty = default: concise answers in your language."/>
+
+            <!-- ===== advanced ===== -->
+            <TextBlock x:Uid="XlAdvanced" Text="advanced" Style="{StaticResource SectionHeader}"/>
+            <TextBox x:Uid="XApiEndpointHeader" x:Name="BaseUrlBox" Header="API endpoint" IsSpellCheckEnabled="False" InputScope="Url"/>
+            <TextBlock x:Uid="XOnlyChangeItToGoThroughYourOwnProxyEGACl" Style="{StaticResource HintText}" Text="Only change it to go through your own proxy (e.g. a Cloudflare Worker)."/>
+
+            <!-- ===== data ===== -->
+            <TextBlock x:Uid="XlData" Text="data" Style="{StaticResource SectionHeader}"/>
+            <TextBlock x:Uid="XCalculating" x:Name="UsageText" Style="{StaticResource HintText}" Text="Calculating..."/>
+            <Button Style="{StaticResource ChipButton}" Click="DeleteAll_Click">
+                <StackPanel Orientation="Horizontal">
+                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Delete.png" Width="20" Height="20" Foreground="{StaticResource DangerBrush}" Margin="0,0,12,0"/>
+                    <TextBlock x:Uid="XDeleteAllChats" Text="Delete all chats" FontSize="17" Foreground="{StaticResource DangerBrush}"/>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource ChipButton}" Click="Tour_Click">
+                <StackPanel Orientation="Horizontal">
+                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Phone.png" Width="20" Height="20" Margin="0,0,12,0"/>
+                    <TextBlock x:Uid="XWelcomeTour" Text="Welcome tour" FontSize="17"/>
+                </StackPanel>
+            </Button>
+
+            <!-- ===== about ===== -->
+            <TextBlock x:Uid="XlAbout" Text="about" Style="{StaticResource SectionHeader}"/>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                <Image Width="56" Height="56" Source="ms-appx:///Assets/Orb.png" Margin="0,0,14,0" VerticalAlignment="Top"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock x:Name="AboutTitle" FontSize="17" FontWeight="SemiBold"/>
+                    <TextBlock x:Uid="XUnofficialClientNotAffiliatedWithGoogleG" Style="{StaticResource HintText}" Text="Unofficial client, not affiliated with Google. Gemini is a trademark of Google LLC. Icons: Fluent System Icons (MIT)."/>
+                    <HyperlinkButton x:Uid="XSourceOnGithubContent" Content="Source on GitHub" NavigateUri="https://github.com/cheipstudio-cmyk/lumen-w10m" Foreground="{StaticResource AccentBrush}" Padding="0,4"/>
+                    <HyperlinkButton Content="@second_dream___" NavigateUri="https://www.instagram.com/second_dream___" Foreground="{StaticResource AccentBrush}" Padding="0,4"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

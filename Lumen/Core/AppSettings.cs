@@ -181,14 +181,15 @@ namespace Lumen.Core
 
         public static int AccentIndex
         {
-            get { return Get("accent", 0); }
-            set { Put("accent", value); }
+            get { return Get("accent2", 0); }
+            set { Put("accent2", value); }
         }
 
-        public static bool PureBlack
+        /// <summary>Windows Phone light theme (white background) instead of dark.</summary>
+        public static bool LightTheme
         {
-            get { return Get("pureBlack", false); }
-            set { Put("pureBlack", value); }
+            get { return Get("lightTheme", false); }
+            set { Put("lightTheme", value); }
         }
 
         /// <summary>0 small, 1 normal, 2 large.</summary>

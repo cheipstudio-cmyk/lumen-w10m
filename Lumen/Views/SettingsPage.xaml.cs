@@ -13,16 +13,16 @@ namespace Lumen.Views
 {
     public sealed partial class SettingsPage : Page
     {
+        private System.Collections.Generic.List<AccentPalette> _swatches;
         private bool _loading;
-        private Windows.UI.Xaml.Media.Animation.Storyboard _breath;
         private List<Tuple<string, string>> _voices = new List<Tuple<string, string>>();
 
         public SettingsPage()
         {
             InitializeComponent();
-            Swatches.ItemsSource = ThemeManager.Palettes;
-            AboutTitle.Text = "Lumen " + S.AppVersion + " by Second Dream";
-            HeroTitle.Text = "Lumen " + S.AppVersion;
+            _swatches = ThemeManager.NewSwatches();
+            Swatches.ItemsSource = _swatches;
+            AboutTitle.Text = string.Format(S.AboutTitle, S.AppVersion);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -31,9 +31,11 @@ namespace Lumen.Views
             _loading = true;
             ApiKeyBox.Password = AppSettings.ApiKey;
             LoadModels();
-            Swatches.SelectedIndex = AppSettings.AccentIndex;
-            BlackToggle.IsOn = AppSettings.PureBlack;
+            ThemeManager.SyncSelection(_swatches);
+            ThemeToggle.IsOn = AppSettings.LightTheme;
+            TextSizeCombo.ItemsSource = new List<string> { S.Small, S.Normal, S.Large };
             TextSizeCombo.SelectedIndex = AppSettings.TextSize;
+            LoadLanguages();
             AnimToggle.IsOn = AppSettings.Animations;
             WikiToggle.IsOn = AppSettings.Wikipedia;
             CreativeToggle.IsOn = AppSettings.Creative;
@@ -45,20 +47,18 @@ namespace Lumen.Views
             UpdateKeyState();
             _loading = false;
 
-            for (int i = 0; i < Root.Children.Count && i < 8; i++) Fx.FadeInUp(Root.Children[i], i * 40, 18, 380);
-            if (_breath == null) _breath = Fx.Breathe(HeroOrb, 0.05, 3000);
+            // Light entrance: just the title block.
+            for (int i = 0; i < Root.Children.Count && i < 3; i++) Fx.FadeInUp(Root.Children[i], i * 40, 14, 300);
 
             var bytes = await FileTools.UsageAsync();
-            UsageText.Text = FormatSize(bytes) + " used on this phone by chats, photos, voice notes and files.";
+            UsageText.Text = string.Format(S.StorageUsed, FormatSize(bytes));
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
             // Text fields are saved once on leave (TextChanged fires asynchronously and would race the loader).
-            AppSettings.ApiKey = ApiKeyBox.Password;
-            AppSettings.CustomPrompt = PromptBox.Text.Trim();
-            AppSettings.BaseUrl = BaseUrlBox.Text;
+            SaveFields();
         }
 
         private static string FormatSize(ulong b)
@@ -71,11 +71,11 @@ namespace Lumen.Views
         private void UpdateKeyState()
         {
             var ok = AppSettings.HasApiKey;
-            KeyStateIcon.Glyph = ok ? Icons.CheckCircle : Icons.Warning;
-            KeyStateText.Text = ok ? "Connected to Gemini · " + AppSettings.ModelDisplayName : "No API key yet";
+            KeyStateIcon.UriSource = ok ? Icons.CheckCircle : Icons.Warning;
+            KeyStateText.Text = ok ? string.Format(S.KeyConnected, AppSettings.ModelDisplayName) : S.NoKeyYet;
             ImageModelText.Text = string.IsNullOrEmpty(AppSettings.ImageModel)
-                ? "Image creation: no image model found for this key yet. Check the key to look again."
-                : "Image creation uses " + AppSettings.ImageModel + ". Free keys usually have no quota for it.";
+                ? S.ImageModelNone
+                : string.Format(S.ImageModelUses, AppSettings.ImageModel);
         }
 
         private void LoadModels()
@@ -89,16 +89,63 @@ namespace Lumen.Views
 
         private void LoadVoices()
         {
-            _voices = new List<Tuple<string, string>> { Tuple.Create("", "System default") };
+            _voices = new List<Tuple<string, string>> { Tuple.Create("", S.SystemDefault) };
             foreach (var v in Speech.Voices) _voices.Add(Tuple.Create(v.Id, v.DisplayName + " (" + v.Language + ")"));
             VoiceCombo.ItemsSource = _voices.Select(v => v.Item2).ToList();
             var idx = _voices.FindIndex(v => v.Item1 == AppSettings.VoiceId);
             VoiceCombo.SelectedIndex = idx < 0 ? 0 : idx;
         }
 
-        private void Back_Click(object sender, RoutedEventArgs e)
+        private void LoadLanguages()
         {
-            if (Frame.CanGoBack) Frame.GoBack();
+            var names = new List<string> { S.SystemDefault };
+            names.AddRange(App.Languages.Select(l => l.Item2));
+            LanguageCombo.ItemsSource = names;
+            var ov = Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride;
+            var idx = string.IsNullOrEmpty(ov) ? 0 : App.Languages.FindIndex(l => l.Item1 == ov) + 1;
+            LanguageCombo.SelectedIndex = Math.Max(0, idx);
+        }
+
+        private void LanguageCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading || LanguageCombo.SelectedIndex < 0) return;
+            var code = LanguageCombo.SelectedIndex == 0 ? "" : App.Languages[LanguageCombo.SelectedIndex - 1].Item1;
+            if (code == Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride) return;
+            if (MainPage.IsBusy)
+            {
+                // Rebuilding the UI mid-answer would lose the chat: wait for Lumen to finish.
+                _loading = true;
+                LoadLanguages();
+                _loading = false;
+                return;
+            }
+            SaveFields();
+            App.SetLanguage(code);
+            App.ReloadUi(typeof(SettingsPage));
+        }
+
+        private void SaveFields()
+        {
+            AppSettings.ApiKey = ApiKeyBox.Password;
+            AppSettings.CustomPrompt = PromptBox.Text.Trim();
+            AppSettings.BaseUrl = BaseUrlBox.Text;
+        }
+
+        private void ThemeToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (_loading) return;
+            if (MainPage.IsBusy)
+            {
+                _loading = true;
+                ThemeToggle.IsOn = AppSettings.LightTheme;
+                _loading = false;
+                return;
+            }
+            AppSettings.LightTheme = ThemeToggle.IsOn;
+            ThemeManager.Apply();
+            SaveFields();
+            // System controls follow RequestedTheme on the root frame: rebuild it.
+            App.ReloadUi(typeof(SettingsPage));
         }
 
         private async void GetKey_Click(object sender, RoutedEventArgs e)
@@ -155,17 +202,12 @@ namespace Lumen.Views
             if (m != null) { AppSettings.Model = m.Id; UpdateKeyState(); }
         }
 
-        private void Swatches_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Swatches_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (_loading || Swatches.SelectedIndex < 0) return;
-            AppSettings.AccentIndex = Swatches.SelectedIndex;
-            ThemeManager.Apply();
-        }
-
-        private void BlackToggle_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (_loading) return;
-            AppSettings.PureBlack = BlackToggle.IsOn;
+            var p = e.ClickedItem as AccentPalette;
+            if (p == null) return;
+            AppSettings.AccentIndex = _swatches.IndexOf(p);
+            ThemeManager.SyncSelection(_swatches);
             ThemeManager.Apply();
         }
 
@@ -209,7 +251,8 @@ namespace Lumen.Views
 
         private void Tour_Click(object sender, RoutedEventArgs e)
         {
-            AppSettings.ApiKey = ApiKeyBox.Password;
+            if (MainPage.IsBusy) return;
+            SaveFields();
             Frame.Navigate(typeof(OnboardingPage));
         }
 
@@ -217,6 +260,7 @@ namespace Lumen.Views
         {
             var dialog = new ContentDialog
             {
+                RequestedTheme = ThemeManager.Theme,
                 Title = S.DeleteAllTitle,
                 Content = S.DeleteAllBody,
                 PrimaryButtonText = S.Delete,

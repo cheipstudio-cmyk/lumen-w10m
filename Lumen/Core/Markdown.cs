@@ -31,10 +31,10 @@ namespace Lumen.Core
         {
             if (_mono != null) return;
             _mono = new FontFamily("Consolas");
-            _codeBrush = new SolidColorBrush(Color.FromArgb(255, 0xF0, 0xB4, 0x7A));
-            _quoteBrush = new SolidColorBrush(Color.FromArgb(255, 0x9A, 0xA0, 0xB0));
-            // Shared theme brush: links follow the accent color live.
-            _linkBrush = (Application.Current.Resources["AccentBrush"] as Brush) ?? new SolidColorBrush(Color.FromArgb(255, 0x8A, 0xB4, 0xFF));
+            _codeBrush = new SolidColorBrush(Color.FromArgb(255, 0xFF, 0xE0, 0xA0));
+            _quoteBrush = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF));
+            // Text sits on the accent bubble: links are white and underlined, quotes a softer white.
+            _linkBrush = new SolidColorBrush(Color.FromArgb(255, 0xFF, 0xFF, 0xFF));
         }
 
         private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -266,7 +266,7 @@ namespace Lumen.Core
                         if (Uri.TryCreate(url, UriKind.Absolute, out uri) && (uri.Scheme == "http" || uri.Scheme == "https"))
                         {
                             FlushText(target, sb);
-                            var link = new Hyperlink { NavigateUri = uri, Foreground = _linkBrush, UnderlineStyle = UnderlineStyle.None };
+                            var link = new Hyperlink { NavigateUri = uri, Foreground = _linkBrush, UnderlineStyle = UnderlineStyle.Single };
                             link.Inlines.Add(new Run { Text = label });
                             target.Add(link);
                             i = paren + 1; continue;

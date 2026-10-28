@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AboutTitle" xml:space="preserve"><value>Lumen {0} da Second Dream</value></data>
+  <data name="AskFilePrefix" xml:space="preserve"><value>Crie um arquivo com </value></data>
+  <data name="AskImagePrefix" xml:space="preserve"><value>Crie uma imagem de </value></data>
+  <data name="CameraError" xml:space="preserve"><value>Câmera indisponível, abrindo a galeria</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="ChatDeleted" xml:space="preserve"><value>Conversa excluída</value></data>
+  <data name="Copied" xml:space="preserve"><value>Copiado</value></data>
+  <data name="Copy" xml:space="preserve"><value>Copiar</value></data>
+  <data name="CreatingFile" xml:space="preserve"><value>Escrevendo o arquivo</value></data>
+  <data name="CreatingImage" xml:space="preserve"><value>Criando a imagem</value></data>
+  <data name="Delete" xml:space="preserve"><value>Excluir</value></data>
+  <data name="DeleteAllBody" xml:space="preserve"><value>Conversas, fotos, mensagens de voz e arquivos serão removidos deste telefone. Não dá para desfazer.</value></data>
+  <data name="DeleteAllTitle" xml:space="preserve"><value>Excluir todas as conversas?</value></data>
+  <data name="Done" xml:space="preserve"><value>Pronto</value></data>
+  <data name="EditResend" xml:space="preserve"><value>Editar e reenviar</value></data>
+  <data name="ErrBadRequest" xml:space="preserve"><value>A solicitação foi recusada.</value></data>
+  <data name="ErrBlocked" xml:space="preserve"><value>A resposta foi bloqueada pelos filtros de segurança do Google. Tente reformular.</value></data>
+  <data name="ErrBusy" xml:space="preserve"><value>Os servidores do Google estão ocupados. Tente de novo em instantes.</value></data>
+  <data name="ErrEmpty" xml:space="preserve"><value>Resposta vazia. Tente de novo.</value></data>
+  <data name="ErrGeneric" xml:space="preserve"><value>Algo deu errado.</value></data>
+  <data name="ErrKey" xml:space="preserve"><value>Chave de API inválida ou ausente. Verifique em Configurações.</value></data>
+  <data name="ErrModel" xml:space="preserve"><value>Este modelo não está disponível para sua chave. Escolha outro em Configurações.</value></data>
+  <data name="ErrNetwork" xml:space="preserve"><value>Sem conexão. Verifique os dados móveis ou o Wi-Fi.</value></data>
+  <data name="ErrQuota" xml:space="preserve"><value>Cota gratuita esgotada. Aguarde um minuto ou mude para Flash-Lite em Configurações.</value></data>
+  <data name="ErrTls" xml:space="preserve"><value>Falha na conexão segura. Os certificados do telefone podem ser antigos demais: configure um proxy em Configurações &gt; Avançado.</value></data>
+  <data name="FilePreview" xml:space="preserve"><value>Arquivo: {0}</value></data>
+  <data name="FileReady" xml:space="preserve"><value>Arquivo pronto: {0}</value></data>
+  <data name="GreetAfternoon" xml:space="preserve"><value>Boa tarde</value></data>
+  <data name="GreetEvening" xml:space="preserve"><value>Boa noite</value></data>
+  <data name="GreetMorning" xml:space="preserve"><value>Bom dia</value></data>
+  <data name="ImageCreated" xml:space="preserve"><value>Imagem criada</value></data>
+  <data name="ImageError" xml:space="preserve"><value>Não foi possível carregar a foto</value></data>
+  <data name="ImageModelNone" xml:space="preserve"><value>Criação de imagens: nenhum modelo de imagem encontrado para esta chave. Verifique a chave para procurar de novo.</value></data>
+  <data name="ImageModelUses" xml:space="preserve"><value>A criação de imagens usa {0}. Chaves gratuitas geralmente não têm cota.</value></data>
+  <data name="ImageOnly" xml:space="preserve"><value>Foto</value></data>
+  <data name="ImageReady" xml:space="preserve"><value>Imagem pronta</value></data>
+  <data name="KeyAlsoImage" xml:space="preserve"><value> Esta chave também vê um modelo de imagens.</value></data>
+  <data name="KeyConnected" xml:space="preserve"><value>Conectado ao Gemini · {0}</value></data>
+  <data name="KeyMissing" xml:space="preserve"><value>Primeiro cole sua chave de API.</value></data>
+  <data name="LabelSend" xml:space="preserve"><value>enviar</value></data>
+  <data name="LabelStop" xml:space="preserve"><value>parar</value></data>
+  <data name="LabelVoice" xml:space="preserve"><value>voz</value></data>
+  <data name="Large" xml:space="preserve"><value>Grande</value></data>
+  <data name="LookingUp" xml:space="preserve"><value>Pesquisando "{0}" na Wikipédia</value></data>
+  <data name="MicDenied" xml:space="preserve"><value>O acesso ao microfone está desligado. Ative em Configurações &gt; Privacidade &gt; Microfone.</value></data>
+  <data name="MicError" xml:space="preserve"><value>Não foi possível iniciar o microfone</value></data>
+  <data name="ModelsLoaded" xml:space="preserve"><value>A chave funciona. {0} modelos disponíveis.</value></data>
+  <data name="NewChatTitle" xml:space="preserve"><value>Nova conversa</value></data>
+  <data name="Next" xml:space="preserve"><value>Avançar</value></data>
+  <data name="NoAppForFile" xml:space="preserve"><value>Nenhum app do telefone abre esse tipo de arquivo. Use Salvar ou Compartilhar.</value></data>
+  <data name="NoChatsYet" xml:space="preserve"><value>Nenhuma conversa ainda</value></data>
+  <data name="NoKeyYet" xml:space="preserve"><value>Ainda sem chave de API</value></data>
+  <data name="NoVoice" xml:space="preserve"><value>Nenhuma voz disponível. Adicione uma em Configurações &gt; Hora e idioma &gt; Fala.</value></data>
+  <data name="Normal" xml:space="preserve"><value>Normal</value></data>
+  <data name="NothingFound" xml:space="preserve"><value>Nada encontrado</value></data>
+  <data name="NowUsing" xml:space="preserve"><value>Agora usando {0}</value></data>
+  <data name="PhoneAccent" xml:space="preserve"><value>cor do telefone</value></data>
+  <data name="PinToTop" xml:space="preserve"><value>Fixar no topo</value></data>
+  <data name="Pinned" xml:space="preserve"><value>Fixada no topo</value></data>
+  <data name="ReadAloud" xml:space="preserve"><value>Ler em voz alta</value></data>
+  <data name="ReadingAloud" xml:space="preserve"><value>Lendo em voz alta. Toque aqui para parar.</value></data>
+  <data name="Regenerate" xml:space="preserve"><value>Gerar de novo</value></data>
+  <data name="Rename" xml:space="preserve"><value>Renomear</value></data>
+  <data name="RenameChat" xml:space="preserve"><value>Renomear conversa</value></data>
+  <data name="Retry" xml:space="preserve"><value>Tentar de novo</value></data>
+  <data name="Saved" xml:space="preserve"><value>Salvo</value></data>
+  <data name="SavedFile" xml:space="preserve"><value>{0} salvo</value></data>
+  <data name="SelectText" xml:space="preserve"><value>Selecionar texto</value></data>
+  <data name="Share" xml:space="preserve"><value>Compartilhar</value></data>
+  <data name="Small" xml:space="preserve"><value>Pequeno</value></data>
+  <data name="Start" xml:space="preserve"><value>Começar</value></data>
+  <data name="Stopped" xml:space="preserve"><value>Interrompido.</value></data>
+  <data name="StorageUsed" xml:space="preserve"><value>{0} usados neste telefone por conversas, fotos, áudios e arquivos.</value></data>
+  <data name="Suggest1" xml:space="preserve"><value>Explique computação quântica como se eu tivesse 10 anos</value></data>
+  <data name="Suggest2" xml:space="preserve"><value>Escreva uma mensagem de aniversário engraçada para um amigo</value></data>
+  <data name="Suggest3" xml:space="preserve"><value>Desenhe uma cabana aconchegante na neve à noite</value></data>
+  <data name="Suggest4" xml:space="preserve"><value>Planeje um passeio perfeito de um dia, pergunte onde eu moro</value></data>
+  <data name="SystemDefault" xml:space="preserve"><value>Padrão do sistema</value></data>
+  <data name="TooShort" xml:space="preserve"><value>Curto demais, grave um pouco mais</value></data>
+  <data name="Truncated" xml:space="preserve"><value>Resposta cortada: tamanho máximo atingido.</value></data>
+  <data name="Unpin" xml:space="preserve"><value>Desafixar</value></data>
+  <data name="Unpinned" xml:space="preserve"><value>Desafixada</value></data>
+  <data name="Verifying" xml:space="preserve"><value>Verificando sua chave...</value></data>
+  <data name="VoiceOnly" xml:space="preserve"><value>Mensagem de voz</value></data>
+  <data name="XAccentColor.Text" xml:space="preserve"><value>Cor de destaque</value></data>
+  <data name="XAddYourFreeApiKey.Text" xml:space="preserve"><value>Adicione sua chave de API gratuita</value></data>
+  <data name="XAnimationsHeader.Header" xml:space="preserve"><value>Animações</value></data>
+  <data name="XAnswersStreamInWordByWordAndGeminiChecks.Text" xml:space="preserve"><value>As respostas chegam palavra por palavra e o Gemini consulta a Wikipédia para fatos recentes.</value></data>
+  <data name="XApiEndpointHeader.Header" xml:space="preserve"><value>Endpoint da API</value></data>
+  <data name="XAskAnything.Text" xml:space="preserve"><value>Pergunte qualquer coisa</value></data>
+  <data name="XAskForAPictureOrADocumentAndGetItInTheCh.Text" xml:space="preserve"><value>Peça uma imagem ou documento e receba na conversa</value></data>
+  <data name="XAskForAPictureOrADocumentLumenPicksTheRi.Text" xml:space="preserve"><value>Peça uma imagem ou documento: o Lumen escolhe o modelo certo e entrega o resultado para salvar ou compartilhar.</value></data>
+  <data name="XAskLumenPlaceholderText.PlaceholderText" xml:space="preserve"><value>Pergunte ao Lumen</value></data>
+  <data name="XCalculating.Text" xml:space="preserve"><value>Calculando...</value></data>
+  <data name="XChatModelHeader.Header" xml:space="preserve"><value>Modelo de conversa</value></data>
+  <data name="XChatTalkSnapPhotosCreateImagesAndFilesBu.Text" xml:space="preserve"><value>Converse, fale, tire fotos, crie imagens e arquivos. Feito para Windows 10 Mobile.</value></data>
+  <data name="XChatsStayOnThisPhoneYourKeySitsInTheWind.Text" xml:space="preserve"><value>As conversas ficam neste telefone. Sua chave fica no cofre de credenciais do Windows.</value></data>
+  <data name="XCheckKeyContent.Content" xml:space="preserve"><value>Verificar chave</value></data>
+  <data name="XChooseFromGallery.Text" xml:space="preserve"><value>Escolher da galeria</value></data>
+  <data name="XChooseYourLanguage.Text" xml:space="preserve"><value>Escolha seu idioma</value></data>
+  <data name="XComeBackAndPasteItBelow.Text" xml:space="preserve"><value>Volte e cole abaixo</value></data>
+  <data name="XConnectGemini.Text" xml:space="preserve"><value>Conecte o Gemini</value></data>
+  <data name="XCreateAFile.Text" xml:space="preserve"><value>Criar um arquivo</value></data>
+  <data name="XCreateAnImage.Text" xml:space="preserve"><value>Criar uma imagem</value></data>
+  <data name="XCreateImagesAndFiles.Text" xml:space="preserve"><value>Crie imagens e arquivos</value></data>
+  <data name="XCreateOneInAMinuteOnGoogleAiStudioThenPa.Text" xml:space="preserve"><value>Crie em um minuto no Google AI Studio e cole em Configurações. Não precisa de cartão.</value></data>
+  <data name="XCreativity.Text" xml:space="preserve"><value>Criatividade</value></data>
+  <data name="XDeleteAllChats.Text" xml:space="preserve"><value>Excluir todas as conversas</value></data>
+  <data name="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText.Header" xml:space="preserve"><value>Instruções personalizadas</value></data>
+  <data name="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText.PlaceholderText" xml:space="preserve"><value>Vazio = padrão: respostas concisas no seu idioma.</value></data>
+  <data name="XEverythingGeminiCanDo.Text" xml:space="preserve"><value>Tudo o que o Gemini faz</value></data>
+  <data name="XFlashLiteIsTheFastestWithTheBiggestFreeQ.Text" xml:space="preserve"><value>O Flash-Lite é o mais rápido e tem a maior cota grátis. Verifique sua chave para ver todos os modelos.</value></data>
+  <data name="XFreeFreshFactsGoogleSearchIsnTInTheFreeP.Text" xml:space="preserve"><value>Fatos atuais grátis. A Pesquisa Google não está no plano gratuito.</value></data>
+  <data name="XFreeFromGoogleAiStudioOrAPaidKeyForBigge.Text" xml:space="preserve"><value>Grátis no Google AI Studio, ou paga para modelos maiores e imagens. Guardada no cofre de credenciais do Windows.</value></data>
+  <data name="XGeminiApiKeyHeader.Header" xml:space="preserve"><value>Chave de API do Gemini</value></data>
+  <data name="XGetAFreeKeyContent.Content" xml:space="preserve"><value>Obter chave grátis</value></data>
+  <data name="XGoogleGeminiBackOnYourLumia.Text" xml:space="preserve"><value>Google Gemini, de volta ao seu Lumia.</value></data>
+  <data name="XImagesAndFilesHeader.Header" xml:space="preserve"><value>Imagens e arquivos</value></data>
+  <data name="XIsItFastOnMyLumia.Text" xml:space="preserve"><value>É rápido no meu Lumia?</value></data>
+  <data name="XJustTalk.Text" xml:space="preserve"><value>É só falar</value></data>
+  <data name="XLanguageHeader.Header" xml:space="preserve"><value>Idioma</value></data>
+  <data name="XLightThemeHeader.Header" xml:space="preserve"><value>Tema claro</value></data>
+  <data name="XLumenTalksToGoogleWithYourOwnGeminiApiKe.Text" xml:space="preserve"><value>O Lumen fala com o Google usando sua própria chave de API do Gemini. A gratuita leva um minuto, sem cartão. Uma chave paga libera modelos maiores e criação de imagens.</value></data>
+  <data name="XMakeItYours.Text" xml:space="preserve"><value>Deixe do seu jeito</value></data>
+  <data name="XNoChatsYet.Text" xml:space="preserve"><value>Nenhuma conversa ainda</value></data>
+  <data name="XOnlyChangeItToGoThroughYourOwnProxyEGACl.Text" xml:space="preserve"><value>Só altere para usar seu próprio proxy (ex.: um Cloudflare Worker).</value></data>
+  <data name="XOpen.Text" xml:space="preserve"><value>Abrir</value></data>
+  <data name="XOpenGoogleAiStudioAndSignIn.Text" xml:space="preserve"><value>Abra o Google AI Studio e entre</value></data>
+  <data name="XOpenGoogleAiStudioContent.Content" xml:space="preserve"><value>Abrir o Google AI Studio</value></data>
+  <data name="XPasteYourKeyAizaPlaceholderText.PlaceholderText" xml:space="preserve"><value>Cole sua chave (AIza...)</value></data>
+  <data name="XPrivateByDesign.Text" xml:space="preserve"><value>Privado por natureza</value></data>
+  <data name="XReadAloudVoiceHeader.Header" xml:space="preserve"><value>Voz de leitura</value></data>
+  <data name="XSave.Text" xml:space="preserve"><value>Salvar</value></data>
+  <data name="XSearchChatsPlaceholderText.PlaceholderText" xml:space="preserve"><value>Buscar conversas</value></data>
+  <data name="XSendAVoiceMessageAndHaveAnswersReadBackT.Text" xml:space="preserve"><value>Envie um áudio e ouça as respostas em voz alta.</value></data>
+  <data name="XSetUpContent.Content" xml:space="preserve"><value>Configurar</value></data>
+  <data name="XShare.Text" xml:space="preserve"><value>Compartilhar</value></data>
+  <data name="XShootWithTheCameraOrChooseFromYourGaller.Text" xml:space="preserve"><value>Use a câmera ou escolha da galeria e pergunte sobre ela.</value></data>
+  <data name="XSnapOrPickAPhoto.Text" xml:space="preserve"><value>Tire ou escolha uma foto</value></data>
+  <data name="XSourceOnGithubContent.Content" xml:space="preserve"><value>Código no GitHub</value></data>
+  <data name="XTakeAPhoto.Text" xml:space="preserve"><value>Tirar uma foto</value></data>
+  <data name="XTapCreateApiKeyAndCopyIt.Text" xml:space="preserve"><value>Toque em Create API key e copie</value></data>
+  <data name="XTextSizeHeader.Header" xml:space="preserve"><value>Tamanho do texto</value></data>
+  <data name="XUnofficialClientNotAffiliatedWithGoogleG.Text" xml:space="preserve"><value>Cliente não oficial, sem vínculo com o Google. Gemini é marca da Google LLC. Ícones: Fluent System Icons (MIT).</value></data>
+  <data name="XVeryLetSGo.Text" xml:space="preserve"><value>Muito. Vamos lá!</value></data>
+  <data name="XWelcomeTour.Text" xml:space="preserve"><value>Tour de boas-vindas</value></data>
+  <data name="XWhatCanIHelpWithToday.Text" xml:space="preserve"><value>Como posso ajudar hoje?</value></data>
+  <data name="XWikipediaLookupsHeader.Header" xml:space="preserve"><value>Pesquisas na Wikipédia</value></data>
+  <data name="XYouCanAlsoSkipThisAndAddTheKeyLaterInSet.Text" xml:space="preserve"><value>Você também pode pular e adicionar a chave depois em Configurações.</value></data>
+  <data name="XlAbout.Text" xml:space="preserve"><value>sobre</value></data>
+  <data name="XlAccount.Text" xml:space="preserve"><value>conta</value></data>
+  <data name="XlAdvanced.Text" xml:space="preserve"><value>avançado</value></data>
+  <data name="XlAppearance.Text" xml:space="preserve"><value>aparência</value></data>
+  <data name="XlAssistant.Text" xml:space="preserve"><value>assistente</value></data>
+  <data name="XlAttachLabel.Label" xml:space="preserve"><value>anexar</value></data>
+  <data name="XlChatHeader.Header" xml:space="preserve"><value>chat</value></data>
+  <data name="XlData.Text" xml:space="preserve"><value>dados</value></data>
+  <data name="XlHistoryHeader.Header" xml:space="preserve"><value>histórico</value></data>
+  <data name="XlModel.Text" xml:space="preserve"><value>modelo</value></data>
+  <data name="XlModelLabel.Label" xml:space="preserve"><value>modelo</value></data>
+  <data name="XlNewChatLabel.Label" xml:space="preserve"><value>nova conversa</value></data>
+  <data name="XlNextLabel.Label" xml:space="preserve"><value>avançar</value></data>
+  <data name="XlSettings.Text" xml:space="preserve"><value>configurações</value></data>
+  <data name="XlSettingsLabel.Label" xml:space="preserve"><value>configurações</value></data>
+  <data name="XlSkipLabel.Label" xml:space="preserve"><value>pular</value></data>
+  <data name="XlVoiceLabel.Label" xml:space="preserve"><value>voz</value></data>
+  <data name="XlWelcomeTourLabel.Label" xml:space="preserve"><value>tour de boas-vindas</value></data>
+  <data name="You" xml:space="preserve"><value>Você: </value></data>
+</root>

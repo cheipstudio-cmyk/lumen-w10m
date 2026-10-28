@@ -135,7 +135,7 @@ namespace Lumen.Core
         {
             if (Children.Count == 0)
             {
-                var brush = Application.Current.Resources["AccentBrush"] as Brush;
+                var brush = new SolidColorBrush(Windows.UI.Colors.White); // dots sit on the accent bubble
                 for (int i = 0; i < 3; i++)
                 {
                     Children.Add(new Ellipse

@@ -6,7 +6,7 @@ Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC
 ## Funzioni
 
 - Onboarding con un Lumia 735 in 3D (render three.js, video H.264 in loop) che fa girare Lumen
-- Look Fluent: icone Fluent System Icons, superfici traslucide su sfondo aurora sfocato per ogni accent
+- Stile Windows Phone (Metro): pivot chat/cronologia, app bar in basso, tilt al tocco, titoli grandi e leggeri, bolle con la codina come in Messaggi, suggerimenti a live tile; icone Fluent System Icons (PNG mostrate con BitmapIcon)
 - Immagini e file generati su richiesta (tool generate_image e create_file), con Salva, Apri, Condividi
 - Lista chat con ricerca, anteprime, chat fissate, rinomina; menu a pressione lunga con icone
 - Leggi ad alta voce, seleziona testo, elimina messaggio
@@ -15,13 +15,13 @@ Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC
 - Messaggi vocali (WAV 16 kHz mono, max 2 minuti) che Gemini ascolta e a cui risponde
 - Foto dalla fotocamera o dalla galleria, ridimensionate a 1024 px prima dell'invio
 - Ricerca automatica su Wikipedia via function calling (gratis, senza chiave) e data di oggi in ogni richiesta
-- Temi: 8 colori accent, sfondo nero AMOLED, dimensione testo, animazioni on/off
+- Temi: i 20 colori accent di Windows Phone più il colore del telefono, tema scuro o chiaro, dimensione testo, animazioni on/off
 - Modelli solo da lista, caricata dalla tua chiave, con cambio rapido dal titolo della chat
 - Markdown: titoli, elenchi, grassetto, corsivo, codice, link
-- Storico chat salvato sul telefono, menu laterale, eliminazione con pressione lunga
+- Storico chat salvato sul telefono, eliminazione con pressione lunga
 - Pressione lunga su un messaggio: copia, condividi, rigenera, modifica
 - Condivisione da altre app (testo, link, immagini) direttamente in una nuova chat
-- Interfaccia in inglese
+- Interfaccia in 6 lingue (EN, IT, ES, FR, DE, PT-BR), scelta nell'onboarding e nelle impostazioni
 
 ## Ottimizzazioni per i Lumia
 
@@ -97,5 +97,6 @@ Lumen/
   Core/Speech.cs           lettura ad alta voce
   Core/TileHelper.cs       live tile
   Assets/Lumia735.mp4      video 3D dell'onboarding
-  Assets/Fonts/            Fluent System Icons (MIT), subset
+  Assets/Icons/            Fluent System Icons (MIT) come PNG
+  Strings/                 traduzioni resw
 ```

@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Lumen.Core;
 using Lumen.Views;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Resources.Core;
+using Windows.Globalization;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -18,9 +22,63 @@ namespace Lumen
 
     sealed partial class App : Application
     {
+        /// <summary>Languages Lumen ships, with their native names.</summary>
+        public static readonly List<Tuple<string, string>> Languages = new List<Tuple<string, string>>
+        {
+            Tuple.Create("en-US", "English"),
+            Tuple.Create("it-IT", "Italiano"),
+            Tuple.Create("es-ES", "Español"),
+            Tuple.Create("fr-FR", "Français"),
+            Tuple.Create("de-DE", "Deutsch"),
+            Tuple.Create("pt-BR", "Português (Brasil)"),
+        };
+
         public App()
         {
             InitializeComponent();
+            // Can only be set here; covers dialogs, menus and the status bar from the first frame.
+            RequestedTheme = AppSettings.LightTheme ? ApplicationTheme.Light : ApplicationTheme.Dark;
+        }
+
+        /// <summary>Language actually in use: the override if set, else the best match of the phone language.</summary>
+        public static string CurrentLanguage
+        {
+            get
+            {
+                var o = ApplicationLanguages.PrimaryLanguageOverride;
+                if (!string.IsNullOrEmpty(o)) return o;
+                var phone = ApplicationLanguages.Languages.FirstOrDefault() ?? "en-US";
+                var match = Languages.FirstOrDefault(l => phone.StartsWith(l.Item1.Substring(0, 2), StringComparison.OrdinalIgnoreCase));
+                return match != null ? match.Item1 : "en-US";
+            }
+        }
+
+        public static bool HasLanguageOverride { get { return !string.IsNullOrEmpty(ApplicationLanguages.PrimaryLanguageOverride); } }
+
+        /// <summary>Switches the UI language ("" = follow the phone). The system persists the override across launches.</summary>
+        public static void SetLanguage(string code)
+        {
+            ApplicationLanguages.PrimaryLanguageOverride = code ?? "";
+            try { ResourceContext.GetForCurrentView().Reset(); } catch (Exception) { }
+            try { ResourceContext.GetForViewIndependentUse().Reset(); } catch (Exception) { }
+            S.Reset();
+        }
+
+        /// <summary>
+        /// Rebuilds the whole UI so every x:Uid string is read again in the new language.
+        /// MainPage is always the root; <paramref name="top"/> (if any) is pushed on top of it.
+        /// </summary>
+        public static void ReloadUi(Type top, object parameter = null)
+        {
+            var frame = CreateFrame();
+            Window.Current.Content = frame;
+            if (top == typeof(OnboardingPage))
+            {
+                frame.Navigate(typeof(OnboardingPage), parameter, new SuppressNavigationTransitionInfo());
+                return;
+            }
+            frame.Navigate(typeof(MainPage), null, new SuppressNavigationTransitionInfo());
+            if (top != null && top != typeof(MainPage)) frame.Navigate(top, parameter, new SuppressNavigationTransitionInfo());
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
@@ -50,15 +108,24 @@ namespace Lumen
             Window.Current.Activate();
         }
 
-        private Frame CreateFrame()
+        // One BackRequested handler per view (the share target runs in its own view and thread).
+        [ThreadStatic] private static bool _backHooked;
+
+        private static Frame CreateFrame()
         {
             var frame = new Frame();
+            frame.RequestedTheme = ThemeManager.Theme;
             if (AppSettings.Animations)
             {
                 frame.ContentTransitions = new TransitionCollection { new NavigationThemeTransition() };
             }
             frame.Navigated += OnNavigated;
-            SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
+            if (!_backHooked)
+            {
+                // One handler per view: it always looks up the current frame.
+                SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
+                _backHooked = true;
+            }
             return frame;
         }
 

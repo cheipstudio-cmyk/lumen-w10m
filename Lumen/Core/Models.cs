@@ -129,7 +129,7 @@ namespace Lumen.Core
         public bool IsPlaying
         {
             get { return _isPlaying; }
-            set { if (Set(ref _isPlaying, value)) Raise(nameof(PlayGlyph)); }
+            set { if (Set(ref _isPlaying, value)) Raise(nameof(PlayIcon)); }
         }
 
         /// <summary>Text pushed to the markdown renderer: only once streaming is over, so long answers are parsed once.</summary>
@@ -144,7 +144,7 @@ namespace Lumen.Core
         public Visibility TextVisibility { get { return string.IsNullOrEmpty(_text) ? Visibility.Collapsed : Visibility.Visible; } }
 
         public string AudioLabel { get { return string.Format("{0}:{1:00}", AudioSeconds / 60, AudioSeconds % 60); } }
-        public string PlayGlyph { get { return _isPlaying ? Icons.Pause : Icons.Play; } }
+        public Uri PlayIcon { get { return _isPlaying ? Icons.Pause : Icons.Play; } }
 
         private BitmapImage _thumb;
         /// <summary>Lazy, downscaled thumbnail. Created on first binding (UI thread).</summary>
@@ -186,7 +186,7 @@ namespace Lumen.Core
             get { return _pinned; }
             set { if (Set(ref _pinned, value)) { Raise(nameof(PinVisibility)); Raise(nameof(PinLabel)); } }
         }
-        public string PinLabel { get { return _pinned ? "Unpin" : "Pin to top"; } }
+        public string PinLabel { get { return _pinned ? S.Unpin : S.PinToTop; } }
         public Visibility PinVisibility { get { return _pinned ? Visibility.Visible : Visibility.Collapsed; } }
 
         /// <summary>First letter for the avatar.</summary>
