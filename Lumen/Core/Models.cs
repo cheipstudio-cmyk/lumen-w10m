@@ -1,0 +1,146 @@
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Media.Imaging;
+
+namespace Lumen.Core
+{
+    public abstract class Observable : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool Set<T>(ref T field, T value, [CallerMemberName] string name = null)
+        {
+            if (Equals(field, value)) return false;
+            field = value;
+            Raise(name);
+            return true;
+        }
+
+        protected void Raise(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+    }
+
+    [Windows.UI.Xaml.Data.Bindable]
+    public sealed class ChatMessage : Observable
+    {
+        public const string RoleUser = "user";
+        public const string RoleModel = "model";
+
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
+        public string Role { get; set; } = RoleUser;
+        public DateTimeOffset Time { get; set; } = DateTimeOffset.Now;
+
+        /// <summary>File name inside LocalFolder\images (JPEG), or null.</summary>
+        public string ImageFile { get; set; }
+
+        public bool IsUser { get { return Role == RoleUser; } }
+
+        private string _text = "";
+        public string Text
+        {
+            get { return _text; }
+            set
+            {
+                if (Set(ref _text, value ?? ""))
+                {
+                    Raise(nameof(ThinkingVisibility));
+                    Raise(nameof(TextVisibility));
+                }
+            }
+        }
+
+        private bool _isStreaming;
+        public bool IsStreaming
+        {
+            get { return _isStreaming; }
+            set
+            {
+                if (Set(ref _isStreaming, value))
+                {
+                    Raise(nameof(StreamingVisibility));
+                    Raise(nameof(RenderedVisibility));
+                    Raise(nameof(ThinkingVisibility));
+                    Raise(nameof(RenderedText));
+                }
+            }
+        }
+
+        private bool _isError;
+        public bool IsError
+        {
+            get { return _isError; }
+            set
+            {
+                if (Set(ref _isError, value))
+                {
+                    Raise(nameof(ErrorVisibility));
+                    Raise(nameof(RenderedVisibility));
+                    Raise(nameof(RenderedText));
+                }
+            }
+        }
+
+        /// <summary>Text pushed to the markdown renderer: only once streaming is over, so long answers are parsed once.</summary>
+        public string RenderedText { get { return (_isStreaming || _isError) ? null : _text; } }
+
+        public Visibility StreamingVisibility { get { return _isStreaming ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility RenderedVisibility { get { return (_isStreaming || _isError) ? Visibility.Collapsed : Visibility.Visible; } }
+        public Visibility ThinkingVisibility { get { return _isStreaming && _text.Length == 0 ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility ErrorVisibility { get { return _isError ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility ImageVisibility { get { return string.IsNullOrEmpty(ImageFile) ? Visibility.Collapsed : Visibility.Visible; } }
+        public Visibility TextVisibility { get { return string.IsNullOrEmpty(_text) ? Visibility.Collapsed : Visibility.Visible; } }
+
+        private BitmapImage _thumb;
+        /// <summary>Lazy, downscaled thumbnail. Created on first binding (UI thread).</summary>
+        public BitmapImage Thumb
+        {
+            get
+            {
+                if (_thumb == null && !string.IsNullOrEmpty(ImageFile))
+                {
+                    _thumb = new BitmapImage { DecodePixelWidth = 440 };
+                    _thumb.UriSource = new Uri("ms-appdata:///local/images/" + ImageFile);
+                }
+                return _thumb;
+            }
+        }
+
+        public string TimeLabel { get { return Time.ToLocalTime().ToString("HH:mm"); } }
+    }
+
+    [Windows.UI.Xaml.Data.Bindable]
+    public sealed class ConversationInfo : Observable
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
+
+        private string _title = "";
+        public string Title { get { return _title; } set { Set(ref _title, value); } }
+
+        private DateTimeOffset _updated = DateTimeOffset.Now;
+        public DateTimeOffset Updated
+        {
+            get { return _updated; }
+            set { if (Set(ref _updated, value)) Raise(nameof(UpdatedLabel)); }
+        }
+
+        public string UpdatedLabel
+        {
+            get
+            {
+                var local = _updated.ToLocalTime();
+                return local.Date == DateTimeOffset.Now.Date ? local.ToString("HH:mm") : local.ToString("dd/MM");
+            }
+        }
+    }
+
+    public sealed class Conversation
+    {
+        public ConversationInfo Info { get; set; } = new ConversationInfo();
+        public ObservableCollection<ChatMessage> Messages { get; } = new ObservableCollection<ChatMessage>();
+    }
+}

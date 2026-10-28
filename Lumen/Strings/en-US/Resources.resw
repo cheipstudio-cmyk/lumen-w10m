@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="DrawerTitle.Text" xml:space="preserve"><value>Chats</value></data>
+  <data name="NewChatButton.Text" xml:space="preserve"><value>New chat</value></data>
+  <data name="EmptySubtitle.Text" xml:space="preserve"><value>What can I help with today?</value></data>
+  <data name="NoKeyTitle.Text" xml:space="preserve"><value>You need a free API key</value></data>
+  <data name="NoKeyBody.Text" xml:space="preserve"><value>Create one in a minute on Google AI Studio, then paste it in Settings. No credit card needed.</value></data>
+  <data name="NoKeyButton.Content" xml:space="preserve"><value>Set up</value></data>
+  <data name="InputBox.PlaceholderText" xml:space="preserve"><value>Ask Lumen</value></data>
+  <data name="MenuCopy.Text" xml:space="preserve"><value>Copy</value></data>
+  <data name="MenuEdit.Text" xml:space="preserve"><value>Edit</value></data>
+  <data name="MenuShare.Text" xml:space="preserve"><value>Share</value></data>
+  <data name="MenuRegenerate.Text" xml:space="preserve"><value>Regenerate</value></data>
+  <data name="MenuDelete.Text" xml:space="preserve"><value>Delete</value></data>
+  <data name="SettingsTitle.Text" xml:space="preserve"><value>Settings</value></data>
+  <data name="KeyHeader.Text" xml:space="preserve"><value>GEMINI API KEY</value></data>
+  <data name="KeyDesc.Text" xml:space="preserve"><value>Free from Google AI Studio. It stays on this phone, in the Windows credential locker.</value></data>
+  <data name="KeyLink.Content" xml:space="preserve"><value>Get a free key on Google AI Studio</value></data>
+  <data name="VerifyButton.Content" xml:space="preserve"><value>Test and load models</value></data>
+  <data name="ModelHeader.Text" xml:space="preserve"><value>MODEL</value></data>
+  <data name="ModelDesc.Text" xml:space="preserve"><value>gemini-flash-latest always points to the newest free Flash model. Flash-Lite models are faster and have a higher daily quota.</value></data>
+  <data name="ModelsCombo.PlaceholderText" xml:space="preserve"><value>Choose from the list</value></data>
+  <data name="BehaviourHeader.Text" xml:space="preserve"><value>BEHAVIOUR</value></data>
+  <data name="TempLabel.Text" xml:space="preserve"><value>Creativity</value></data>
+  <data name="SearchToggle.Header" xml:space="preserve"><value>Google Search grounding</value></data>
+  <data name="SearchDesc.Text" xml:space="preserve"><value>Up-to-date answers with web sources. The free tier allows a limited number of searches per day.</value></data>
+  <data name="PromptLabel.Text" xml:space="preserve"><value>Instructions for the assistant</value></data>
+  <data name="AdvancedHeader.Text" xml:space="preserve"><value>ADVANCED</value></data>
+  <data name="BaseUrlDesc.Text" xml:space="preserve"><value>API endpoint. Change it only to go through your own proxy (for example a Cloudflare Worker) if the phone cannot reach Google directly.</value></data>
+  <data name="DataHeader.Text" xml:space="preserve"><value>DATA</value></data>
+  <data name="DeleteAllButton.Content" xml:space="preserve"><value>Delete all chats</value></data>
+  <data name="AboutText.Text" xml:space="preserve"><value>Lumen 1.0 by Second Dream. Unofficial client, not affiliated with Google. Gemini is a trademark of Google LLC.</value></data>
+  <data name="Suggest1" xml:space="preserve"><value>Explain quantum computing like I'm 10</value></data>
+  <data name="Suggest2" xml:space="preserve"><value>Write a funny birthday message for a friend</value></data>
+  <data name="Suggest3" xml:space="preserve"><value>Give me a quick dinner idea with eggs and potatoes</value></data>
+  <data name="Suggest4" xml:space="preserve"><value>Plan a perfect day trip near me, ask me where I live</value></data>
+  <data name="GreetMorning" xml:space="preserve"><value>Good morning</value></data>
+  <data name="GreetAfternoon" xml:space="preserve"><value>Good afternoon</value></data>
+  <data name="GreetEvening" xml:space="preserve"><value>Good evening</value></data>
+  <data name="NewChatTitle" xml:space="preserve"><value>New chat</value></data>
+  <data name="ImageOnly" xml:space="preserve"><value>Image</value></data>
+  <data name="Copied" xml:space="preserve"><value>Copied</value></data>
+  <data name="Stopped" xml:space="preserve"><value>Stopped.</value></data>
+  <data name="Truncated" xml:space="preserve"><value>Answer cut off: maximum length reached.</value></data>
+  <data name="ImageError" xml:space="preserve"><value>Could not load the image</value></data>
+  <data name="Verifying" xml:space="preserve"><value>Checking...</value></data>
+  <data name="ModelsLoaded" xml:space="preserve"><value>Key works. {0} models available.</value></data>
+  <data name="DefaultSystemPrompt" xml:space="preserve"><value>You are Lumen, a helpful assistant running on a small phone screen. Answer clearly and concisely, use short paragraphs and lists, and avoid wide tables.</value></data>
+  <data name="ErrKey" xml:space="preserve"><value>Invalid or missing API key. Check it in Settings.</value></data>
+  <data name="ErrBadRequest" xml:space="preserve"><value>The request was rejected.</value></data>
+  <data name="ErrModel" xml:space="preserve"><value>Model not found. Pick another one in Settings.</value></data>
+  <data name="ErrQuota" xml:space="preserve"><value>Free quota reached. Wait a minute, or switch to a Flash-Lite model in Settings.</value></data>
+  <data name="ErrBusy" xml:space="preserve"><value>Google's servers are busy. Try again in a moment.</value></data>
+  <data name="ErrTls" xml:space="preserve"><value>Secure connection failed. The phone's certificates may be too old: set a proxy URL in Settings &gt; Advanced.</value></data>
+  <data name="ErrNetwork" xml:space="preserve"><value>No connection. Check data or Wi-Fi.</value></data>
+  <data name="ErrGeneric" xml:space="preserve"><value>Something went wrong.</value></data>
+  <data name="ErrBlocked" xml:space="preserve"><value>The answer was blocked by Google's safety filters. Try rephrasing.</value></data>
+  <data name="ErrEmpty" xml:space="preserve"><value>Empty answer. Try again.</value></data>
+  <data name="DeleteAllTitle" xml:space="preserve"><value>Delete all chats?</value></data>
+  <data name="DeleteAllBody" xml:space="preserve"><value>Conversations and images will be removed from this phone. This cannot be undone.</value></data>
+  <data name="DeleteAllConfirm" xml:space="preserve"><value>Delete</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+</root>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="DrawerTitle.Text" xml:space="preserve"><value>Chat</value></data>
+  <data name="NewChatButton.Text" xml:space="preserve"><value>Nuova chat</value></data>
+  <data name="EmptySubtitle.Text" xml:space="preserve"><value>Come posso aiutarti oggi?</value></data>
+  <data name="NoKeyTitle.Text" xml:space="preserve"><value>Ti serve una chiave API gratuita</value></data>
+  <data name="NoKeyBody.Text" xml:space="preserve"><value>Si crea in un minuto su Google AI Studio, poi la incolli nelle impostazioni. Non serve la carta di credito.</value></data>
+  <data name="NoKeyButton.Content" xml:space="preserve"><value>Configura</value></data>
+  <data name="InputBox.PlaceholderText" xml:space="preserve"><value>Chiedi a Lumen</value></data>
+  <data name="MenuCopy.Text" xml:space="preserve"><value>Copia</value></data>
+  <data name="MenuEdit.Text" xml:space="preserve"><value>Modifica</value></data>
+  <data name="MenuShare.Text" xml:space="preserve"><value>Condividi</value></data>
+  <data name="MenuRegenerate.Text" xml:space="preserve"><value>Rigenera</value></data>
+  <data name="MenuDelete.Text" xml:space="preserve"><value>Elimina</value></data>
+  <data name="SettingsTitle.Text" xml:space="preserve"><value>Impostazioni</value></data>
+  <data name="KeyHeader.Text" xml:space="preserve"><value>CHIAVE API GEMINI</value></data>
+  <data name="KeyDesc.Text" xml:space="preserve"><value>Gratuita su Google AI Studio. Resta su questo telefono, nell'archivio credenziali di Windows.</value></data>
+  <data name="KeyLink.Content" xml:space="preserve"><value>Ottieni una chiave gratuita su Google AI Studio</value></data>
+  <data name="VerifyButton.Content" xml:space="preserve"><value>Verifica e carica modelli</value></data>
+  <data name="ModelHeader.Text" xml:space="preserve"><value>MODELLO</value></data>
+  <data name="ModelDesc.Text" xml:space="preserve"><value>gemini-flash-latest punta sempre al modello Flash gratuito più recente. I modelli Flash-Lite sono più veloci e hanno una quota giornaliera più alta.</value></data>
+  <data name="ModelsCombo.PlaceholderText" xml:space="preserve"><value>Scegli dalla lista</value></data>
+  <data name="BehaviourHeader.Text" xml:space="preserve"><value>COMPORTAMENTO</value></data>
+  <data name="TempLabel.Text" xml:space="preserve"><value>Creatività</value></data>
+  <data name="SearchToggle.Header" xml:space="preserve"><value>Ricerca Google</value></data>
+  <data name="SearchDesc.Text" xml:space="preserve"><value>Risposte aggiornate con fonti dal web. Il piano gratuito ha un numero limitato di ricerche al giorno.</value></data>
+  <data name="PromptLabel.Text" xml:space="preserve"><value>Istruzioni per l'assistente</value></data>
+  <data name="AdvancedHeader.Text" xml:space="preserve"><value>AVANZATE</value></data>
+  <data name="BaseUrlDesc.Text" xml:space="preserve"><value>Endpoint API. Cambialo solo per passare da un tuo proxy (per esempio un Cloudflare Worker) se il telefono non riesce a raggiungere Google.</value></data>
+  <data name="DataHeader.Text" xml:space="preserve"><value>DATI</value></data>
+  <data name="DeleteAllButton.Content" xml:space="preserve"><value>Elimina tutte le chat</value></data>
+  <data name="AboutText.Text" xml:space="preserve"><value>Lumen 1.0 di Second Dream. Client non ufficiale, non affiliato a Google. Gemini è un marchio di Google LLC.</value></data>
+  <data name="Suggest1" xml:space="preserve"><value>Spiegami il computer quantistico come se avessi 10 anni</value></data>
+  <data name="Suggest2" xml:space="preserve"><value>Scrivi un messaggio di auguri divertente per un amico</value></data>
+  <data name="Suggest3" xml:space="preserve"><value>Dammi un'idea veloce per cena con uova e patate</value></data>
+  <data name="Suggest4" xml:space="preserve"><value>Organizzami una gita di un giorno, chiedimi dove abito</value></data>
+  <data name="GreetMorning" xml:space="preserve"><value>Buongiorno</value></data>
+  <data name="GreetAfternoon" xml:space="preserve"><value>Buon pomeriggio</value></data>
+  <data name="GreetEvening" xml:space="preserve"><value>Buonasera</value></data>
+  <data name="NewChatTitle" xml:space="preserve"><value>Nuova chat</value></data>
+  <data name="ImageOnly" xml:space="preserve"><value>Immagine</value></data>
+  <data name="Copied" xml:space="preserve"><value>Copiato</value></data>
+  <data name="Stopped" xml:space="preserve"><value>Interrotto.</value></data>
+  <data name="Truncated" xml:space="preserve"><value>Risposta troncata: raggiunta la lunghezza massima.</value></data>
+  <data name="ImageError" xml:space="preserve"><value>Impossibile caricare l'immagine</value></data>
+  <data name="Verifying" xml:space="preserve"><value>Verifica in corso...</value></data>
+  <data name="ModelsLoaded" xml:space="preserve"><value>La chiave funziona. {0} modelli disponibili.</value></data>
+  <data name="DefaultSystemPrompt" xml:space="preserve"><value>Sei Lumen, un assistente utile che gira su uno schermo di telefono piccolo. Rispondi in modo chiaro e conciso, usa paragrafi brevi ed elenchi, ed evita tabelle larghe. Rispondi nella lingua dell'utente.</value></data>
+  <data name="ErrKey" xml:space="preserve"><value>Chiave API non valida o mancante. Controllala nelle impostazioni.</value></data>
+  <data name="ErrBadRequest" xml:space="preserve"><value>La richiesta è stata rifiutata.</value></data>
+  <data name="ErrModel" xml:space="preserve"><value>Modello non trovato. Scegline un altro nelle impostazioni.</value></data>
+  <data name="ErrQuota" xml:space="preserve"><value>Quota gratuita esaurita. Aspetta un minuto o passa a un modello Flash-Lite nelle impostazioni.</value></data>
+  <data name="ErrBusy" xml:space="preserve"><value>I server di Google sono occupati. Riprova tra poco.</value></data>
+  <data name="ErrTls" xml:space="preserve"><value>Connessione sicura non riuscita. I certificati del telefono potrebbero essere troppo vecchi: imposta un proxy in Impostazioni &gt; Avanzate.</value></data>
+  <data name="ErrNetwork" xml:space="preserve"><value>Nessuna connessione. Controlla dati o Wi-Fi.</value></data>
+  <data name="ErrGeneric" xml:space="preserve"><value>Qualcosa è andato storto.</value></data>
+  <data name="ErrBlocked" xml:space="preserve"><value>La risposta è stata bloccata dai filtri di sicurezza di Google. Prova a riformulare.</value></data>
+  <data name="ErrEmpty" xml:space="preserve"><value>Risposta vuota. Riprova.</value></data>
+  <data name="DeleteAllTitle" xml:space="preserve"><value>Eliminare tutte le chat?</value></data>
+  <data name="DeleteAllBody" xml:space="preserve"><value>Conversazioni e immagini verranno rimosse da questo telefono. Non si può annullare.</value></data>
+  <data name="DeleteAllConfirm" xml:space="preserve"><value>Elimina</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Annulla</value></data>
+</root>

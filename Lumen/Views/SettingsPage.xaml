@@ -1,0 +1,89 @@
+<Page
+    x:Class="Lumen.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{StaticResource BgBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Height="56" Padding="4,0,4,0" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,0,1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Style="{StaticResource IconButton}" Click="Back_Click">
+                <FontIcon Glyph="&#xE72B;" FontSize="18"/>
+            </Button>
+            <TextBlock x:Uid="SettingsTitle" Grid.Column="1" Text="Settings" FontSize="18" FontWeight="SemiBold"
+                       VerticalAlignment="Center" Margin="6,0,0,0"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="16,0,16,32" MaxWidth="560">
+
+                <!-- API key -->
+                <TextBlock x:Uid="KeyHeader" Text="GEMINI API KEY" Style="{StaticResource SectionHeader}"/>
+                <TextBlock x:Uid="KeyDesc" Style="{StaticResource HintText}"
+                           Text="Free from Google AI Studio. It stays on this phone, in the Windows credential locker."/>
+                <PasswordBox x:Name="ApiKeyBox" PlaceholderText="AIza..." PasswordChanged="ApiKeyBox_PasswordChanged"/>
+                <HyperlinkButton x:Uid="KeyLink" Content="Get a free key on Google AI Studio"
+                                 NavigateUri="https://aistudio.google.com/apikey" Margin="0,6,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="VerifyButton" x:Uid="VerifyButton" Content="Test and load models" Click="Verify_Click"
+                            Background="{StaticResource AccentGradient}" Foreground="White" Padding="16,8"/>
+                    <ProgressRing x:Name="VerifyRing" Width="20" Height="20" Margin="12,0,0,0" Foreground="{StaticResource AccentBrush}"/>
+                </StackPanel>
+                <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,8,0,0"/>
+
+                <!-- Model -->
+                <TextBlock x:Uid="ModelHeader" Text="MODEL" Style="{StaticResource SectionHeader}"/>
+                <TextBlock x:Uid="ModelDesc" Style="{StaticResource HintText}"
+                           Text="gemini-flash-latest always points to the newest free Flash model. Flash-Lite is faster and has a higher daily quota."/>
+                <TextBox x:Name="ModelBox" TextChanged="ModelBox_TextChanged" IsSpellCheckEnabled="False"/>
+                <ComboBox x:Name="ModelsCombo" x:Uid="ModelsCombo" PlaceholderText="Choose from the list" HorizontalAlignment="Stretch"
+                          Margin="0,8,0,0" Visibility="Collapsed" SelectionChanged="ModelsCombo_SelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding DisplayName}"/>
+                                <TextBlock Text="{Binding Id}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Behaviour -->
+                <TextBlock x:Uid="BehaviourHeader" Text="BEHAVIOUR" Style="{StaticResource SectionHeader}"/>
+                <Grid>
+                    <TextBlock x:Uid="TempLabel" Text="Creativity"/>
+                    <TextBlock x:Name="TempValue" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondaryBrush}"/>
+                </Grid>
+                <Slider x:Name="TempSlider" Minimum="0" Maximum="2" StepFrequency="0.1" ValueChanged="TempSlider_ValueChanged"/>
+
+                <ToggleSwitch x:Name="SearchToggle" x:Uid="SearchToggle" Header="Google Search grounding" Toggled="SearchToggle_Toggled"/>
+                <TextBlock x:Uid="SearchDesc" Style="{StaticResource HintText}"
+                           Text="Up-to-date answers with web sources. The free tier allows a limited number of searches per day."/>
+
+                <TextBlock x:Uid="PromptLabel" Text="Instructions for the assistant" Margin="0,12,0,6"/>
+                <TextBox x:Name="PromptBox" AcceptsReturn="True" TextWrapping="Wrap" Height="110" TextChanged="PromptBox_TextChanged"/>
+
+                <!-- Advanced -->
+                <TextBlock x:Uid="AdvancedHeader" Text="ADVANCED" Style="{StaticResource SectionHeader}"/>
+                <TextBlock x:Uid="BaseUrlDesc" Style="{StaticResource HintText}"
+                           Text="API endpoint. Change it only to go through your own proxy (for example a Cloudflare Worker) if the phone cannot reach Google directly."/>
+                <TextBox x:Name="BaseUrlBox" IsSpellCheckEnabled="False" InputScope="Url" TextChanged="BaseUrlBox_TextChanged"/>
+
+                <!-- Data -->
+                <TextBlock x:Uid="DataHeader" Text="DATA" Style="{StaticResource SectionHeader}"/>
+                <Button x:Uid="DeleteAllButton" Content="Delete all chats" Click="DeleteAll_Click" Foreground="#FFFF8A80"/>
+
+                <TextBlock x:Uid="AboutText" Style="{StaticResource HintText}" Margin="0,28,0,0"
+                           Text="Lumen 1.0 by Second Dream. Unofficial client, not affiliated with Google. Gemini is a trademark of Google LLC."/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
