@@ -71,21 +71,17 @@ namespace Lumen
         public static bool IsBusy { get; private set; }
 
         /// <summary>Suggestion row: accent icon in the 48 px icon column, text beside it (W10M list item).</summary>
-        private static UIElement SuggestionContent(Uri icon, string text)
+        private static UIElement SuggestionContent(string icon, string text)
         {
             var g = new Grid();
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(36) });
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            g.Children.Add(new BitmapIcon
-            {
-                UriSource = icon,
-                Width = 20,
-                Height = 20,
-                Foreground = (Brush)Application.Current.Resources["AccentTextBrush"],
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(0, 1, 0, 0)
-            });
+            var fi = Icons.Make(icon, 20);
+            fi.Foreground = (Brush)Application.Current.Resources["AccentTextBrush"];
+            fi.HorizontalAlignment = HorizontalAlignment.Left;
+            fi.VerticalAlignment = VerticalAlignment.Top;
+            fi.Margin = new Thickness(0, 1, 0, 0);
+            g.Children.Add(fi);
             var t = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, FontSize = 15 };
             Grid.SetColumn(t, 1);
             g.Children.Add(t);
@@ -299,16 +295,19 @@ namespace Lumen
             var statusDirty = false;
             var artifacts = new List<Artifact>();
 
-            // Push text to the UI at ~15 fps instead of on every chunk: smooth on a Lumia 735.
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(66) };
+            // Typewriter: the network delivers text in bursts; the screen reveals it at a steady pace
+            // (a few characters every 40 ms, faster when it falls behind) so writing looks fluid, never jumpy.
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(40) };
+            var target = "";
+            var shown = 0;
             Action pump = () =>
             {
-                string snapshot = null, st = null;
+                string st = null;
                 bool stChanged;
                 Artifact[] arts;
                 lock (gate)
                 {
-                    if (dirty) { snapshot = buffer.ToString(); dirty = false; }
+                    if (dirty) { target = buffer.ToString(); dirty = false; }
                     stChanged = statusDirty; st = status; statusDirty = false;
                     arts = artifacts.ToArray(); artifacts.Clear();
                 }
@@ -318,10 +317,20 @@ namespace Lumen
                     if (a.IsImage) reply.ImageFile = a.FileName;
                     else { reply.DocSize = a.Size; reply.DocFile = a.FileName; }
                 }
-                if (snapshot != null || arts.Length > 0)
+                var grew = false;
+                if (shown < target.Length)
+                {
+                    var step = Math.Max(3, (target.Length - shown) / 6);
+                    var next = Math.Min(target.Length, shown + step);
+                    // Never cut a word in half.
+                    while (next < target.Length && next - shown < step + 14 && !char.IsWhiteSpace(target[next])) next++;
+                    shown = next;
+                    grew = true;
+                }
+                if (grew || arts.Length > 0)
                 {
                     var stick = IsNearBottom();
-                    if (snapshot != null) reply.Text = snapshot;
+                    if (grew) reply.Text = Markdown.ToPlain(target.Substring(0, shown));
                     if (stick) ScrollToEnd(false);
                 }
             };
@@ -340,6 +349,10 @@ namespace Lumen
                     art => { lock (gate) { artifacts.Add(art); } },
                     cts.Token));
 
+                // Let the typewriter finish (capped, so a long answer never keeps you waiting).
+                lock (gate) { target = buffer.ToString(); dirty = false; }
+                var until = DateTime.UtcNow.AddMilliseconds(1500);
+                while (shown < target.Length && DateTime.UtcNow < until) await Task.Delay(40);
                 pump();
                 string final;
                 lock (gate) final = buffer.ToString();
@@ -399,21 +412,19 @@ namespace Lumen
             _busy = busy;
             IsBusy = busy;
             UpdateBarState();
-            BusyBar.IsIndeterminate = busy;
-            BusyBar.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
             UpdateSendState();
         }
 
         /// <summary>One button, three jobs: stop (answering), send (recording or something typed), mic (empty).</summary>
         private void UpdateSendState()
         {
-            Uri glyph;
+            string glyph;
             if (_busy) glyph = Icons.Stop;
             else if (_recorder.IsRecording) glyph = Icons.Send;
             else if (InputBox.Text.Trim().Length > 0 || _pendingImage != null) glyph = Icons.Send;
             else glyph = Icons.Mic;
 
-            if (SendGlyph.UriSource != glyph) SendGlyph.UriSource = glyph;
+            if (SendGlyph.Glyph != glyph) SendGlyph.Glyph = glyph;
         }
 
         // ================================================================ voice
@@ -706,14 +717,14 @@ namespace Lumen
         // ================================================================ notifications
 
         /// <summary>Animated in-app notification: slides down with a little overshoot, then slides back up.</summary>
-        private void ShowToast(Uri glyph, string text, bool warning = false)
+        private void ShowToast(string glyph, string text, bool warning = false)
         {
             // A hide animation still running (or holding its end values) must not swallow this toast.
             _toastHide?.Stop();
             _toastHide = null;
             Toast.Opacity = 1;
             ToastMove.Y = 0;
-            ToastIcon.UriSource = glyph;
+            ToastIcon.Glyph = glyph;
             ToastText.Text = text;
             Toast.Visibility = Visibility.Visible;
 
@@ -983,10 +994,10 @@ namespace Lumen
 
         // ================================================================ context menus (built on demand: none per list item)
 
-        private static MenuFlyoutItem MenuItem(string text, Uri icon, object context, RoutedEventHandler click, bool danger = false)
+        private static MenuFlyoutItem MenuItem(string text, string icon, object context, RoutedEventHandler click, bool danger = false)
         {
             var item = new MenuFlyoutItem { Text = text, DataContext = context };
-            var bi = new BitmapIcon { UriSource = icon, Width = 20, Height = 20 };
+            var bi = Icons.Make(icon, 18);
             if (danger)
             {
                 var red = (Brush)Application.Current.Resources["DangerBrush"];

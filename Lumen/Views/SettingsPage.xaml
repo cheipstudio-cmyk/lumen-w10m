@@ -11,7 +11,7 @@
             <Grid Width="50" Height="50" Background="{x:Bind SwatchBrush}">
                 <TextBlock Text="{x:Bind Label}" FontSize="9" Foreground="White" VerticalAlignment="Bottom" Margin="3,0,2,2" TextWrapping="Wrap"/>
                 <Border BorderBrush="{StaticResource TextPrimaryBrush}" BorderThickness="3" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
-                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="14" Height="14" Foreground="White"
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE73E;" FontSize="14" Foreground="White"
                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
             </Grid>
         </DataTemplate>
@@ -41,10 +41,11 @@
         <!-- ===== home: categories, like the W10M Settings app ===== -->
         <ScrollViewer x:Name="Home" Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel x:Name="Root" Padding="0,0,0,24">
+                <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                 <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="ai">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Cloud.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE753;" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
                         <StackPanel Grid.Column="1">
                             <TextBlock x:Uid="XAiService" Text="AI service" FontSize="15"/>
                             <TextBlock x:Name="KeyStateText" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
@@ -54,7 +55,7 @@
                 <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="look">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Paint.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE771;" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
                         <StackPanel Grid.Column="1">
                             <TextBlock x:Uid="XPersonalization" Text="Personalization" FontSize="15"/>
                             <TextBlock x:Uid="XThemeAccentColorLanguage" Text="Theme, accent color, language" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
@@ -64,7 +65,7 @@
                 <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="assistant">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Sparkle.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEA80;" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
                         <StackPanel Grid.Column="1">
                             <TextBlock x:Uid="XAssistant" Text="Assistant" FontSize="15"/>
                             <TextBlock x:Uid="XWikipediaImagesAndFilesVoiceInstructions" Text="Wikipedia, images and files, voice, instructions" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
@@ -74,7 +75,7 @@
                 <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="storage">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Storage.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEDA2;" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
                         <StackPanel Grid.Column="1">
                             <TextBlock x:Uid="XStorage" Text="Storage" FontSize="15"/>
                             <TextBlock x:Name="UsageText" Text="..." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
@@ -84,7 +85,7 @@
                 <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="about">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Info.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE946;" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
                         <StackPanel Grid.Column="1">
                             <TextBlock x:Uid="XAbout" Text="About" FontSize="15"/>
                             <TextBlock x:Name="AboutSubtitle" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
@@ -97,6 +98,7 @@
         <!-- ===== AI service ===== -->
         <ScrollViewer x:Name="AiSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
             <StackPanel Padding="12,0,12,32">
+                <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                 <ComboBox x:Uid="XServiceHeader" x:Name="ProviderCombo" Header="Service" HorizontalAlignment="Stretch"
                           ItemTemplate="{StaticResource ProviderTemplate}" SelectionChanged="ProviderCombo_SelectionChanged"/>
                 <TextBlock x:Name="ProviderHint" Style="{StaticResource HintText}" Margin="0,6,0,0"/>
@@ -134,6 +136,7 @@
         <!-- ===== personalization ===== -->
         <ScrollViewer x:Name="LookSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
             <StackPanel Padding="12,0,12,32">
+                <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                 <ComboBox x:Uid="XLanguageHeader" x:Name="LanguageCombo" Header="Language" HorizontalAlignment="Stretch" SelectionChanged="LanguageCombo_SelectionChanged"/>
                 <ToggleSwitch x:Uid="XLightThemeHeader" x:Name="ThemeToggle" Header="Light theme" Toggled="ThemeToggle_Toggled" Margin="0,12,0,0"/>
                 <TextBlock x:Uid="XChooseYourAccentColor" Text="Choose your accent color" Style="{StaticResource SectionHeader}" Margin="0,14,0,8"/>
@@ -148,6 +151,7 @@
         <!-- ===== assistant ===== -->
         <ScrollViewer x:Name="AssistantSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
             <StackPanel Padding="12,0,12,32">
+                <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                 <ToggleSwitch x:Uid="XWikipediaLookupsHeader" x:Name="WikiToggle" Header="Wikipedia lookups" Toggled="WikiToggle_Toggled"/>
                 <TextBlock x:Uid="XFreshFactsForFreeWithAnyService" Style="{StaticResource HintText}" Text="Fresh facts for free, with any service."/>
                 <ToggleSwitch x:Uid="XImagesAndFilesHeader" x:Name="CreativeToggle" Header="Images and files" Toggled="CreativeToggle_Toggled" Margin="0,8,0,0"/>
@@ -166,11 +170,12 @@
         <!-- ===== storage ===== -->
         <ScrollViewer x:Name="StorageSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
             <StackPanel Padding="0,0,0,32">
+                <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                 <TextBlock x:Name="UsageDetail" Style="{StaticResource HintText}" Margin="12,0,12,8"/>
                 <Button Style="{StaticResource ChipButton}" Click="DeleteAll_Click">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Delete.png" Width="22" Height="22" HorizontalAlignment="Left" Foreground="{StaticResource DangerBrush}"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" FontSize="22" HorizontalAlignment="Left" Foreground="{StaticResource DangerBrush}"/>
                         <TextBlock x:Uid="XDeleteAllChats" Grid.Column="1" Text="Delete all chats" FontSize="15" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center"/>
                     </Grid>
                 </Button>
@@ -180,13 +185,14 @@
         <!-- ===== about ===== -->
         <ScrollViewer x:Name="AboutSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
             <StackPanel Padding="12,0,12,32">
+                <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                 <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
                     <Image Width="56" Height="56" Source="ms-appx:///Assets/Orb.png" Margin="0,0,14,0" VerticalAlignment="Top"/>
                     <StackPanel Grid.Column="1">
                         <TextBlock x:Name="AboutTitle" FontSize="15" FontWeight="SemiBold"/>
                         <TextBlock x:Uid="XUnofficialClientForGeminiClaudeChatgptAn" Style="{StaticResource HintText}"
-                                   Text="Unofficial client for Gemini, Claude, ChatGPT and OpenAI compatible services. Not affiliated with Google, Anthropic or OpenAI. Icons: Fluent System Icons (MIT)."/>
+                                   Text="Unofficial client for Gemini, Claude, ChatGPT and OpenAI compatible services. Not affiliated with Google, Anthropic or OpenAI."/>
                     </StackPanel>
                 </Grid>
                 <HyperlinkButton x:Uid="XSourceOnGithubContent" Content="Source on GitHub" NavigateUri="https://github.com/cheipstudio-cmyk/lumen-w10m" Foreground="{StaticResource AccentTextBrush}" Padding="0,8"/>

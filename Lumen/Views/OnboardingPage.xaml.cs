@@ -17,7 +17,7 @@ namespace Lumen.Views
         private System.Collections.Generic.List<AccentPalette> _swatches;
         private const int HeroPage = 1;
         private bool _ready;
-        private int _startPage;
+        private int _step;
 
         public OnboardingPage()
         {
@@ -36,14 +36,19 @@ namespace Lumen.Views
             ShowProvider(AppSettings.ProviderId);
             ThemeManager.SyncSelection(_swatches);
             ThemeToggle.IsOn = AppSettings.LightTheme;
-            _startPage = e.Parameter is int ? (int)e.Parameter : 0;
+            _step = e.Parameter is int ? Math.Max(0, Math.Min((int)e.Parameter, Steps.Children.Count - 1)) : 0;
+            Steps.Children[_step].Visibility = Visibility.Visible;
+            // Only the hero step loads the video: the other steps never touch the decoder.
+            if (_step == HeroPage) { HeroVideo.AutoPlay = true; HeroVideo.Source = new Uri("ms-appx:///Assets/Lumia735.mp4"); }
             _ready = true;
-            if (_startPage > 0) Pages.SelectedIndex = _startPage;
             UpdateChrome();
-            if (_startPage == 0)
-            {
-                for (int i = 0; i < LangList.Children.Count; i++) Fx.FadeInUp(LangList.Children[i], 120 + i * 60, 22, 420);
-            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            SaveProvider();
+            try { HeroVideo.Stop(); } catch (Exception) { }
         }
 
         // ------------------------------------------------------------ language (page 0)
@@ -68,13 +73,8 @@ namespace Lumen.Views
                 });
                 if (selected)
                 {
-                    var check = new BitmapIcon
-                    {
-                        UriSource = Icons.Check,
-                        Width = 18,
-                        Height = 18,
-                        Foreground = (Brush)Application.Current.Resources["AccentTextBrush"]
-                    };
+                    var check = Icons.Make(Icons.Check, 18);
+                    check.Foreground = (Brush)Application.Current.Resources["AccentTextBrush"];
                     Grid.SetColumn(check, 1);
                     row.Children.Add(check);
                 }
@@ -95,55 +95,39 @@ namespace Lumen.Views
             var code = (string)((Button)sender).Tag;
             if (code == App.CurrentLanguage && App.HasLanguageOverride)
             {
-                Pages.SelectedIndex = HeroPage;
+                Frame.Navigate(typeof(OnboardingPage), HeroPage);
                 return;
             }
             SaveProvider();
             App.SetLanguage(code);
             // Rebuild the onboarding in the new language, straight on the 3D Lumia page.
-            App.ReloadUi(typeof(OnboardingPage), HeroPage);
+            App.ReloadUi(typeof(OnboardingPage), 0);
+            var frame = Window.Current.Content as Frame;
+            if (frame != null) frame.Navigate(typeof(OnboardingPage), HeroPage);
         }
 
         // ------------------------------------------------------------ paging
 
-        private void Pages_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // FlipView can select its first item while InitializeComponent is still running.
-            if (!_ready || Dots == null || NextText == null || NextIcon == null || SkipButton == null || HeroVideo == null) return;
-            UpdateChrome();
-
-            var i = Pages.SelectedIndex;
-            if (i == 2) StaggerChildren(FeaturesPanel);
-            else if (i == 3) Fx.FadeInUp(KeyPanel, 0, 24, 420);
-            else if (i == 4) Fx.FadeInUp(ThemePanel, 0, 24, 420);
-            else if (i == HeroPage) Fx.FadeInUp(HeroText, 200, 28, 600);
-        }
-
         private void UpdateChrome()
         {
-            var i = Pages.SelectedIndex;
+            var i = _step;
             for (int d = 0; d < Dots.Children.Count; d++)
             {
                 var dot = (Ellipse)Dots.Children[d];
                 dot.Fill = (Brush)Application.Current.Resources[d == i ? "AccentBrush" : "StrokeBrush"];
             }
-            var last = i == Pages.Items.Count - 1;
+            var last = i == Steps.Children.Count - 1;
             NextText.Text = last ? S.Start : S.Next;
-            NextIcon.UriSource = last ? Icons.Sparkle : Icons.ChevronRight;
+            NextIcon.Glyph = last ? Icons.Check : Icons.ChevronRight;
             SkipButton.Visibility = last || i == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            // The video only plays while visible: no wasted decoding on the other pages.
-            try { if (i == HeroPage) HeroVideo.Play(); else HeroVideo.Pause(); } catch (Exception) { }
-        }
 
-        private static void StaggerChildren(Panel panel)
-        {
-            for (int c = 0; c < panel.Children.Count; c++) Fx.FadeInUp(panel.Children[c], c * 90, 26, 460);
+
         }
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
-            if (Pages.SelectedIndex < Pages.Items.Count - 1) Pages.SelectedIndex++;
+            if (_step < Steps.Children.Count - 1) Frame.Navigate(typeof(OnboardingPage), _step + 1);
             else Finish();
         }
 

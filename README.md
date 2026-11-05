@@ -27,5 +27,5 @@ Device Portal works too: Apps > Install app, then add the dependencies.
 
 GitHub Actions builds an ARM + x64 appxbundle on every `v*` tag. Signing uses the `SIGNING_PFX` and `SIGNING_PASSWORD` secrets (subject `CN=Second Dream`).
 
-Unofficial client, not affiliated with Google, Anthropic or OpenAI. Icons: Fluent System Icons (MIT).
+Unofficial client, not affiliated with Google, Anthropic or OpenAI.
 Made by [Second Dream](https://www.instagram.com/second_dream___).

@@ -17,8 +17,8 @@
                         <Button Visibility="{x:Bind AudioVisibility}" Click="PlayAudio_Click" Background="#33000000"
                                 BorderThickness="0" Padding="10,6" Margin="0,2,0,4" HorizontalAlignment="Left">
                             <StackPanel Orientation="Horizontal">
-                                <BitmapIcon UriSource="{x:Bind PlayIcon, Mode=OneWay}" Width="16" Height="16" Foreground="White" Margin="0,0,10,0"/>
-                                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Mic.png" Width="15" Height="15" Foreground="#CCFFFFFF" Margin="0,0,6,0"/>
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind PlayIcon, Mode=OneWay}" FontSize="16" Foreground="White" Margin="0,0,10,0"/>
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE720;" FontSize="15" Foreground="#CCFFFFFF" Margin="0,0,6,0"/>
                                 <TextBlock Text="{x:Bind AudioLabel}" Foreground="White"/>
                             </StackPanel>
                         </Button>
@@ -35,9 +35,12 @@
                 <Polygon Points="0,0 0,12 16,12" Fill="{StaticResource ModelBubbleSolid}" HorizontalAlignment="Left" Margin="14,0,0,0"/>
                 <Border Background="{StaticResource ModelBubbleSolid}" Padding="12,9,12,11" MinWidth="64">
                     <StackPanel>
-                        <core:TypingIndicator Visibility="{x:Bind ThinkingVisibility, Mode=OneWay}"/>
+                        <!-- W10M "marching dots" while thinking: runs on the compositor, smooth even when the UI thread is busy -->
+                        <ProgressBar Width="72" Height="10" Margin="0,6,0,6" HorizontalAlignment="Left" Background="Transparent"
+                                     Foreground="{StaticResource AccentTextBrush}" IsIndeterminate="{x:Bind IsThinking, Mode=OneWay}"
+                                     Visibility="{x:Bind ThinkingVisibility, Mode=OneWay}"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6" Visibility="{x:Bind StatusVisibility, Mode=OneWay}">
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/Sparkle.png" Width="14" Height="14" Foreground="{StaticResource AccentTextBrush}" Margin="0,0,8,0"/>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEA80;" FontSize="14" Foreground="{StaticResource AccentTextBrush}" Margin="0,0,8,0"/>
                             <TextBlock Text="{x:Bind Status, Mode=OneWay}" FontSize="13" FontStyle="Italic" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                         <TextBlock Text="{x:Bind Text, Mode=OneWay}" Visibility="{x:Bind StreamingVisibility, Mode=OneWay}"
@@ -45,7 +48,7 @@
                         <RichTextBlock core:Markdown.Source="{Binding RenderedText}" Visibility="{x:Bind RenderedVisibility, Mode=OneWay}"
                                        Foreground="{StaticResource TextPrimaryBrush}" IsTextSelectionEnabled="False" TextWrapping="Wrap"/>
                         <StackPanel Orientation="Horizontal" Visibility="{x:Bind ErrorVisibility, Mode=OneWay}">
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/Warning.png" Width="16" Height="16" Foreground="{StaticResource DangerBrush}" Margin="0,2,8,0" VerticalAlignment="Top"/>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7BA;" FontSize="16" Foreground="{StaticResource DangerBrush}" Margin="0,2,8,0" VerticalAlignment="Top"/>
                             <TextBlock Text="{x:Bind Text, Mode=OneWay}" TextWrapping="Wrap" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" MaxWidth="520"/>
                         </StackPanel>
 
@@ -54,10 +57,10 @@
                             <Image Source="{x:Bind Thumb, Mode=OneWay}" MaxWidth="300" MaxHeight="400" Stretch="Uniform" Tapped="GeneratedImage_Tapped"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="6">
                                 <Button Style="{StaticResource IconButton}" Width="38" Height="38" Background="#99000000" Click="SaveImage_Click" Margin="0,0,6,0">
-                                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Save.png" Width="18" Height="18" Foreground="White"/>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" FontSize="18" Foreground="White"/>
                                 </Button>
                                 <Button Style="{StaticResource IconButton}" Width="38" Height="38" Background="#99000000" Click="ShareImage_Click">
-                                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Share.png" Width="18" Height="18" Foreground="White"/>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72D;" FontSize="18" Foreground="White"/>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -73,7 +76,7 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Border Width="42" Height="42" Background="{StaticResource AccentBrush}" Margin="0,0,12,0">
-                                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Document.png" Width="22" Height="22" Foreground="White"/>
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8A5;" FontSize="22" Foreground="White"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="{x:Bind DocName, Mode=OneWay}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
@@ -81,13 +84,13 @@
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,0">
                                 <Button Style="{StaticResource ChipButton}" HorizontalAlignment="Left" MinHeight="0" Padding="4,6" Margin="0,0,20,0" Click="OpenDoc_Click" Foreground="{StaticResource AccentTextBrush}">
-                                    <StackPanel Orientation="Horizontal"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Open.png" Width="16" Height="16" Margin="0,0,6,0"/><TextBlock x:Uid="XOpen" Text="Open"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8A7;" FontSize="16" Margin="0,0,6,0"/><TextBlock x:Uid="XOpen" Text="Open"/></StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource ChipButton}" HorizontalAlignment="Left" MinHeight="0" Padding="4,6" Margin="0,0,20,0" Click="SaveDoc_Click" Foreground="{StaticResource AccentTextBrush}">
-                                    <StackPanel Orientation="Horizontal"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Save.png" Width="16" Height="16" Margin="0,0,6,0"/><TextBlock x:Uid="XSave" Text="Save"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" FontSize="16" Margin="0,0,6,0"/><TextBlock x:Uid="XSave" Text="Save"/></StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource ChipButton}" HorizontalAlignment="Left" MinHeight="0" Padding="4,6" Click="ShareDoc_Click" Foreground="{StaticResource AccentTextBrush}">
-                                    <StackPanel Orientation="Horizontal"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Share.png" Width="16" Height="16" Margin="0,0,6,0"/><TextBlock x:Uid="XShare" Text="Share"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72D;" FontSize="16" Margin="0,0,6,0"/><TextBlock x:Uid="XShare" Text="Share"/></StackPanel>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -123,7 +126,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal">
                         <Button Style="{StaticResource IconButton}" Click="Hamburger_Click">
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/Menu.png" Width="20" Height="20"/>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" FontSize="20"/>
                         </Button>
                         <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="4,0,0,0"/>
                     </StackPanel>
@@ -131,7 +134,7 @@
                     <Button Grid.Row="1" Style="{StaticResource ChipButton}" Padding="0" Click="NewChat_Click">
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="48"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/Add.png" Width="20" Height="20" HorizontalAlignment="Center"/>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;" FontSize="20" HorizontalAlignment="Center"/>
                             <TextBlock x:Uid="XNewChat" Grid.Column="1" Text="New chat" VerticalAlignment="Center" Margin="4,0,0,0"/>
                         </Grid>
                     </Button>
@@ -162,7 +165,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Chat.png" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8BD;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0"/>
                                     <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                         <TextBlock Text="{x:Bind Title, Mode=OneWay}" TextTrimming="CharacterEllipsis" FontSize="15"/>
                                         <TextBlock Text="{x:Bind Preview, Mode=OneWay}" TextTrimming="CharacterEllipsis" FontSize="13"
@@ -170,7 +173,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Margin="8,2,0,0">
                                         <TextBlock Text="{x:Bind UpdatedLabel, Mode=OneWay}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right"/>
-                                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Pin.png" Width="14" Height="14" Foreground="{StaticResource AccentTextBrush}"
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE718;" FontSize="14" Foreground="{StaticResource AccentTextBrush}"
                                                     HorizontalAlignment="Right" Margin="0,6,0,0" Visibility="{x:Bind PinVisibility, Mode=OneWay}"/>
                                     </StackPanel>
                                 </Grid>
@@ -184,7 +187,7 @@
                         <Button Style="{StaticResource ChipButton}" Padding="0" Click="Settings_Click">
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="48"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Settings.png" Width="20" Height="20" HorizontalAlignment="Center"/>
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;" FontSize="20" HorizontalAlignment="Center"/>
                                 <TextBlock x:Uid="XSettings" Grid.Column="1" Text="Settings" VerticalAlignment="Center" Margin="4,0,0,0"/>
                             </Grid>
                         </Button>
@@ -207,7 +210,7 @@
                         <ColumnDefinition Width="48"/>
                     </Grid.ColumnDefinitions>
                     <Button Style="{StaticResource IconButton}" Click="Hamburger_Click">
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Menu.png" Width="20" Height="20"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" FontSize="20"/>
                     </Button>
                     <Button x:Name="ModelButton" Grid.Column="1" Style="{StaticResource ChipButton}" Padding="4,0" MinHeight="48" Click="ModelButton_Click">
                         <Grid>
@@ -216,12 +219,12 @@
                                 <TextBlock x:Name="TitleText" Text="Lumen" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="220"/>
                                 <TextBlock x:Name="ModelLabel" FontSize="12" Foreground="{StaticResource AccentTextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="220"/>
                             </StackPanel>
-                            <BitmapIcon Grid.Column="1" UriSource="ms-appx:///Assets/Icons/ChevronDown.png" Width="12" Height="12" Margin="8,14,0,0"
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE70D;" FontSize="12" Grid.Column="1" Margin="8,14,0,0"
                                         VerticalAlignment="Top" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </Grid>
                     </Button>
                     <Button Grid.Column="2" Style="{StaticResource IconButton}" Click="NewChat_Click">
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Add.png" Width="20" Height="20"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;" FontSize="20"/>
                     </Button>
                 </Grid>
 
@@ -252,7 +255,7 @@
 
                         <Grid x:Name="NoKeyCard" Background="{StaticResource ChromeBrush}" Padding="12" Margin="12,0,12,14" Visibility="Collapsed">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Key.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8D7;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XConnectAnAiService" Text="Connect an AI service" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XAddAKeyForGeminiFreeClaudeOrChatgptInSet" Style="{StaticResource HintText}" Margin="0,4,0,12"
@@ -263,6 +266,7 @@
 
                         <TextBlock x:Uid="XTryAsking" x:Name="SuggestHeader" Text="Try asking" Style="{StaticResource SectionHeader}" Margin="12,0,12,4"/>
                         <StackPanel x:Name="SuggestionsPanel">
+                            <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                             <Button x:Name="Suggest1" Style="{StaticResource ChipButton}" Click="Suggestion_Click"/>
                             <Button x:Name="Suggest2" Style="{StaticResource ChipButton}" Click="Suggestion_Click"/>
                             <Button x:Name="Suggest3" Style="{StaticResource ChipButton}" Click="Suggestion_Click"/>
@@ -287,26 +291,26 @@
                         <Button Style="{StaticResource IconButton}" Width="28" Height="28" Margin="0,-8,-8,0"
                                 HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Background="{StaticResource AccentBrush}" Click="RemoveAttachment_Click">
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/Dismiss.png" Width="12" Height="12" Foreground="White"/>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE711;" FontSize="12" Foreground="White"/>
                         </Button>
                     </Grid>
 
                     <Button x:Name="AttachButton" Grid.Row="1" Style="{StaticResource IconButton}" VerticalAlignment="Bottom">
-                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Add.png" Width="20" Height="20"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;" FontSize="20"/>
                         <Button.Flyout>
                             <MenuFlyout Placement="Top">
                                 <MenuFlyoutItem x:Uid="XTakeAPhoto" Text="Take a photo" Click="Camera_Click">
-                                    <MenuFlyoutItem.Icon><BitmapIcon UriSource="ms-appx:///Assets/Icons/Camera.png" Width="20" Height="20"/></MenuFlyoutItem.Icon>
+                                    <MenuFlyoutItem.Icon><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE722;" FontSize="20"/></MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutItem x:Uid="XChooseFromGallery" Text="Choose from gallery" Click="Gallery_Click">
-                                    <MenuFlyoutItem.Icon><BitmapIcon UriSource="ms-appx:///Assets/Icons/Image.png" Width="20" Height="20"/></MenuFlyoutItem.Icon>
+                                    <MenuFlyoutItem.Icon><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB9F;" FontSize="20"/></MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutSeparator/>
                                 <MenuFlyoutItem x:Uid="XCreateAnImage" Text="Create an image" Click="AskImage_Click">
-                                    <MenuFlyoutItem.Icon><BitmapIcon UriSource="ms-appx:///Assets/Icons/ImageSparkle.png" Width="20" Height="20"/></MenuFlyoutItem.Icon>
+                                    <MenuFlyoutItem.Icon><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE91B;" FontSize="20"/></MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutItem x:Uid="XCreateAFile" Text="Create a file" Click="AskFile_Click">
-                                    <MenuFlyoutItem.Icon><BitmapIcon UriSource="ms-appx:///Assets/Icons/DocumentAdd.png" Width="20" Height="20"/></MenuFlyoutItem.Icon>
+                                    <MenuFlyoutItem.Icon><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7C3;" FontSize="20"/></MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                             </MenuFlyout>
                         </Button.Flyout>
@@ -334,19 +338,16 @@
                         <Ellipse x:Name="RecordDot" Width="10" Height="10" Fill="#FFE81123" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBlock x:Name="RecordTime" Grid.Column="1" Text="0:00" FontSize="15" VerticalAlignment="Center"/>
                         <Button Grid.Column="2" Style="{StaticResource IconButton}" Height="40" Click="CancelRecording_Click">
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/Delete.png" Width="18" Height="18" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" FontSize="18" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </Button>
                     </Grid>
 
                     <Button x:Name="SendButton" Grid.Row="1" Grid.Column="2" Style="{StaticResource IconButton}" VerticalAlignment="Bottom"
                             Foreground="{StaticResource AccentTextBrush}" Click="Send_Click">
-                        <BitmapIcon x:Name="SendGlyph" UriSource="ms-appx:///Assets/Icons/Mic.png" Width="22" Height="22"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE720;" FontSize="22" x:Name="SendGlyph"/>
                     </Button>
                 </Grid>
 
-                <!-- Indeterminate dots while Lumen is answering -->
-                <ProgressBar x:Name="BusyBar" Grid.Row="1" VerticalAlignment="Top" Foreground="{StaticResource AccentBrush}" Background="Transparent"
-                             IsIndeterminate="False" Visibility="Collapsed"/>
             </Grid>
         </SplitView>
 
@@ -359,7 +360,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Border Width="32" Height="32" Background="{StaticResource AccentBrush}" Margin="0,0,12,0" VerticalAlignment="Top">
-                <BitmapIcon x:Name="ToastIcon" UriSource="ms-appx:///Assets/Icons/Check.png" Width="18" Height="18" Foreground="White"/>
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE73E;" FontSize="18" x:Name="ToastIcon" Foreground="White"/>
             </Border>
             <StackPanel Grid.Column="1">
                 <TextBlock Text="Lumen" FontWeight="SemiBold" FontSize="14"/>

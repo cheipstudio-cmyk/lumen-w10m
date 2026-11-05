@@ -5,7 +5,7 @@ namespace Lumen.Core
     /// <summary>User-facing runtime strings, from Strings/*/Resources.resw (generated).</summary>
     public static class S
     {
-        public const string AppVersion = "1.4";
+        public const string AppVersion = "1.5";
 
         /// <summary>Model-facing, kept in English on purpose: the model replies in the user's language anyway.</summary>
         public const string DefaultSystemPrompt =

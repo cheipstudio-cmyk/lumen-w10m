@@ -17,6 +17,44 @@ namespace Lumen.Core
     /// </summary>
     public static class Markdown
     {
+        /// <summary>
+        /// Cheap plain-text view of markdown for the live typewriter: same words and line breaks as the
+        /// final rendering, without the symbols, so the swap to rich text at the end barely moves anything.
+        /// </summary>
+        public static string ToPlain(string md)
+        {
+            if (string.IsNullOrEmpty(md)) return "";
+            var sb = new System.Text.StringBuilder(md.Length);
+            var lines = md.Split('\n');
+            for (int li = 0; li < lines.Length; li++)
+            {
+                var line = lines[li].TrimEnd('\r');
+                var t = line.TrimStart();
+                if (t.StartsWith("```")) continue;
+                int h = 0;
+                while (h < t.Length && h < 6 && t[h] == '#') h++;
+                if (h > 0 && h < t.Length && t[h] == ' ') line = t.Substring(h + 1);
+                else if (t.StartsWith("- ") || t.StartsWith("* ") || t.StartsWith("+ ")) line = new string(' ', Math.Min(6, line.Length - t.Length)) + "• " + t.Substring(2);
+                else if (t.StartsWith("> ")) line = t.Substring(2);
+                if (li > 0) sb.Append('\n');
+                for (int i = 0; i < line.Length; i++)
+                {
+                    var c = line[i];
+                    if (c == '*' || c == '`' || (c == '_' && i + 1 < line.Length && line[i + 1] == '_')) continue;
+                    if (c == '_' && (i == 0 || !char.IsLetterOrDigit(line[i - 1]) || i + 1 >= line.Length || !char.IsLetterOrDigit(line[i + 1]))) continue;
+                    if (c == '[')
+                    {
+                        // [label](url) -> label
+                        var close = line.IndexOf("](", i, StringComparison.Ordinal);
+                        var end = close < 0 ? -1 : line.IndexOf(')', close);
+                        if (close > i && end > close) { sb.Append(line, i + 1, close - i - 1); i = end; continue; }
+                    }
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
+
         public static readonly DependencyProperty SourceProperty = DependencyProperty.RegisterAttached(
             "Source", typeof(string), typeof(Markdown), new PropertyMetadata(null, OnSourceChanged));
 

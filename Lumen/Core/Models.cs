@@ -78,7 +78,7 @@ namespace Lumen.Core
             {
                 if (Set(ref _text, value ?? ""))
                 {
-                    Raise(nameof(ThinkingVisibility));
+                    Raise(nameof(ThinkingVisibility)); Raise(nameof(IsThinking));
                     Raise(nameof(TextVisibility));
                     Raise(nameof(StreamingVisibility));
                 }
@@ -95,7 +95,7 @@ namespace Lumen.Core
                 {
                     Raise(nameof(StreamingVisibility));
                     Raise(nameof(RenderedVisibility));
-                    Raise(nameof(ThinkingVisibility));
+                    Raise(nameof(ThinkingVisibility)); Raise(nameof(IsThinking));
                     Raise(nameof(RenderedText));
                 }
             }
@@ -137,6 +137,7 @@ namespace Lumen.Core
 
         public Visibility StreamingVisibility { get { return _isStreaming && _text.Length > 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility RenderedVisibility { get { return (_isStreaming || _isError) ? Visibility.Collapsed : Visibility.Visible; } }
+        public bool IsThinking { get { return _isStreaming && _text.Length == 0; } }
         public Visibility ThinkingVisibility { get { return _isStreaming && _text.Length == 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility ErrorVisibility { get { return _isError ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility ImageVisibility { get { return string.IsNullOrEmpty(ImageFile) ? Visibility.Collapsed : Visibility.Visible; } }
@@ -144,7 +145,7 @@ namespace Lumen.Core
         public Visibility TextVisibility { get { return string.IsNullOrEmpty(_text) ? Visibility.Collapsed : Visibility.Visible; } }
 
         public string AudioLabel { get { return string.Format("{0}:{1:00}", AudioSeconds / 60, AudioSeconds % 60); } }
-        public Uri PlayIcon { get { return _isPlaying ? Icons.Pause : Icons.Play; } }
+        public string PlayIcon { get { return _isPlaying ? Icons.Pause : Icons.Play; } }
 
         private BitmapImage _thumb;
         /// <summary>Lazy, downscaled thumbnail. Created on first binding (UI thread).</summary>

@@ -168,7 +168,7 @@
   <data name="XThemeAccentColorLanguage.Text" xml:space="preserve"><value>Theme, accent color, language</value></data>
   <data name="XTryAsking.Text" xml:space="preserve"><value>Try asking</value></data>
   <data name="XTypeAMessagePlaceholderText.PlaceholderText" xml:space="preserve"><value>Type a message</value></data>
-  <data name="XUnofficialClientForGeminiClaudeChatgptAn.Text" xml:space="preserve"><value>Unofficial client for Gemini, Claude, ChatGPT and OpenAI compatible services. Not affiliated with Google, Anthropic or OpenAI. Icons: Fluent System Icons (MIT).</value></data>
+  <data name="XUnofficialClientForGeminiClaudeChatgptAn.Text" xml:space="preserve"><value>Unofficial client for Gemini, Claude, ChatGPT and OpenAI compatible services. Not affiliated with Google, Anthropic or OpenAI.</value></data>
   <data name="XVeryLetSGo.Text" xml:space="preserve"><value>Very. Let's go!</value></data>
   <data name="XWelcomeTourContent.Content" xml:space="preserve"><value>Welcome tour</value></data>
   <data name="XWhatCanIHelpWithToday.Text" xml:space="preserve"><value>What can I help with today?</value></data>

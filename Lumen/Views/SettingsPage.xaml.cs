@@ -11,7 +11,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Lumen.Views
 {
-    public sealed partial class SettingsPage : Page, IBackAware
+    public sealed partial class SettingsPage : Page
     {
         private string _shownProvider;
         private string _section;
@@ -50,7 +50,7 @@ namespace Lumen.Views
             UpdateKeyState();
             _loading = false;
 
-            ShowSection(e.Parameter as string, false);
+            ShowSection(e.Parameter as string);
 
             var bytes = await FileTools.UsageAsync();
             UsageText.Text = string.Format(S.StorageUsed, FormatSize(bytes));
@@ -73,21 +73,14 @@ namespace Lumen.Views
 
         // ------------------------------------------------------------ sections (W10M Settings: list, then a page per category)
 
-        public bool HandleBack()
-        {
-            if (_section == null) return false;
-            ShowSection(null, true);
-            return true;
-        }
-
         private void Category_Click(object sender, RoutedEventArgs e)
         {
-            ShowSection((string)((FrameworkElement)sender).Tag, true);
+            // Like the W10M Settings app: each category is its own page, with the system transition and the back key.
+            Frame.Navigate(typeof(SettingsPage), (string)((FrameworkElement)sender).Tag);
         }
 
-        private void ShowSection(string id, bool animate)
+        private void ShowSection(string id)
         {
-            SaveFields();
             UpdateKeyState();
             _section = id;
             var map = new Dictionary<string, Tuple<FrameworkElement, string>>
@@ -102,7 +95,6 @@ namespace Lumen.Views
             Home.Visibility = id == null ? Visibility.Visible : Visibility.Collapsed;
             foreach (var kv in map) kv.Value.Item1.Visibility = kv.Key == id ? Visibility.Visible : Visibility.Collapsed;
             HeaderText.Text = (id == null ? S.SettingsTitle : map[id].Item2).ToUpperInvariant();
-            if (animate) Fx.FadeInUp(id == null ? (UIElement)Home : map[id].Item1, 0, 18, 260);
         }
 
         // ------------------------------------------------------------ AI service

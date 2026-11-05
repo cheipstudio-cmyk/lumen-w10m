@@ -10,7 +10,7 @@
             <Grid Width="50" Height="50" Background="{x:Bind SwatchBrush}">
                 <TextBlock Text="{x:Bind Label}" FontSize="9" Foreground="White" VerticalAlignment="Bottom" Margin="3,0,2,2" TextWrapping="Wrap"/>
                 <Border BorderBrush="{StaticResource TextPrimaryBrush}" BorderThickness="3" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
-                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="14" Height="14" Foreground="White"
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE73E;" FontSize="14" Foreground="White"
                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
             </Grid>
         </DataTemplate>
@@ -39,47 +39,53 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <FlipView x:Name="Pages" Background="Transparent" SelectionChanged="Pages_SelectionChanged">
+        <!-- One step per page instance: "next" navigates, so W10M page transitions and the back key work naturally -->
+        <Grid x:Name="Steps">
 
             <!-- 0. language -->
-            <FlipViewItem>
+            <Grid Visibility="Collapsed">
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
                     <StackPanel x:Name="LangPanel" Padding="0,18,0,24">
+                        <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                         <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="12,0,12,14"/>
                         <TextBlock x:Uid="XChooseYourLanguage" Text="Choose your language" Style="{StaticResource PageTitle}" Margin="12,0,12,8"/>
-                        <StackPanel x:Name="LangList"/>
+                        <StackPanel x:Name="LangList">
+                            <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
-            </FlipViewItem>
+            </Grid>
 
             <!-- 1. hero: rendered 3D Lumia 735 running Lumen -->
-            <FlipViewItem>
+            <Grid Visibility="Collapsed">
                 <Grid Background="Black">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <MediaElement x:Name="HeroVideo" Source="ms-appx:///Assets/Lumia735.mp4" AutoPlay="False" IsLooping="True"
+                    <MediaElement x:Name="HeroVideo" AutoPlay="False" IsLooping="True"
                                   IsMuted="True" AreTransportControlsEnabled="False" Stretch="Uniform"/>
                     <StackPanel x:Name="HeroText" Grid.Row="1" Padding="12,0,12,12">
+                        <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                         <TextBlock Text="Lumen" FontSize="34" FontWeight="SemiLight" Foreground="White"/>
                         <TextBlock x:Uid="XGeminiClaudeAndChatgptOnYourLumia" Text="Gemini, Claude and ChatGPT on your Lumia." FontSize="17" TextWrapping="Wrap" Foreground="White"/>
                         <TextBlock x:Uid="XChatTalkSnapPhotosCreateImagesAndFilesBu" Text="Chat, talk, snap photos, create images and files. Built for Windows 10 Mobile."
                                    FontSize="13" TextWrapping="Wrap" Foreground="#FFA0A0A0" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Grid>
-            </FlipViewItem>
+            </Grid>
 
             <!-- 2. features -->
-            <FlipViewItem>
+            <Grid Visibility="Collapsed">
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
                     <StackPanel x:Name="FeaturesPanel" Padding="12,18,12,24">
+                        <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                         <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="0,0,0,14"/>
                         <TextBlock x:Uid="XOneAppEveryAssistant" Text="One app, every assistant" Style="{StaticResource PageTitle}"/>
 
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Cloud.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE753;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XPickYourAi" Text="Pick your AI" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XGoogleGeminiFreeKeyAnthropicClaudeOpenai" Text="Google Gemini (free key), Anthropic Claude, OpenAI ChatGPT or any OpenAI compatible server. Switch from the top of a chat." Style="{StaticResource HintText}"/>
@@ -87,7 +93,7 @@
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Chat.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8BD;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XAskAnything" Text="Ask anything" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XAnswersStreamInWordByWordWithFreeWikiped" Text="Answers stream in word by word, with free Wikipedia lookups for fresh facts." Style="{StaticResource HintText}"/>
@@ -95,7 +101,7 @@
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Mic.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE720;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XJustTalk" Text="Just talk" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XSendAVoiceMessageAndHaveAnswersReadBackT" Text="Send a voice message, and have answers read back to you." Style="{StaticResource HintText}"/>
@@ -103,7 +109,7 @@
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Camera.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE722;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XSnapOrPickAPhoto" Text="Snap or pick a photo" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XShootWithTheCameraOrChooseFromYourGaller" Text="Shoot with the camera or choose from your gallery, then ask about it." Style="{StaticResource HintText}"/>
@@ -111,7 +117,7 @@
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/ImageSparkle.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE91B;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XCreateImagesAndFiles" Text="Create images and files" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XAskForAPictureOrADocumentAndGetItInTheCh" Text="Ask for a picture or a document and get it in the chat, ready to save or share." Style="{StaticResource HintText}"/>
@@ -119,7 +125,7 @@
                         </Grid>
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Lock.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72E;" FontSize="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XPrivateByDesign" Text="Private by design" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XChatsStayOnThisPhoneKeysSitInTheWindowsC" Text="Chats stay on this phone. Keys sit in the Windows credential locker and go only to the service you pick." Style="{StaticResource HintText}"/>
@@ -127,12 +133,13 @@
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
-            </FlipViewItem>
+            </Grid>
 
             <!-- 3. connect -->
-            <FlipViewItem>
+            <Grid Visibility="Collapsed">
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
                     <StackPanel x:Name="KeyPanel" Padding="12,18,12,24">
+                        <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                         <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="0,0,0,14"/>
                         <TextBlock x:Uid="XConnectAnAiService" Text="Connect an AI service" Style="{StaticResource PageTitle}"/>
                         <TextBlock x:Uid="XLumenTalksToTheServiceWithYourOwnApiKeyG" Text="Lumen talks to the service with your own API key. Gemini has a free key that takes a minute, no credit card."
@@ -154,12 +161,13 @@
                         <TextBlock x:Uid="XYouCanAlsoSkipThisAndAddKeysLaterInSetti" Text="You can also skip this and add keys later in Settings." Style="{StaticResource HintText}"/>
                     </StackPanel>
                 </ScrollViewer>
-            </FlipViewItem>
+            </Grid>
 
             <!-- 4. theme -->
-            <FlipViewItem>
+            <Grid Visibility="Collapsed">
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
                     <StackPanel x:Name="ThemePanel" Padding="12,18,12,24">
+                        <StackPanel.ChildrenTransitions><TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="40"/></TransitionCollection></StackPanel.ChildrenTransitions>
                         <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="0,0,0,14"/>
                         <TextBlock x:Uid="XMakeItYours" Text="Make it yours" Style="{StaticResource PageTitle}"/>
                         <ToggleSwitch x:Uid="XLightThemeHeader" x:Name="ThemeToggle" Header="Light theme" Toggled="ThemeToggle_Toggled"/>
@@ -185,8 +193,8 @@
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
-            </FlipViewItem>
-        </FlipView>
+            </Grid>
+        </Grid>
 
         <!-- Bottom bar: page dots, skip, next (W10M setup style) -->
         <Grid Grid.Row="1" Background="{StaticResource ChromeBrush}" Padding="12,8,12,8">
@@ -206,7 +214,7 @@
             <Button x:Name="NextButton" Grid.Column="2" Click="Next_Click" Style="{StaticResource AccentButton}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Uid="XNext" x:Name="NextText" Text="Next"/>
-                    <BitmapIcon x:Name="NextIcon" UriSource="ms-appx:///Assets/Icons/ChevronRight.png" Width="14" Height="14" Margin="8,1,0,0" Foreground="White"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE76C;" FontSize="14" x:Name="NextIcon" Margin="8,1,0,0" Foreground="White"/>
                 </StackPanel>
             </Button>
         </Grid>
