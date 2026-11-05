@@ -5,7 +5,7 @@ namespace Lumen.Core
     /// <summary>User-facing runtime strings, from Strings/*/Resources.resw (generated).</summary>
     public static class S
     {
-        public const string AppVersion = "1.3";
+        public const string AppVersion = "1.4";
 
         /// <summary>Model-facing, kept in English on purpose: the model replies in the user's language anyway.</summary>
         public const string DefaultSystemPrompt =
@@ -114,5 +114,21 @@ namespace Lumen.Core
         public static string AskImagePrefix { get { return Get("AskImagePrefix"); } }
         public static string AskFilePrefix { get { return Get("AskFilePrefix"); } }
         public static string Retry { get { return Get("Retry"); } }
+        public static string SettingsTitle { get { return Get("SettingsTitle"); } }
+        public static string SecAi { get { return Get("SecAi"); } }
+        public static string SecLook { get { return Get("SecLook"); } }
+        public static string SecAssistant { get { return Get("SecAssistant"); } }
+        public static string SecStorage { get { return Get("SecStorage"); } }
+        public static string SecAbout { get { return Get("SecAbout"); } }
+        public static string EndpointHint { get { return Get("EndpointHint"); } }
+        public static string EndpointCustomHint { get { return Get("EndpointCustomHint"); } }
+        public static string HintGemini { get { return Get("HintGemini"); } }
+        public static string HintClaude { get { return Get("HintClaude"); } }
+        public static string HintOpenAI { get { return Get("HintOpenAI"); } }
+        public static string HintCustom { get { return Get("HintCustom"); } }
+        public static string ErrNoEndpoint { get { return Get("ErrNoEndpoint"); } }
+        public static string VoiceNeedsGemini { get { return Get("VoiceNeedsGemini"); } }
+        public static string Transcribing { get { return Get("Transcribing"); } }
+        public static string TranscribeFailed { get { return Get("TranscribeFailed"); } }
     }
 }

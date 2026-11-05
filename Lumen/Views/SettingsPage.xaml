@@ -6,118 +6,193 @@
     Background="{StaticResource BgBrush}">
 
     <Page.Resources>
-        <!-- Square accent tiles, Windows Phone style: white frame + check on the selected one -->
+        <!-- Square accent tiles like W10M Settings > Personalization > Colors: frame + check on the selected one -->
         <DataTemplate x:Key="SwatchTemplate" x:DataType="core:AccentPalette">
-            <Grid Width="58" Height="58" Background="{x:Bind SwatchBrush}">
-                <TextBlock Text="{x:Bind Label}" FontSize="10" Foreground="White" VerticalAlignment="Bottom" Margin="4,0,2,3" TextWrapping="Wrap"/>
+            <Grid Width="50" Height="50" Background="{x:Bind SwatchBrush}">
+                <TextBlock Text="{x:Bind Label}" FontSize="9" Foreground="White" VerticalAlignment="Bottom" Margin="3,0,2,2" TextWrapping="Wrap"/>
                 <Border BorderBrush="{StaticResource TextPrimaryBrush}" BorderThickness="3" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
-                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="16" Height="16" Foreground="White"
+                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="14" Height="14" Foreground="White"
                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
             </Grid>
         </DataTemplate>
         <Style x:Key="SwatchItem" TargetType="GridViewItem">
-            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="Margin" Value="0,0,4,4"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="MinWidth" Value="0"/>
             <Setter Property="MinHeight" Value="0"/>
         </Style>
+        <DataTemplate x:Key="ProviderTemplate" x:DataType="core:Provider">
+            <StackPanel Orientation="Horizontal">
+                <Border Width="24" Height="24" Background="{StaticResource AccentBrush}" Margin="0,0,10,0">
+                    <TextBlock Text="{x:Bind Initial}" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
     </Page.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel x:Name="Root" Padding="12,14,12,40" MaxWidth="560" HorizontalAlignment="Left">
-            <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}"/>
-            <TextBlock x:Uid="XlSettings" Text="settings" Style="{StaticResource PageTitle}"/>
-            <StackPanel Orientation="Horizontal" Margin="0,-6,0,4">
-                <BitmapIcon x:Name="KeyStateIcon" UriSource="ms-appx:///Assets/Icons/CheckCircle.png" Width="16" Height="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0"/>
-                <TextBlock x:Name="KeyStateText" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
-            </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="HeaderText" Text="SETTINGS" Style="{StaticResource AppTitle}" Margin="12,14,12,10"/>
 
-            <!-- ===== account ===== -->
-            <TextBlock x:Uid="XlAccount" Text="account" Style="{StaticResource SectionHeader}"/>
-            <PasswordBox x:Uid="XGeminiApiKeyHeader" x:Name="ApiKeyBox" Header="Gemini API key" PlaceholderText="AIza..."/>
-            <TextBlock x:Uid="XFreeFromGoogleAiStudioOrAPaidKeyForBigge" Style="{StaticResource HintText}" Text="Free from Google AI Studio, or a paid key for bigger models and image creation. Stored in the Windows credential locker."/>
-            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                <Button x:Uid="XCheckKeyContent" x:Name="VerifyButton" Content="Check key" Click="Verify_Click" Style="{StaticResource AccentButton}"/>
-                <ProgressRing x:Name="VerifyRing" Width="22" Height="22" Margin="12,0,0,0" Foreground="{StaticResource AccentBrush}"/>
-            </StackPanel>
-            <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,8,0,0"/>
-            <HyperlinkButton x:Uid="XGetAFreeKeyContent" Content="Get a free key" Click="GetKey_Click" Foreground="{StaticResource AccentBrush}" Padding="0,4"/>
-
-            <!-- ===== model ===== -->
-            <TextBlock x:Uid="XlModel" Text="model" Style="{StaticResource SectionHeader}"/>
-            <ComboBox x:Uid="XChatModelHeader" x:Name="ModelsCombo" Header="Chat model" HorizontalAlignment="Stretch" SelectionChanged="ModelsCombo_SelectionChanged">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate x:DataType="core:ModelInfo">
-                        <StackPanel Padding="0,2">
-                            <TextBlock Text="{x:Bind DisplayName}"/>
-                            <TextBlock Text="{x:Bind Id}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+        <!-- ===== home: categories, like the W10M Settings app ===== -->
+        <ScrollViewer x:Name="Home" Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="Root" Padding="0,0,0,24">
+                <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="ai">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Cloud.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Uid="XAiService" Text="AI service" FontSize="15"/>
+                            <TextBlock x:Name="KeyStateText" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
                         </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <TextBlock x:Uid="XFlashLiteIsTheFastestWithTheBiggestFreeQ" Style="{StaticResource HintText}" Margin="0,6,0,0"
-                       Text="Flash-Lite is the fastest with the biggest free quota. Check your key to list every model it can use."/>
-            <TextBlock x:Name="ImageModelText" Style="{StaticResource HintText}"/>
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="look">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Paint.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Uid="XPersonalization" Text="Personalization" FontSize="15"/>
+                            <TextBlock x:Uid="XThemeAccentColorLanguage" Text="Theme, accent color, language" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="assistant">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Sparkle.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Uid="XAssistant" Text="Assistant" FontSize="15"/>
+                            <TextBlock x:Uid="XWikipediaImagesAndFilesVoiceInstructions" Text="Wikipedia, images and files, voice, instructions" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="storage">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Storage.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Uid="XStorage" Text="Storage" FontSize="15"/>
+                            <TextBlock x:Name="UsageText" Text="..." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource ChipButton}" Click="Category_Click" Tag="about">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Info.png" Width="24" Height="24" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,2,0,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Uid="XAbout" Text="About" FontSize="15"/>
+                            <TextBlock x:Name="AboutSubtitle" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
 
-            <!-- ===== appearance ===== -->
-            <TextBlock x:Uid="XlAppearance" Text="appearance" Style="{StaticResource SectionHeader}"/>
-            <ComboBox x:Uid="XLanguageHeader" x:Name="LanguageCombo" Header="Language" HorizontalAlignment="Stretch" SelectionChanged="LanguageCombo_SelectionChanged"/>
-            <ToggleSwitch x:Uid="XLightThemeHeader" x:Name="ThemeToggle" Header="Light theme" Toggled="ThemeToggle_Toggled" Margin="0,12,0,0"/>
-            <TextBlock x:Uid="XAccentColor" Text="Accent color" Margin="0,12,0,8"/>
-            <GridView x:Name="Swatches" ItemTemplate="{StaticResource SwatchTemplate}" ItemContainerStyle="{StaticResource SwatchItem}"
-                      SelectionMode="None" IsItemClickEnabled="True" ItemClick="Swatches_ItemClick" Padding="0"
-                      ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
-            <ComboBox x:Uid="XTextSizeHeader" x:Name="TextSizeCombo" Header="Text size" Width="200" HorizontalAlignment="Left" Margin="0,8,0,0" SelectionChanged="TextSizeCombo_SelectionChanged"/>
-            <ToggleSwitch x:Uid="XAnimationsHeader" x:Name="AnimToggle" Header="Animations" Toggled="AnimToggle_Toggled" Margin="0,12,0,0"/>
+        <!-- ===== AI service ===== -->
+        <ScrollViewer x:Name="AiSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="12,0,12,32">
+                <ComboBox x:Uid="XServiceHeader" x:Name="ProviderCombo" Header="Service" HorizontalAlignment="Stretch"
+                          ItemTemplate="{StaticResource ProviderTemplate}" SelectionChanged="ProviderCombo_SelectionChanged"/>
+                <TextBlock x:Name="ProviderHint" Style="{StaticResource HintText}" Margin="0,6,0,0"/>
 
-            <!-- ===== assistant ===== -->
-            <TextBlock x:Uid="XlAssistant" Text="assistant" Style="{StaticResource SectionHeader}"/>
-            <ToggleSwitch x:Uid="XWikipediaLookupsHeader" x:Name="WikiToggle" Header="Wikipedia lookups" Toggled="WikiToggle_Toggled"/>
-            <TextBlock x:Uid="XFreeFreshFactsGoogleSearchIsnTInTheFreeP" Style="{StaticResource HintText}" Text="Free fresh facts. Google Search isn't in the free plan."/>
-            <ToggleSwitch x:Uid="XImagesAndFilesHeader" x:Name="CreativeToggle" Header="Images and files" Toggled="CreativeToggle_Toggled" Margin="0,8,0,0"/>
-            <TextBlock x:Uid="XAskForAPictureOrADocumentAndGetItInTheCh" Style="{StaticResource HintText}" Text="Ask for a picture or a document and get it in the chat"/>
-            <Grid Margin="0,12,0,0">
-                <TextBlock x:Uid="XCreativity" Text="Creativity"/>
-                <TextBlock x:Name="TempValue" HorizontalAlignment="Right" Foreground="{StaticResource AccentBrush}"/>
-            </Grid>
-            <Slider x:Name="TempSlider" Minimum="0" Maximum="2" StepFrequency="0.1" ValueChanged="TempSlider_ValueChanged"/>
-            <ComboBox x:Uid="XReadAloudVoiceHeader" x:Name="VoiceCombo" Header="Read-aloud voice" HorizontalAlignment="Stretch" SelectionChanged="VoiceCombo_SelectionChanged"/>
-            <TextBox x:Uid="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText" x:Name="PromptBox" Header="Custom instructions" AcceptsReturn="True" TextWrapping="Wrap" Height="110" Margin="0,12,0,0"
-                     PlaceholderText="Empty = default: concise answers in your language."/>
+                <PasswordBox x:Uid="XApiKeyHeader" x:Name="ApiKeyBox" Header="API key" Margin="0,12,0,0"/>
+                <HyperlinkButton x:Uid="XGetAKeyContent" x:Name="GetKeyLink" Content="Get a key" Click="GetKey_Click" Foreground="{StaticResource AccentTextBrush}" Padding="0,6"/>
 
-            <!-- ===== advanced ===== -->
-            <TextBlock x:Uid="XlAdvanced" Text="advanced" Style="{StaticResource SectionHeader}"/>
-            <TextBox x:Uid="XApiEndpointHeader" x:Name="BaseUrlBox" Header="API endpoint" IsSpellCheckEnabled="False" InputScope="Url"/>
-            <TextBlock x:Uid="XOnlyChangeItToGoThroughYourOwnProxyEGACl" Style="{StaticResource HintText}" Text="Only change it to go through your own proxy (e.g. a Cloudflare Worker)."/>
+                <TextBox x:Uid="XApiEndpointHeader" x:Name="BaseUrlBox" Header="API endpoint" IsSpellCheckEnabled="False" InputScope="Url" Margin="0,6,0,0"/>
+                <TextBlock x:Name="EndpointHint" Style="{StaticResource HintText}"/>
 
-            <!-- ===== data ===== -->
-            <TextBlock x:Uid="XlData" Text="data" Style="{StaticResource SectionHeader}"/>
-            <TextBlock x:Uid="XCalculating" x:Name="UsageText" Style="{StaticResource HintText}" Text="Calculating..."/>
-            <Button Style="{StaticResource ChipButton}" Click="DeleteAll_Click">
-                <StackPanel Orientation="Horizontal">
-                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Delete.png" Width="20" Height="20" Foreground="{StaticResource DangerBrush}" Margin="0,0,12,0"/>
-                    <TextBlock x:Uid="XDeleteAllChats" Text="Delete all chats" FontSize="17" Foreground="{StaticResource DangerBrush}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button x:Uid="XCheckKeyContent" x:Name="VerifyButton" Content="Check key" Click="Verify_Click" Style="{StaticResource AccentButton}"/>
+                    <ProgressRing x:Name="VerifyRing" Width="22" Height="22" Margin="12,0,0,0" Foreground="{StaticResource AccentBrush}"/>
                 </StackPanel>
-            </Button>
-            <Button Style="{StaticResource ChipButton}" Click="Tour_Click">
-                <StackPanel Orientation="Horizontal">
-                    <BitmapIcon UriSource="ms-appx:///Assets/Icons/Phone.png" Width="20" Height="20" Margin="0,0,12,0"/>
-                    <TextBlock x:Uid="XWelcomeTour" Text="Welcome tour" FontSize="17"/>
-                </StackPanel>
-            </Button>
+                <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,8,0,0"/>
 
-            <!-- ===== about ===== -->
-            <TextBlock x:Uid="XlAbout" Text="about" Style="{StaticResource SectionHeader}"/>
-            <Grid>
-                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                <Image Width="56" Height="56" Source="ms-appx:///Assets/Orb.png" Margin="0,0,14,0" VerticalAlignment="Top"/>
-                <StackPanel Grid.Column="1">
-                    <TextBlock x:Name="AboutTitle" FontSize="17" FontWeight="SemiBold"/>
-                    <TextBlock x:Uid="XUnofficialClientNotAffiliatedWithGoogleG" Style="{StaticResource HintText}" Text="Unofficial client, not affiliated with Google. Gemini is a trademark of Google LLC. Icons: Fluent System Icons (MIT)."/>
-                    <HyperlinkButton x:Uid="XSourceOnGithubContent" Content="Source on GitHub" NavigateUri="https://github.com/cheipstudio-cmyk/lumen-w10m" Foreground="{StaticResource AccentBrush}" Padding="0,4"/>
-                    <HyperlinkButton Content="@second_dream___" NavigateUri="https://www.instagram.com/second_dream___" Foreground="{StaticResource AccentBrush}" Padding="0,4"/>
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-    </ScrollViewer>
+                <ComboBox x:Uid="XModelHeader" x:Name="ModelsCombo" Header="Model" HorizontalAlignment="Stretch" Margin="0,12,0,0" SelectionChanged="ModelsCombo_SelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="core:ModelInfo">
+                            <StackPanel Padding="0,2">
+                                <TextBlock Text="{x:Bind DisplayName}"/>
+                                <TextBlock Text="{x:Bind Id}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock x:Uid="XCheckYourKeyToListEveryModelItCanUse" Style="{StaticResource HintText}" Margin="0,6,0,0"
+                           Text="Check your key to list every model it can use."/>
+                <TextBlock x:Name="ImageModelText" Style="{StaticResource HintText}"/>
+                <TextBlock x:Uid="XEveryKeyStaysInTheWindowsCredentialLocke" Style="{StaticResource HintText}" Margin="0,12,0,0"
+                           Text="Every key stays in the Windows credential locker on this phone. Keys for different services are kept side by side: switch any time from the model name at the top of a chat."/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== personalization ===== -->
+        <ScrollViewer x:Name="LookSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="12,0,12,32">
+                <ComboBox x:Uid="XLanguageHeader" x:Name="LanguageCombo" Header="Language" HorizontalAlignment="Stretch" SelectionChanged="LanguageCombo_SelectionChanged"/>
+                <ToggleSwitch x:Uid="XLightThemeHeader" x:Name="ThemeToggle" Header="Light theme" Toggled="ThemeToggle_Toggled" Margin="0,12,0,0"/>
+                <TextBlock x:Uid="XChooseYourAccentColor" Text="Choose your accent color" Style="{StaticResource SectionHeader}" Margin="0,14,0,8"/>
+                <GridView x:Name="Swatches" ItemTemplate="{StaticResource SwatchTemplate}" ItemContainerStyle="{StaticResource SwatchItem}"
+                          SelectionMode="None" IsItemClickEnabled="True" ItemClick="Swatches_ItemClick" Padding="0"
+                          ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+                <ComboBox x:Uid="XTextSizeHeader" x:Name="TextSizeCombo" Header="Text size" Width="200" HorizontalAlignment="Left" Margin="0,10,0,0" SelectionChanged="TextSizeCombo_SelectionChanged"/>
+                <ToggleSwitch x:Uid="XAnimationsHeader" x:Name="AnimToggle" Header="Animations" Toggled="AnimToggle_Toggled" Margin="0,12,0,0"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== assistant ===== -->
+        <ScrollViewer x:Name="AssistantSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="12,0,12,32">
+                <ToggleSwitch x:Uid="XWikipediaLookupsHeader" x:Name="WikiToggle" Header="Wikipedia lookups" Toggled="WikiToggle_Toggled"/>
+                <TextBlock x:Uid="XFreshFactsForFreeWithAnyService" Style="{StaticResource HintText}" Text="Fresh facts for free, with any service."/>
+                <ToggleSwitch x:Uid="XImagesAndFilesHeader" x:Name="CreativeToggle" Header="Images and files" Toggled="CreativeToggle_Toggled" Margin="0,8,0,0"/>
+                <TextBlock x:Uid="XAskForAPictureOrADocumentAndGetItInTheCh" Style="{StaticResource HintText}" Text="Ask for a picture or a document and get it in the chat"/>
+                <Grid Margin="0,12,0,0">
+                    <TextBlock x:Uid="XCreativity" Text="Creativity"/>
+                    <TextBlock x:Name="TempValue" HorizontalAlignment="Right" Foreground="{StaticResource AccentTextBrush}"/>
+                </Grid>
+                <Slider x:Name="TempSlider" Minimum="0" Maximum="2" StepFrequency="0.1" ValueChanged="TempSlider_ValueChanged"/>
+                <ComboBox x:Uid="XReadAloudVoiceHeader" x:Name="VoiceCombo" Header="Read-aloud voice" HorizontalAlignment="Stretch" SelectionChanged="VoiceCombo_SelectionChanged"/>
+                <TextBox x:Uid="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText" x:Name="PromptBox" Header="Custom instructions" AcceptsReturn="True" TextWrapping="Wrap" Height="110" Margin="0,12,0,0"
+                         PlaceholderText="Empty = default: concise answers in your language."/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== storage ===== -->
+        <ScrollViewer x:Name="StorageSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="0,0,0,32">
+                <TextBlock x:Name="UsageDetail" Style="{StaticResource HintText}" Margin="12,0,12,8"/>
+                <Button Style="{StaticResource ChipButton}" Click="DeleteAll_Click">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="44"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <BitmapIcon UriSource="ms-appx:///Assets/Icons/Delete.png" Width="22" Height="22" HorizontalAlignment="Left" Foreground="{StaticResource DangerBrush}"/>
+                        <TextBlock x:Uid="XDeleteAllChats" Grid.Column="1" Text="Delete all chats" FontSize="15" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== about ===== -->
+        <ScrollViewer x:Name="AboutSection" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="12,0,12,32">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                    <Image Width="56" Height="56" Source="ms-appx:///Assets/Orb.png" Margin="0,0,14,0" VerticalAlignment="Top"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock x:Name="AboutTitle" FontSize="15" FontWeight="SemiBold"/>
+                        <TextBlock x:Uid="XUnofficialClientForGeminiClaudeChatgptAn" Style="{StaticResource HintText}"
+                                   Text="Unofficial client for Gemini, Claude, ChatGPT and OpenAI compatible services. Not affiliated with Google, Anthropic or OpenAI. Icons: Fluent System Icons (MIT)."/>
+                    </StackPanel>
+                </Grid>
+                <HyperlinkButton x:Uid="XSourceOnGithubContent" Content="Source on GitHub" NavigateUri="https://github.com/cheipstudio-cmyk/lumen-w10m" Foreground="{StaticResource AccentTextBrush}" Padding="0,8"/>
+                <HyperlinkButton Content="@second_dream___" NavigateUri="https://www.instagram.com/second_dream___" Foreground="{StaticResource AccentTextBrush}" Padding="0,8"/>
+                <HyperlinkButton x:Uid="XWelcomeTourContent" Content="Welcome tour" Click="Tour_Click" Foreground="{StaticResource AccentTextBrush}" Padding="0,8"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Page>

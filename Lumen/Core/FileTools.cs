@@ -22,7 +22,7 @@ namespace Lumen.Core
     }
 
     /// <summary>
-    /// "Creative" tools exposed to Gemini: generate_image (routed to an image-capable model)
+    /// "Creative" tools exposed to the model: generate_image (routed to an image-capable model)
     /// and create_file (text files the user can save, open or share). Works the same on free and paid keys:
     /// when the key has no quota for image models, the model gets a clear reason and tells the user.
     /// </summary>
@@ -32,16 +32,35 @@ namespace Lumen.Core
         public const string FileTool = "create_file";
         private const int MaxFileChars = 200000;
 
-        public const string PromptHint =
-            "When the user asks for a picture, drawing, logo, photo or any image, call generate_image with a detailed English prompt. " +
+        public static string Hint(bool images)
+        {
+            return (images
+                ? "When the user asks for a picture, drawing, logo, photo or any image, call generate_image with a detailed English prompt. "
+                : "You cannot draw images here: if asked, say that creating images needs a Gemini or OpenAI key in Lumen settings. ") +
             "When the user asks for a document, code file, table, list or anything they will keep, call create_file with a sensible file name and the full content " +
             "(markdown .md, .txt, .csv, .html, .json or source code). After a tool succeeds, reply with one short sentence; the result is already shown to the user.";
+        }
+
+        /// <summary>Which provider draws images: the active one if it can, else any saved Gemini or OpenAI key.</summary>
+        public static string ImageProvider
+        {
+            get
+            {
+                var cur = AppSettings.Provider;
+                if (cur.Images && AppSettings.HasKeyFor(cur.Id)) return cur.Id;
+                if (AppSettings.HasKeyFor("gemini")) return "gemini";
+                if (AppSettings.HasKeyFor("openai")) return "openai";
+                return null;
+            }
+        }
+
+        public static bool CanDrawImages { get { return ImageProvider != null; } }
 
         // ------------------------------------------------------------ declarations
 
-        public static IEnumerable<JsonObject> Declarations()
+        public static IEnumerable<JsonObject> Declarations(bool images)
         {
-            yield return Decl(ImageTool, "Create an image from a text description and show it to the user.",
+            if (images) yield return Decl(ImageTool, "Create an image from a text description and show it to the user.",
                 Prop("prompt", "Detailed description of the image to create, in English."), new[] { "prompt" });
 
             var fileProps = Prop("filename", "File name with extension, e.g. 'shopping-list.md' or 'script.py'.");
@@ -111,27 +130,35 @@ namespace Lumen.Core
 
         // ------------------------------------------------------------ generate_image
 
-        public static async Task<Tuple<string, Artifact>> GenerateImageAsync(GeminiClient client, string apiKey, string baseUrl, JsonObject args, CancellationToken ct)
+        public static async Task<Tuple<string, Artifact>> GenerateImageAsync(JsonObject args, CancellationToken ct)
         {
             var prompt = args.GetNamedString("prompt", "").Trim();
             if (prompt.Length == 0) return Tuple.Create<string, Artifact>("Empty prompt.", null);
 
-            var model = AppSettings.ImageModel;
+            var provider = ImageProvider;
+            if (provider == null)
+                return Tuple.Create<string, Artifact>("Image generation is not available: tell the user that it needs a Gemini or OpenAI key in Lumen settings.", null);
+            var apiKey = AppSettings.KeyFor(provider);
+            var baseUrl = AppSettings.BaseUrlFor(provider);
+
+            var model = AppSettings.ImageModelFor(provider);
             if (string.IsNullOrEmpty(model))
             {
                 // Discover once: which image-capable models does this key see?
-                try { await client.ListModelsAsync(apiKey, baseUrl, ct); } catch (OperationCanceledException) { throw; } catch (Exception) { }
-                model = AppSettings.ImageModel;
+                try { await Ai.ListModelsAsync(provider, apiKey, baseUrl, ct); } catch (OperationCanceledException) { throw; } catch (Exception) { }
+                model = AppSettings.ImageModelFor(provider);
             }
             if (string.IsNullOrEmpty(model))
             {
                 return Tuple.Create<string, Artifact>(
-                    "Image generation failed: this API key has no image-capable Gemini model. Tell the user in one sentence that creating images needs a Gemini API key with access to an image model (usually a paid plan).", null);
+                    "Image generation failed: this API key has no image model. Tell the user in one sentence that creating images needs a key with access to an image model (usually a paid plan).", null);
             }
 
             try
             {
-                var img = await client.GenerateImageAsync(apiKey, baseUrl, model, prompt, ct);
+                var img = provider == "openai"
+                    ? await OpenAIClient.GenerateImageAsync(apiKey, baseUrl, model, prompt, ct)
+                    : await GeminiClient.Shared.GenerateImageAsync(apiKey, baseUrl, model, prompt, ct);
                 if (img == null)
                 {
                     return Tuple.Create<string, Artifact>("The image model answered without an image. Tell the user briefly and suggest rephrasing.", null);

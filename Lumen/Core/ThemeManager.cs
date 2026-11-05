@@ -125,6 +125,9 @@ namespace Lumen.Core
             }
         }
 
+        public static Color Darken(Color c, double t) { return Mix(c, Hex(0xFF000000), t); }
+        public static Color Lighten(Color c, double t) { return Mix(c, Hex(0xFFFFFFFF), t); }
+
         private static Color Mix(Color a, Color b, double t)
         {
             return Color.FromArgb(255,
@@ -142,20 +145,23 @@ namespace Lumen.Core
             var black = Hex(0xFF000000);
             var white = Hex(0xFFFFFFFF);
 
+            // Windows 10 Mobile system palette (ChromeLow/Medium/High, BaseLow...).
             SetBrush(res, "BgBrush", light ? white : black);
-            SetBrush(res, "SurfaceBrush", light ? Hex(0xFFF0F0F0) : Hex(0xFF1F1F1F));
-            SetBrush(res, "Surface2Brush", light ? Hex(0xFFE2E2E2) : Hex(0xFF2B2B2B));
-            SetBrush(res, "PaneBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF171717));
-            SetBrush(res, "GlassBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF171717));
-            SetBrush(res, "StrokeBrush", light ? Hex(0x33000000) : Hex(0x40FFFFFF));
-            SetBrush(res, "HighlightBrush", light ? Hex(0x14000000) : Hex(0x14FFFFFF));
+            SetBrush(res, "ChromeBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF1F1F1F));
+            SetBrush(res, "PaneBrush", light ? Hex(0xFFE6E6E6) : Hex(0xFF2B2B2B));
+            SetBrush(res, "SurfaceBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF1F1F1F));
+            SetBrush(res, "Surface2Brush", light ? Hex(0xFFE6E6E6) : Hex(0xFF2B2B2B));
+            SetBrush(res, "GlassBrush", light ? Hex(0xFFF2F2F2) : Hex(0xFF1F1F1F));
+            SetBrush(res, "StrokeBrush", light ? Hex(0x33000000) : Hex(0x33FFFFFF));
+            SetBrush(res, "HighlightBrush", light ? Hex(0x19000000) : Hex(0x19FFFFFF));
             SetBrush(res, "TextPrimaryBrush", light ? black : white);
-            SetBrush(res, "TextSecondaryBrush", light ? Hex(0xFF6B6B6B) : Hex(0xFF9A9A9A));
+            SetBrush(res, "TextSecondaryBrush", light ? Hex(0xFF767676) : Hex(0xFFA0A0A0));
             SetBrush(res, "AccentBrush", accent);
             SetBrush(res, "AccentSoftBrush", Color.FromArgb(0x33, accent.R, accent.G, accent.B));
-            // Messaging-style bubbles: yours in the accent, Lumen's in a deeper shade of it.
+            SetBrush(res, "AccentTextBrush", light ? Darken(accent, 0.15) : Lighten(accent, 0.25));
+            // Messaging bubbles: yours in the accent, Lumen's in the system grey.
             SetBrush(res, "UserBubbleSolid", accent);
-            SetBrush(res, "ModelBubbleSolid", Mix(accent, black, light ? 0.18 : 0.55));
+            SetBrush(res, "ModelBubbleSolid", light ? Hex(0xFFE6E6E6) : Hex(0xFF333333));
 
             SetGradient(res, "AccentGradient", accent, accent, accent);
             SetGradient(res, "UserBubbleBrush", accent, accent, accent);

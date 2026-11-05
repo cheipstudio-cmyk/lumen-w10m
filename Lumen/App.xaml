@@ -9,21 +9,23 @@
 
             <!-- Palette. ThemeManager recolours these brush objects in place (dark/light, accent). -->
             <SolidColorBrush x:Key="BgBrush" Color="#FF000000"/>
+            <SolidColorBrush x:Key="ChromeBrush" Color="#FF1F1F1F"/>
+            <SolidColorBrush x:Key="PaneBrush" Color="#FF2B2B2B"/>
             <SolidColorBrush x:Key="SurfaceBrush" Color="#FF1F1F1F"/>
             <SolidColorBrush x:Key="Surface2Brush" Color="#FF2B2B2B"/>
-            <SolidColorBrush x:Key="GlassBrush" Color="#FF171717"/>
-            <SolidColorBrush x:Key="PaneBrush" Color="#FF171717"/>
-            <SolidColorBrush x:Key="StrokeBrush" Color="#40FFFFFF"/>
-            <SolidColorBrush x:Key="HighlightBrush" Color="#14FFFFFF"/>
+            <SolidColorBrush x:Key="GlassBrush" Color="#FF1F1F1F"/>
+            <SolidColorBrush x:Key="StrokeBrush" Color="#33FFFFFF"/>
+            <SolidColorBrush x:Key="HighlightBrush" Color="#19FFFFFF"/>
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF"/>
-            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF9A9A9A"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFA0A0A0"/>
             <SolidColorBrush x:Key="AccentBrush" Color="#FF1BA1E2"/>
             <SolidColorBrush x:Key="AccentSoftBrush" Color="#331BA1E2"/>
+            <SolidColorBrush x:Key="AccentTextBrush" Color="#FF54B9EA"/>
             <SolidColorBrush x:Key="UserBubbleSolid" Color="#FF1BA1E2"/>
-            <SolidColorBrush x:Key="ModelBubbleSolid" Color="#FF0C4866"/>
-            <SolidColorBrush x:Key="DangerBrush" Color="#FFFF6B5E"/>
+            <SolidColorBrush x:Key="ModelBubbleSolid" Color="#FF333333"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#FFE81123"/>
 
-            <!-- Kept as gradients for compatibility, recoloured flat by ThemeManager (Metro has no gradients). -->
+            <!-- Kept for compatibility, recoloured flat by ThemeManager. -->
             <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#FF1BA1E2" Offset="0"/>
                 <GradientStop Color="#FF1BA1E2" Offset="0.5"/>
@@ -36,176 +38,125 @@
             </LinearGradientBrush>
 
             <Style TargetType="MenuFlyoutItem">
-                <Setter Property="Padding" Value="16,13,20,13"/>
+                <Setter Property="Padding" Value="14,12,20,12"/>
                 <Setter Property="FontSize" Value="15"/>
             </Style>
             <Style TargetType="ToggleMenuFlyoutItem">
-                <Setter Property="Padding" Value="16,13,20,13"/>
+                <Setter Property="Padding" Value="14,12,20,12"/>
                 <Setter Property="FontSize" Value="15"/>
             </Style>
 
-            <!-- Metro page header: small app name, big light title -->
+            <!-- Windows 10 Mobile page header: small caps title under the status bar (Settings, Store...) -->
             <Style x:Key="AppTitle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="15"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="CharacterSpacing" Value="40"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
             <Style x:Key="PageTitle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="44"/>
-                <Setter Property="FontWeight" Value="Light"/>
-                <Setter Property="Margin" Value="-2,-6,0,12"/>
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontWeight" Value="SemiLight"/>
+                <Setter Property="Margin" Value="0,0,0,10"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
             </Style>
 
-            <!-- Metro tilt: the pressed element leans towards the finger -->
-            <Style x:Key="TileButton" TargetType="Button">
-                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                <Setter Property="VerticalAlignment" Value="Stretch"/>
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                <Setter Property="Padding" Value="10"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Grid x:Name="Root" Background="{TemplateBinding Background}">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <Storyboard><PointerUpThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <Storyboard><PointerUpThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <Storyboard><PointerDownThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="Disabled">
-                                            <VisualState.Setters><Setter Target="Root.Opacity" Value="0.4"/></VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                                <ContentPresenter Margin="{TemplateBinding Padding}"
-                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                  Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"/>
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            <!-- Flat control with the system pressed highlight (no tilt, like W10M lists and buttons) -->
+            <ControlTemplate x:Key="FlatButtonTemplate" TargetType="Button">
+                <Grid x:Name="Root" Background="{TemplateBinding Background}">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal"/>
+                            <VisualState x:Name="PointerOver"/>
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters><Setter Target="Press.Opacity" Value="1"/></VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters><Setter Target="Root.Opacity" Value="0.4"/></VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                    <ContentPresenter Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"/>
+                    <Rectangle x:Name="Press" Fill="{StaticResource HighlightBrush}" Opacity="0" IsHitTestVisible="False"/>
+                </Grid>
+            </ControlTemplate>
 
-            <!-- Flat list row with tilt (language list, settings links) -->
+            <!-- Full-width list row: pane items, settings categories, suggestions -->
             <Style x:Key="ChipButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                <Setter Property="Padding" Value="0,10"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="12,10"/>
                 <Setter Property="Margin" Value="0"/>
+                <Setter Property="MinHeight" Value="48"/>
                 <Setter Property="FontSize" Value="15"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Grid x:Name="Root" Background="{TemplateBinding Background}">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <Storyboard><PointerUpThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <Storyboard><PointerUpThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <Storyboard><PointerDownThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="Disabled">
-                                            <VisualState.Setters><Setter Target="Root.Opacity" Value="0.4"/></VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                                <ContentPresenter Margin="{TemplateBinding Padding}"
-                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                  VerticalAlignment="Center"
-                                                  Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"/>
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
+                <Setter Property="Template" Value="{StaticResource FlatButtonTemplate}"/>
             </Style>
 
-            <!-- Rectangular accent button (Metro) -->
-            <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource TileButton}">
+            <!-- Kept name: square flat tile -->
+            <Style x:Key="TileButton" TargetType="Button" BasedOn="{StaticResource ChipButton}">
+                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+
+            <!-- Primary button: accent fill, white text -->
+            <Style x:Key="AccentButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                <Setter Property="Foreground" Value="White"/>
                 <Setter Property="HorizontalAlignment" Value="Left"/>
-                <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
-                <Setter Property="Padding" Value="18,9"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="20,7"/>
+                <Setter Property="MinHeight" Value="34"/>
+                <Setter Property="MinWidth" Value="110"/>
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="Template" Value="{StaticResource FlatButtonTemplate}"/>
             </Style>
 
-            <!-- Small round icon button for in-content actions -->
+            <!-- 48x48 chrome icon button (hamburger, composer, header actions) -->
             <Style x:Key="IconButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Width" Value="44"/>
-                <Setter Property="Height" Value="44"/>
+                <Setter Property="Width" Value="48"/>
+                <Setter Property="Height" Value="48"/>
                 <Setter Property="Padding" Value="0"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Root" Background="{TemplateBinding Background}" CornerRadius="22">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <Storyboard><PointerUpThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver"/>
-                                        <VisualState x:Name="Pressed">
-                                            <Storyboard><PointerDownThemeAnimation TargetName="Root"/></Storyboard>
-                                        </VisualState>
-                                        <VisualState x:Name="Disabled">
-                                            <VisualState.Setters><Setter Target="Root.Opacity" Value="0.35"/></VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Template" Value="{StaticResource FlatButtonTemplate}"/>
             </Style>
 
-            <!-- Square accent icon tile -->
+            <!-- Accent square behind an icon (onboarding features, about) -->
             <Style x:Key="IconBadge" TargetType="Border">
-                <Setter Property="Width" Value="44"/>
-                <Setter Property="Height" Value="44"/>
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="40"/>
                 <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
                 <Setter Property="VerticalAlignment" Value="Top"/>
                 <Setter Property="Margin" Value="0,0,14,0"/>
             </Style>
 
+            <!-- Group title inside a settings page -->
             <Style x:Key="SectionHeader" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="FontWeight" Value="SemiLight"/>
-                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-                <Setter Property="Margin" Value="0,26,0,6"/>
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="Margin" Value="0,22,0,6"/>
             </Style>
 
             <Style x:Key="CardTitle" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="17"/>
+                <Setter Property="FontSize" Value="15"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             </Style>
 
             <Style x:Key="HintText" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="13.5"/>
+                <Setter Property="FontSize" Value="13"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 <Setter Property="TextWrapping" Value="Wrap"/>
                 <Setter Property="Margin" Value="0,2,0,6"/>

@@ -46,18 +46,9 @@ namespace Lumen.Core
     {
         public static readonly GeminiClient Shared = new GeminiClient();
 
-        private readonly HttpClient _http;
+        private static HttpClient _http { get { return Net.Http; } }
 
-        public GeminiClient()
-        {
-            var filter = new HttpBaseProtocolFilter { AllowUI = false };
-            filter.CacheControl.ReadBehavior = HttpCacheReadBehavior.MostRecent;
-            filter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache;
-            _http = new HttpClient(filter);
-            _http.DefaultRequestHeaders.UserAgent.TryParseAdd("Lumen/1.0 (Windows 10 Mobile)");
-        }
-
-        public void Dispose() { _http.Dispose(); }
+        public void Dispose() { }
 
         // ---------------------------------------------------------------- models
 
@@ -102,7 +93,7 @@ namespace Lumen.Core
                 .ThenByDescending(i => !i.Contains("preview"))
                 .ThenByDescending(i => i, StringComparer.Ordinal)
                 .FirstOrDefault();
-            AppSettings.ImageModel = best ?? "";
+            AppSettings.SetImageModelFor("gemini", best ?? "");
 
             return result
                 .OrderByDescending(m => m.Id.EndsWith("-latest"))
@@ -138,9 +129,11 @@ namespace Lumen.Core
             IList<ChatMessage> history, Action<string> onDelta, Action<string> onStatus, Action<Artifact> onArtifact, CancellationToken ct)
         {
             var contents = await BuildContentsAsync(history);
-            var system = systemPrompt + "\n\n" + DateLine();
-            if (tools.Wikipedia) system += "\n" + WikipediaClient.PromptHint;
-            if (tools.Creative) system += "\n" + FileTools.PromptHint;
+            var system = ToolRunner.SystemPrompt(systemPrompt, tools);
+            // Text from a new tool round starts on its own paragraph.
+            bool sep = false, any = false;
+            var raw = onDelta;
+            onDelta = t => { if (sep && any) raw("\n\n"); sep = false; any = true; raw(t); };
             var result = new StreamResult();
 
             for (int round = 0; round <= MaxToolRounds; round++)
@@ -150,7 +143,8 @@ namespace Lumen.Core
                 var turn = new TurnState();
                 await StreamOnceAsync(apiKey, baseUrl, model, body, turn, onDelta, result, ct);
 
-                if (turn.Calls.Count == 0) break;
+                if (turn.Calls.Count == 0 || round == MaxToolRounds) break;
+                sep = true;
 
                 // Echo the model turn verbatim (Gemini 3 needs its thought signatures back), then the results.
                 var modelTurn = new JsonObject();
@@ -163,31 +157,7 @@ namespace Lumen.Core
                 {
                     var name = call.GetNamedString("name", "");
                     var args = call.GetNamedObject("args", new JsonObject());
-                    string output;
-                    if (name == WikipediaClient.ToolName)
-                    {
-                        var query = args.GetNamedString("query", "");
-                        onStatus?.Invoke(string.Format(S.LookingUp, query));
-                        output = await WikipediaClient.SearchAsync(query, args.GetNamedString("lang", "en"), ct);
-                    }
-                    else if (name == FileTools.ImageTool)
-                    {
-                        onStatus?.Invoke(S.CreatingImage);
-                        var r = await FileTools.GenerateImageAsync(this, apiKey, baseUrl, args, ct);
-                        output = r.Item1;
-                        if (r.Item2 != null) onArtifact?.Invoke(r.Item2);
-                    }
-                    else if (name == FileTools.FileTool)
-                    {
-                        onStatus?.Invoke(S.CreatingFile);
-                        var r = await FileTools.CreateFileAsync(args);
-                        output = r.Item1;
-                        if (r.Item2 != null) onArtifact?.Invoke(r.Item2);
-                    }
-                    else
-                    {
-                        output = "Unknown function.";
-                    }
+                    var output = await ToolRunner.RunAsync(name, args, onStatus, onArtifact, ct);
 
                     var resp = new JsonObject();
                     resp["name"] = JsonValue.CreateStringValue(name);
@@ -270,12 +240,46 @@ namespace Lumen.Core
             }
         }
 
-        private static string DateLine()
+        /// <summary>
+        /// Speech to text with a free Gemini key, so voice messages also work when chatting with Claude or ChatGPT.
+        /// </summary>
+        public async Task<string> TranscribeAsync(string apiKey, string baseUrl, string wavBase64, CancellationToken ct)
         {
-            var now = DateTimeOffset.Now;
-            return "Current date and time: " + now.ToString("dddd d MMMM yyyy, HH:mm", System.Globalization.CultureInfo.InvariantCulture) +
-                   " (UTC" + (now.Offset < TimeSpan.Zero ? "-" : "+") + now.Offset.ToString("hh\\:mm") + "). " +
-                   "Your training data may be older than this date: never claim something doesn't exist yet just because you don't know it.";
+            var parts = new JsonArray();
+            parts.Add(InlinePart("audio/wav", wavBase64));
+            var ask = new JsonObject();
+            ask["text"] = JsonValue.CreateStringValue("Transcribe this voice message word for word in its original language. Reply with the transcript only, no quotes or comments.");
+            parts.Add(ask);
+            var content = new JsonObject();
+            content["role"] = JsonValue.CreateStringValue("user");
+            content["parts"] = parts;
+            var contents = new JsonArray();
+            contents.Add(content);
+            var body = new JsonObject();
+            body["contents"] = contents;
+
+            var url = baseUrl + "/v1beta/models/" + Providers.Find("gemini").DefaultModel + ":generateContent";
+            var req = new HttpRequestMessage(HttpMethod.Post, new Uri(url));
+            req.Headers.Add("x-goog-api-key", apiKey);
+            req.Content = Net.Json(body);
+            using (var resp = await _http.SendRequestAsync(req, HttpCompletionOption.ResponseContentRead).AsTask(ct))
+            {
+                var raw = await resp.Content.ReadAsStringAsync().AsTask(ct);
+                if (!resp.IsSuccessStatusCode) throw ToError((int)resp.StatusCode, raw);
+                JsonObject root;
+                if (!JsonObject.TryParse(raw, out root)) return "";
+                var sb = new StringBuilder();
+                foreach (var c in root.GetNamedArray("candidates", new JsonArray()))
+                {
+                    if (c.ValueType != JsonValueType.Object) continue;
+                    var ps = c.GetObject().GetNamedObject("content", new JsonObject()).GetNamedArray("parts", new JsonArray());
+                    foreach (var p in ps)
+                        if (p.ValueType == JsonValueType.Object && !p.GetObject().GetNamedBoolean("thought", false))
+                            sb.Append(p.GetObject().GetNamedString("text", ""));
+                    break;
+                }
+                return sb.ToString().Trim();
+            }
         }
 
         private sealed class TurnState
@@ -433,8 +437,7 @@ namespace Lumen.Core
             body["generationConfig"] = gen;
 
             var decls = new JsonArray();
-            if (tools.Wikipedia) decls.Add(WikipediaClient.Declaration());
-            if (tools.Creative) foreach (var d in FileTools.Declarations()) decls.Add(d);
+            foreach (var d in ToolRunner.Declarations(tools)) decls.Add(d);
             if (decls.Count > 0)
             {
                 var tool = new JsonObject();
@@ -483,7 +486,7 @@ namespace Lumen.Core
             if (string.IsNullOrWhiteSpace(raw) || raw.StartsWith("HTTP ")) return "";
             var t = raw.Replace("\n", " ").Trim();
             if (t.Length > 220) t = t.Substring(0, 220).TrimEnd() + "...";
-            return "\n\nGoogle: " + t;
+            return "\n\n" + AppSettings.Provider.Vendor + ": " + t;
         }
 
         /// <summary>Human-friendly message for any failure, localized.</summary>
@@ -502,7 +505,10 @@ namespace Lumen.Core
                     case 404: return S.ErrModel + Detail(g.Message);
                     case 429: return S.ErrQuota + Detail(g.Message);
                     case 500:
-                    case 503: return S.ErrBusy + Detail(g.Message);
+                    case 502:
+                    case 503:
+                    case 504:
+                    case 529: return S.ErrBusy + Detail(g.Message);
                     default: return "HTTP " + g.Status + ": " + g.Message;
                 }
             }

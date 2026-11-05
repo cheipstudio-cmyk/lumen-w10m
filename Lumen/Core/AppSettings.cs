@@ -6,11 +6,9 @@ using Windows.Storage;
 
 namespace Lumen.Core
 {
-    /// <summary>App settings. The API key lives in the Credential Locker, everything else in LocalSettings.</summary>
+    /// <summary>App settings. API keys live in the Credential Locker, everything else in LocalSettings.</summary>
     public static class AppSettings
     {
-        public const string DefaultModel = "gemini-flash-lite-latest";
-        public const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
         private const string VaultResource = "Lumen.GeminiApiKey";
         private const string VaultUser = "default";
 
@@ -28,89 +26,154 @@ namespace Lumen.Core
             Store.Values[key] = value;
         }
 
-        // ------------------------------------------------------------ key
+        // ------------------------------------------------------------ provider
 
-        private static string _cachedKey;
-
-        public static string ApiKey
+        /// <summary>Which AI service answers: gemini, anthropic, openai or custom (any OpenAI-compatible endpoint).</summary>
+        public static string ProviderId
         {
-            get
-            {
-                if (_cachedKey != null) return _cachedKey;
-                try
-                {
-                    var vault = new PasswordVault();
-                    var cred = vault.Retrieve(VaultResource, VaultUser);
-                    cred.RetrievePassword();
-                    _cachedKey = cred.Password ?? "";
-                }
-                catch (Exception)
-                {
-                    _cachedKey = "";
-                }
-                return _cachedKey;
-            }
-            set
-            {
-                var clean = (value ?? "").Trim();
-                if (clean == _cachedKey) return;
-                var vault = new PasswordVault();
-                try
-                {
-                    foreach (var c in vault.FindAllByResource(VaultResource)) vault.Remove(c);
-                }
-                catch (Exception) { }
-                if (clean.Length > 0) vault.Add(new PasswordCredential(VaultResource, VaultUser, clean));
-                _cachedKey = clean;
-            }
+            get { var p = Get("provider", "gemini"); return Providers.Find(p) != null ? p : "gemini"; }
+            set { Put("provider", value ?? "gemini"); }
         }
 
-        public static bool HasApiKey { get { return ApiKey.Length > 0; } }
+        public static Provider Provider { get { return Providers.Find(ProviderId); } }
 
-        // ------------------------------------------------------------ model
+        // Gemini keeps its pre-1.4 storage keys so existing users keep their key, model and list.
+        private static string K(string baseKey, string provider)
+        {
+            return provider == "gemini" ? baseKey : baseKey + "." + provider;
+        }
+
+        // ------------------------------------------------------------ keys (Credential Locker)
+
+        private static readonly Dictionary<string, string> _keys = new Dictionary<string, string>();
+
+        private static string VaultFor(string provider)
+        {
+            return provider == "gemini" ? VaultResource : "Lumen.Key." + provider;
+        }
+
+        public static string KeyFor(string provider)
+        {
+            string cached;
+            lock (_keys) if (_keys.TryGetValue(provider, out cached)) return cached;
+            string key = "";
+            try
+            {
+                var cred = new PasswordVault().Retrieve(VaultFor(provider), VaultUser);
+                cred.RetrievePassword();
+                key = cred.Password ?? "";
+            }
+            catch (Exception) { }
+            lock (_keys) _keys[provider] = key;
+            return key;
+        }
+
+        public static void SetKeyFor(string provider, string value)
+        {
+            var clean = (value ?? "").Trim();
+            if (clean == KeyFor(provider)) return;
+            var vault = new PasswordVault();
+            try
+            {
+                foreach (var c in vault.FindAllByResource(VaultFor(provider))) vault.Remove(c);
+            }
+            catch (Exception) { }
+            if (clean.Length > 0) vault.Add(new PasswordCredential(VaultFor(provider), VaultUser, clean));
+            lock (_keys) _keys[provider] = clean;
+        }
+
+        public static bool HasKeyFor(string provider) { return KeyFor(provider).Length > 0; }
+
+        /// <summary>Key of the active provider.</summary>
+        public static string ApiKey
+        {
+            get { return KeyFor(ProviderId); }
+            set { SetKeyFor(ProviderId, value); }
+        }
+
+        /// <summary>A custom endpoint may need no key at all (local servers); everything else does.</summary>
+        public static bool HasApiKey { get { return ApiKey.Length > 0 || (ProviderId == "custom" && HasBaseUrlFor("custom")); } }
+
+        // ------------------------------------------------------------ models
+
+        public static string ModelFor(string provider)
+        {
+            var m = Get(K("model2", provider), "");
+            if (!string.IsNullOrWhiteSpace(m)) return m;
+            var def = Providers.Find(provider).DefaultModel;
+            var list = ModelsFor(provider);
+            foreach (var x in list) if (x.Id == def) return def;
+            return list.Count > 0 ? list[0].Id : def;
+        }
+
+        public static void SetModelFor(string provider, string value) { Put(K("model2", provider), (value ?? "").Trim()); }
 
         public static string Model
         {
-            get { var m = Get("model2", DefaultModel); return string.IsNullOrWhiteSpace(m) ? DefaultModel : m; }
-            set { Put("model2", (value ?? "").Trim()); }
+            get { return ModelFor(ProviderId); }
+            set { SetModelFor(ProviderId, value); }
         }
 
-        /// <summary>Models shown in the dropdown. Seeded with the two stable aliases, replaced by the live list once the key is verified.</summary>
+        /// <summary>Models shown in the dropdown: the provider's defaults until the key is checked, then the live list.</summary>
+        public static List<ModelInfo> ModelsFor(string provider)
+        {
+            var list = new List<ModelInfo>();
+            JsonArray arr;
+            if (JsonArray.TryParse(ReadModelsFile(provider) ?? Get(K("modelsCache", provider), ""), out arr))
+            {
+                foreach (var v in arr)
+                {
+                    if (v.ValueType != JsonValueType.Object) continue;
+                    var o = v.GetObject();
+                    var id = o.GetNamedString("id", "");
+                    if (id.Length > 0) list.Add(new ModelInfo { Id = id, DisplayName = o.GetNamedString("name", id) });
+                }
+            }
+            if (list.Count == 0) list.AddRange(Providers.Find(provider).Defaults());
+            return list;
+        }
+
+        public static void SetModelsFor(string provider, List<ModelInfo> value)
+        {
+            var arr = new JsonArray();
+            foreach (var m in value)
+            {
+                var o = new JsonObject();
+                o["id"] = JsonValue.CreateStringValue(m.Id);
+                o["name"] = JsonValue.CreateStringValue(m.DisplayName ?? m.Id);
+                arr.Add(o);
+            }
+            // A file, not LocalSettings: one setting is capped at 8 KB and OpenRouter lists hundreds of models.
+            try
+            {
+                System.IO.File.WriteAllText(ModelsPath(provider), arr.Stringify());
+                lock (_models) _models[provider] = arr.Stringify();
+            }
+            catch (Exception) { }
+        }
+
+        private static readonly Dictionary<string, string> _models = new Dictionary<string, string>();
+
+        private static string ModelsPath(string provider)
+        {
+            return System.IO.Path.Combine(ApplicationData.Current.LocalFolder.Path, "models." + provider + ".json");
+        }
+
+        private static string ReadModelsFile(string provider)
+        {
+            string cached;
+            lock (_models) if (_models.TryGetValue(provider, out cached)) return cached;
+            string text = null;
+            try { if (System.IO.File.Exists(ModelsPath(provider))) text = System.IO.File.ReadAllText(ModelsPath(provider)); }
+            catch (Exception) { }
+            if (text != null) lock (_models) _models[provider] = text;
+            return text;
+        }
+
         public static List<ModelInfo> Models
         {
-            get
-            {
-                var list = new List<ModelInfo>();
-                JsonArray arr;
-                if (JsonArray.TryParse(Get("modelsCache", ""), out arr))
-                {
-                    foreach (var v in arr)
-                    {
-                        if (v.ValueType != JsonValueType.Object) continue;
-                        var o = v.GetObject();
-                        var id = o.GetNamedString("id", "");
-                        if (id.Length > 0) list.Add(new ModelInfo { Id = id, DisplayName = o.GetNamedString("name", id) });
-                    }
-                }
-                if (list.Count == 0)
-                {
-                    list.Add(new ModelInfo { Id = "gemini-flash-lite-latest", DisplayName = "Gemini Flash-Lite (latest)" });
-                    list.Add(new ModelInfo { Id = "gemini-flash-latest", DisplayName = "Gemini Flash (latest)" });
-                }
-                return list;
-            }
-            set
-            {
-                var arr = new JsonArray();
-                foreach (var m in value)
-                {
-                    var o = new JsonObject();
-                    o["id"] = JsonValue.CreateStringValue(m.Id);
-                    o["name"] = JsonValue.CreateStringValue(m.DisplayName ?? m.Id);
-                    arr.Add(o);
-                }
-                Put("modelsCache", arr.Stringify());
-            }
+            get { return ModelsFor(ProviderId); }
+            set { SetModelsFor(ProviderId, value); }
         }
 
         public static string ModelDisplayName
@@ -150,20 +213,29 @@ namespace Lumen.Core
             set { Put("wikipedia", value); }
         }
 
+        public static string BaseUrlFor(string provider)
+        {
+            var d = Providers.Find(provider).DefaultBaseUrl;
+            var u = Get(K("baseUrl", provider), d);
+            return string.IsNullOrWhiteSpace(u) ? d : u.Trim().TrimEnd('/');
+        }
+
+        public static void SetBaseUrlFor(string provider, string value) { Put(K("baseUrl", provider), (value ?? "").Trim()); }
+
+        public static bool HasBaseUrlFor(string provider) { return BaseUrlFor(provider).Length > 0; }
+
         public static string BaseUrl
         {
-            get { var u = Get("baseUrl", DefaultBaseUrl); return string.IsNullOrWhiteSpace(u) ? DefaultBaseUrl : u.Trim().TrimEnd('/'); }
-            set { Put("baseUrl", (value ?? "").Trim()); }
+            get { return BaseUrlFor(ProviderId); }
+            set { SetBaseUrlFor(ProviderId, value); }
         }
 
         /// <summary>Image-capable model used by the generate_image tool (auto-picked from the key's model list).</summary>
-        public static string ImageModel
-        {
-            get { return Get("imageModel", ""); }
-            set { Put("imageModel", value ?? ""); }
-        }
+        public static string ImageModelFor(string provider) { return Get(K("imageModel", provider), ""); }
 
-        /// <summary>Let Gemini create images and files on request.</summary>
+        public static void SetImageModelFor(string provider, string value) { Put(K("imageModel", provider), value ?? ""); }
+
+        /// <summary>Let the assistant create images and files on request.</summary>
         public static bool Creative
         {
             get { return Get("creative", true); }

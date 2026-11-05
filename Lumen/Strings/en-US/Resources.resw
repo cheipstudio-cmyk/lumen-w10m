@@ -19,24 +19,31 @@
   <data name="DeleteAllTitle" xml:space="preserve"><value>Delete all chats?</value></data>
   <data name="Done" xml:space="preserve"><value>Done</value></data>
   <data name="EditResend" xml:space="preserve"><value>Edit and resend</value></data>
+  <data name="EndpointCustomHint" xml:space="preserve"><value>Base URL of an OpenAI compatible API: OpenRouter, Groq, Mistral, DeepSeek, LM Studio...</value></data>
+  <data name="EndpointHint" xml:space="preserve"><value>Leave as is, or point it to your own proxy.</value></data>
   <data name="ErrBadRequest" xml:space="preserve"><value>The request was rejected.</value></data>
-  <data name="ErrBlocked" xml:space="preserve"><value>The answer was blocked by Google's safety filters. Try rephrasing.</value></data>
-  <data name="ErrBusy" xml:space="preserve"><value>Google's servers are busy. Try again in a moment.</value></data>
+  <data name="ErrBlocked" xml:space="preserve"><value>The answer was blocked by the safety filters. Try rephrasing.</value></data>
+  <data name="ErrBusy" xml:space="preserve"><value>The service is busy. Try again in a moment.</value></data>
   <data name="ErrEmpty" xml:space="preserve"><value>Empty answer. Try again.</value></data>
   <data name="ErrGeneric" xml:space="preserve"><value>Something went wrong.</value></data>
   <data name="ErrKey" xml:space="preserve"><value>Invalid or missing API key. Check it in Settings.</value></data>
   <data name="ErrModel" xml:space="preserve"><value>This model isn't available for your key. Pick another one in Settings.</value></data>
   <data name="ErrNetwork" xml:space="preserve"><value>No connection. Check mobile data or Wi-Fi.</value></data>
-  <data name="ErrQuota" xml:space="preserve"><value>Free quota reached. Wait a minute, or switch to Flash-Lite in Settings.</value></data>
+  <data name="ErrNoEndpoint" xml:space="preserve"><value>Enter the API endpoint first.</value></data>
+  <data name="ErrQuota" xml:space="preserve"><value>Quota reached for this key. Wait a minute, or pick a lighter model from the top of the chat.</value></data>
   <data name="ErrTls" xml:space="preserve"><value>Secure connection failed. The phone's certificates may be too old: set a proxy URL in Settings &gt; Advanced.</value></data>
   <data name="FilePreview" xml:space="preserve"><value>File: {0}</value></data>
   <data name="FileReady" xml:space="preserve"><value>File ready: {0}</value></data>
   <data name="GreetAfternoon" xml:space="preserve"><value>Good afternoon</value></data>
   <data name="GreetEvening" xml:space="preserve"><value>Good evening</value></data>
   <data name="GreetMorning" xml:space="preserve"><value>Good morning</value></data>
+  <data name="HintClaude" xml:space="preserve"><value>Paid key from the Anthropic Console. Great at writing and reasoning. Voice messages work too if you also add a free Gemini key.</value></data>
+  <data name="HintCustom" xml:space="preserve"><value>Any server that speaks the OpenAI API: OpenRouter, Groq, Mistral, DeepSeek or a model on your PC.</value></data>
+  <data name="HintGemini" xml:space="preserve"><value>Free key from Google AI Studio in a minute, no credit card. Understands voice messages; a paid key also draws images.</value></data>
+  <data name="HintOpenAI" xml:space="preserve"><value>Paid key from the OpenAI platform. GPT models, plus image creation with gpt-image. Voice messages work with a free Gemini key too.</value></data>
   <data name="ImageCreated" xml:space="preserve"><value>Image created</value></data>
   <data name="ImageError" xml:space="preserve"><value>Couldn't load the photo</value></data>
-  <data name="ImageModelNone" xml:space="preserve"><value>Image creation: no image model found for this key yet. Check the key to look again.</value></data>
+  <data name="ImageModelNone" xml:space="preserve"><value>Image creation needs a Gemini or OpenAI key.</value></data>
   <data name="ImageModelUses" xml:space="preserve"><value>Image creation uses {0}. Free keys usually have no quota for it.</value></data>
   <data name="ImageOnly" xml:space="preserve"><value>Photo</value></data>
   <data name="ImageReady" xml:space="preserve"><value>Image ready</value></data>
@@ -71,7 +78,13 @@
   <data name="Retry" xml:space="preserve"><value>Retry</value></data>
   <data name="Saved" xml:space="preserve"><value>Saved</value></data>
   <data name="SavedFile" xml:space="preserve"><value>Saved {0}</value></data>
+  <data name="SecAbout" xml:space="preserve"><value>About</value></data>
+  <data name="SecAi" xml:space="preserve"><value>AI service</value></data>
+  <data name="SecAssistant" xml:space="preserve"><value>Assistant</value></data>
+  <data name="SecLook" xml:space="preserve"><value>Personalization</value></data>
+  <data name="SecStorage" xml:space="preserve"><value>Storage</value></data>
   <data name="SelectText" xml:space="preserve"><value>Select text</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
   <data name="Share" xml:space="preserve"><value>Share</value></data>
   <data name="Small" xml:space="preserve"><value>Small</value></data>
   <data name="Start" xml:space="preserve"><value>Start</value></data>
@@ -83,93 +96,84 @@
   <data name="Suggest4" xml:space="preserve"><value>Plan a perfect day trip, ask me where I live</value></data>
   <data name="SystemDefault" xml:space="preserve"><value>System default</value></data>
   <data name="TooShort" xml:space="preserve"><value>Hold on a bit longer, that was too short</value></data>
+  <data name="TranscribeFailed" xml:space="preserve"><value>Couldn't turn the voice message into text. Try again or type it.</value></data>
+  <data name="Transcribing" xml:space="preserve"><value>Turning your voice into text...</value></data>
   <data name="Truncated" xml:space="preserve"><value>Answer cut off: maximum length reached.</value></data>
   <data name="Unpin" xml:space="preserve"><value>Unpin</value></data>
   <data name="Unpinned" xml:space="preserve"><value>Unpinned</value></data>
   <data name="Verifying" xml:space="preserve"><value>Checking your key...</value></data>
+  <data name="VoiceNeedsGemini" xml:space="preserve"><value>This service can't hear audio. Add a free Gemini key in Settings and Lumen will turn your voice into text.</value></data>
   <data name="VoiceOnly" xml:space="preserve"><value>Voice message</value></data>
-  <data name="XAccentColor.Text" xml:space="preserve"><value>Accent color</value></data>
-  <data name="XAddYourFreeApiKey.Text" xml:space="preserve"><value>Add your free API key</value></data>
+  <data name="XAbout.Text" xml:space="preserve"><value>About</value></data>
+  <data name="XAddAKeyForGeminiFreeClaudeOrChatgptInSet.Text" xml:space="preserve"><value>Add a key for Gemini (free), Claude or ChatGPT in Settings.</value></data>
+  <data name="XAiService.Text" xml:space="preserve"><value>AI service</value></data>
   <data name="XAnimationsHeader.Header" xml:space="preserve"><value>Animations</value></data>
-  <data name="XAnswersStreamInWordByWordAndGeminiChecks.Text" xml:space="preserve"><value>Answers stream in word by word, and Gemini checks Wikipedia for fresh facts.</value></data>
+  <data name="XAnswersStreamInWordByWordWithFreeWikiped.Text" xml:space="preserve"><value>Answers stream in word by word, with free Wikipedia lookups for fresh facts.</value></data>
   <data name="XApiEndpointHeader.Header" xml:space="preserve"><value>API endpoint</value></data>
+  <data name="XApiKeyHeader.Header" xml:space="preserve"><value>API key</value></data>
   <data name="XAskAnything.Text" xml:space="preserve"><value>Ask anything</value></data>
   <data name="XAskForAPictureOrADocumentAndGetItInTheCh.Text" xml:space="preserve"><value>Ask for a picture or a document and get it in the chat</value></data>
-  <data name="XAskForAPictureOrADocumentLumenPicksTheRi.Text" xml:space="preserve"><value>Ask for a picture or a document: Lumen picks the right model and hands you the result to save or share.</value></data>
-  <data name="XAskLumenPlaceholderText.PlaceholderText" xml:space="preserve"><value>Ask Lumen</value></data>
-  <data name="XCalculating.Text" xml:space="preserve"><value>Calculating...</value></data>
-  <data name="XChatModelHeader.Header" xml:space="preserve"><value>Chat model</value></data>
+  <data name="XAssistant.Text" xml:space="preserve"><value>Assistant</value></data>
   <data name="XChatTalkSnapPhotosCreateImagesAndFilesBu.Text" xml:space="preserve"><value>Chat, talk, snap photos, create images and files. Built for Windows 10 Mobile.</value></data>
-  <data name="XChatsStayOnThisPhoneYourKeySitsInTheWind.Text" xml:space="preserve"><value>Chats stay on this phone. Your key sits in the Windows credential locker.</value></data>
+  <data name="XChatsStayOnThisPhoneKeysSitInTheWindowsC.Text" xml:space="preserve"><value>Chats stay on this phone. Keys sit in the Windows credential locker and go only to the service you pick.</value></data>
   <data name="XCheckKeyContent.Content" xml:space="preserve"><value>Check key</value></data>
+  <data name="XCheckYourKeyToListEveryModelItCanUse.Text" xml:space="preserve"><value>Check your key to list every model it can use.</value></data>
   <data name="XChooseFromGallery.Text" xml:space="preserve"><value>Choose from gallery</value></data>
+  <data name="XChooseYourAccentColor.Text" xml:space="preserve"><value>Choose your accent color</value></data>
   <data name="XChooseYourLanguage.Text" xml:space="preserve"><value>Choose your language</value></data>
-  <data name="XComeBackAndPasteItBelow.Text" xml:space="preserve"><value>Come back and paste it below</value></data>
-  <data name="XConnectGemini.Text" xml:space="preserve"><value>Connect Gemini</value></data>
+  <data name="XConnectAnAiService.Text" xml:space="preserve"><value>Connect an AI service</value></data>
   <data name="XCreateAFile.Text" xml:space="preserve"><value>Create a file</value></data>
   <data name="XCreateAnImage.Text" xml:space="preserve"><value>Create an image</value></data>
   <data name="XCreateImagesAndFiles.Text" xml:space="preserve"><value>Create images and files</value></data>
-  <data name="XCreateOneInAMinuteOnGoogleAiStudioThenPa.Text" xml:space="preserve"><value>Create one in a minute on Google AI Studio, then paste it in Settings. No credit card needed.</value></data>
   <data name="XCreativity.Text" xml:space="preserve"><value>Creativity</value></data>
   <data name="XDeleteAllChats.Text" xml:space="preserve"><value>Delete all chats</value></data>
   <data name="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText.Header" xml:space="preserve"><value>Custom instructions</value></data>
   <data name="XEmptyDefaultConciseAnswersInYourLanguagePlaceholderText.PlaceholderText" xml:space="preserve"><value>Empty = default: concise answers in your language.</value></data>
-  <data name="XEverythingGeminiCanDo.Text" xml:space="preserve"><value>Everything Gemini can do</value></data>
-  <data name="XFlashLiteIsTheFastestWithTheBiggestFreeQ.Text" xml:space="preserve"><value>Flash-Lite is the fastest with the biggest free quota. Check your key to list every model it can use.</value></data>
-  <data name="XFreeFreshFactsGoogleSearchIsnTInTheFreeP.Text" xml:space="preserve"><value>Free fresh facts. Google Search isn't in the free plan.</value></data>
-  <data name="XFreeFromGoogleAiStudioOrAPaidKeyForBigge.Text" xml:space="preserve"><value>Free from Google AI Studio, or a paid key for bigger models and image creation. Stored in the Windows credential locker.</value></data>
-  <data name="XGeminiApiKeyHeader.Header" xml:space="preserve"><value>Gemini API key</value></data>
-  <data name="XGetAFreeKeyContent.Content" xml:space="preserve"><value>Get a free key</value></data>
-  <data name="XGoogleGeminiBackOnYourLumia.Text" xml:space="preserve"><value>Google Gemini, back on your Lumia.</value></data>
+  <data name="XEveryKeyStaysInTheWindowsCredentialLocke.Text" xml:space="preserve"><value>Every key stays in the Windows credential locker on this phone. Keys for different services are kept side by side: switch any time from the model name at the top of a chat.</value></data>
+  <data name="XFreshFactsForFreeWithAnyService.Text" xml:space="preserve"><value>Fresh facts for free, with any service.</value></data>
+  <data name="XGeminiClaudeAndChatgptOnYourLumia.Text" xml:space="preserve"><value>Gemini, Claude and ChatGPT on your Lumia.</value></data>
+  <data name="XGetAKeyContent.Content" xml:space="preserve"><value>Get a key</value></data>
+  <data name="XGoogleGeminiFreeKeyAnthropicClaudeOpenai.Text" xml:space="preserve"><value>Google Gemini (free key), Anthropic Claude, OpenAI ChatGPT or any OpenAI compatible server. Switch from the top of a chat.</value></data>
   <data name="XImagesAndFilesHeader.Header" xml:space="preserve"><value>Images and files</value></data>
   <data name="XIsItFastOnMyLumia.Text" xml:space="preserve"><value>Is it fast on my Lumia?</value></data>
   <data name="XJustTalk.Text" xml:space="preserve"><value>Just talk</value></data>
   <data name="XLanguageHeader.Header" xml:space="preserve"><value>Language</value></data>
   <data name="XLightThemeHeader.Header" xml:space="preserve"><value>Light theme</value></data>
-  <data name="XLumenTalksToGoogleWithYourOwnGeminiApiKe.Text" xml:space="preserve"><value>Lumen talks to Google with your own Gemini API key. The free key takes a minute, no credit card. A paid key unlocks bigger models and image creation.</value></data>
+  <data name="XLumenTalksToTheServiceWithYourOwnApiKeyG.Text" xml:space="preserve"><value>Lumen talks to the service with your own API key. Gemini has a free key that takes a minute, no credit card.</value></data>
   <data name="XMakeItYours.Text" xml:space="preserve"><value>Make it yours</value></data>
+  <data name="XModelHeader.Header" xml:space="preserve"><value>Model</value></data>
+  <data name="XNewChat.Text" xml:space="preserve"><value>New chat</value></data>
+  <data name="XNext.Text" xml:space="preserve"><value>Next</value></data>
   <data name="XNoChatsYet.Text" xml:space="preserve"><value>No chats yet</value></data>
-  <data name="XOnlyChangeItToGoThroughYourOwnProxyEGACl.Text" xml:space="preserve"><value>Only change it to go through your own proxy (e.g. a Cloudflare Worker).</value></data>
+  <data name="XOneAppEveryAssistant.Text" xml:space="preserve"><value>One app, every assistant</value></data>
   <data name="XOpen.Text" xml:space="preserve"><value>Open</value></data>
-  <data name="XOpenGoogleAiStudioAndSignIn.Text" xml:space="preserve"><value>Open Google AI Studio and sign in</value></data>
-  <data name="XOpenGoogleAiStudioContent.Content" xml:space="preserve"><value>Open Google AI Studio</value></data>
-  <data name="XPasteYourKeyAizaPlaceholderText.PlaceholderText" xml:space="preserve"><value>Paste your key (AIza...)</value></data>
+  <data name="XPersonalization.Text" xml:space="preserve"><value>Personalization</value></data>
+  <data name="XPickYourAi.Text" xml:space="preserve"><value>Pick your AI</value></data>
   <data name="XPrivateByDesign.Text" xml:space="preserve"><value>Private by design</value></data>
   <data name="XReadAloudVoiceHeader.Header" xml:space="preserve"><value>Read-aloud voice</value></data>
   <data name="XSave.Text" xml:space="preserve"><value>Save</value></data>
   <data name="XSearchChatsPlaceholderText.PlaceholderText" xml:space="preserve"><value>Search chats</value></data>
   <data name="XSendAVoiceMessageAndHaveAnswersReadBackT.Text" xml:space="preserve"><value>Send a voice message, and have answers read back to you.</value></data>
+  <data name="XServiceHeader.Header" xml:space="preserve"><value>Service</value></data>
   <data name="XSetUpContent.Content" xml:space="preserve"><value>Set up</value></data>
+  <data name="XSettings.Text" xml:space="preserve"><value>Settings</value></data>
   <data name="XShare.Text" xml:space="preserve"><value>Share</value></data>
   <data name="XShootWithTheCameraOrChooseFromYourGaller.Text" xml:space="preserve"><value>Shoot with the camera or choose from your gallery, then ask about it.</value></data>
+  <data name="XSkipContent.Content" xml:space="preserve"><value>Skip</value></data>
   <data name="XSnapOrPickAPhoto.Text" xml:space="preserve"><value>Snap or pick a photo</value></data>
   <data name="XSourceOnGithubContent.Content" xml:space="preserve"><value>Source on GitHub</value></data>
+  <data name="XStorage.Text" xml:space="preserve"><value>Storage</value></data>
   <data name="XTakeAPhoto.Text" xml:space="preserve"><value>Take a photo</value></data>
-  <data name="XTapCreateApiKeyAndCopyIt.Text" xml:space="preserve"><value>Tap Create API key and copy it</value></data>
   <data name="XTextSizeHeader.Header" xml:space="preserve"><value>Text size</value></data>
-  <data name="XUnofficialClientNotAffiliatedWithGoogleG.Text" xml:space="preserve"><value>Unofficial client, not affiliated with Google. Gemini is a trademark of Google LLC. Icons: Fluent System Icons (MIT).</value></data>
+  <data name="XThemeAccentColorLanguage.Text" xml:space="preserve"><value>Theme, accent color, language</value></data>
+  <data name="XTryAsking.Text" xml:space="preserve"><value>Try asking</value></data>
+  <data name="XTypeAMessagePlaceholderText.PlaceholderText" xml:space="preserve"><value>Type a message</value></data>
+  <data name="XUnofficialClientForGeminiClaudeChatgptAn.Text" xml:space="preserve"><value>Unofficial client for Gemini, Claude, ChatGPT and OpenAI compatible services. Not affiliated with Google, Anthropic or OpenAI. Icons: Fluent System Icons (MIT).</value></data>
   <data name="XVeryLetSGo.Text" xml:space="preserve"><value>Very. Let's go!</value></data>
-  <data name="XWelcomeTour.Text" xml:space="preserve"><value>Welcome tour</value></data>
+  <data name="XWelcomeTourContent.Content" xml:space="preserve"><value>Welcome tour</value></data>
   <data name="XWhatCanIHelpWithToday.Text" xml:space="preserve"><value>What can I help with today?</value></data>
+  <data name="XWikipediaImagesAndFilesVoiceInstructions.Text" xml:space="preserve"><value>Wikipedia, images and files, voice, instructions</value></data>
   <data name="XWikipediaLookupsHeader.Header" xml:space="preserve"><value>Wikipedia lookups</value></data>
-  <data name="XYouCanAlsoSkipThisAndAddTheKeyLaterInSet.Text" xml:space="preserve"><value>You can also skip this and add the key later in Settings.</value></data>
-  <data name="XlAbout.Text" xml:space="preserve"><value>about</value></data>
-  <data name="XlAccount.Text" xml:space="preserve"><value>account</value></data>
-  <data name="XlAdvanced.Text" xml:space="preserve"><value>advanced</value></data>
-  <data name="XlAppearance.Text" xml:space="preserve"><value>appearance</value></data>
-  <data name="XlAssistant.Text" xml:space="preserve"><value>assistant</value></data>
-  <data name="XlAttachLabel.Label" xml:space="preserve"><value>attach</value></data>
-  <data name="XlChatHeader.Header" xml:space="preserve"><value>chat</value></data>
-  <data name="XlData.Text" xml:space="preserve"><value>data</value></data>
-  <data name="XlHistoryHeader.Header" xml:space="preserve"><value>history</value></data>
-  <data name="XlModel.Text" xml:space="preserve"><value>model</value></data>
-  <data name="XlModelLabel.Label" xml:space="preserve"><value>model</value></data>
-  <data name="XlNewChatLabel.Label" xml:space="preserve"><value>new chat</value></data>
-  <data name="XlNextLabel.Label" xml:space="preserve"><value>next</value></data>
-  <data name="XlSettings.Text" xml:space="preserve"><value>settings</value></data>
-  <data name="XlSettingsLabel.Label" xml:space="preserve"><value>settings</value></data>
-  <data name="XlSkipLabel.Label" xml:space="preserve"><value>skip</value></data>
-  <data name="XlVoiceLabel.Label" xml:space="preserve"><value>voice</value></data>
-  <data name="XlWelcomeTourLabel.Label" xml:space="preserve"><value>welcome tour</value></data>
+  <data name="XYouCanAlsoSkipThisAndAddKeysLaterInSetti.Text" xml:space="preserve"><value>You can also skip this and add keys later in Settings.</value></data>
   <data name="You" xml:space="preserve"><value>You: </value></data>
 </root>

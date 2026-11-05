@@ -11,8 +11,10 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Lumen.Views
 {
-    public sealed partial class SettingsPage : Page
+    public sealed partial class SettingsPage : Page, IBackAware
     {
+        private string _shownProvider;
+        private string _section;
         private System.Collections.Generic.List<AccentPalette> _swatches;
         private bool _loading;
         private List<Tuple<string, string>> _voices = new List<Tuple<string, string>>();
@@ -23,14 +25,16 @@ namespace Lumen.Views
             _swatches = ThemeManager.NewSwatches();
             Swatches.ItemsSource = _swatches;
             AboutTitle.Text = string.Format(S.AboutTitle, S.AppVersion);
+            AboutSubtitle.Text = AboutTitle.Text;
+            ProviderCombo.ItemsSource = Providers.All;
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             _loading = true;
-            ApiKeyBox.Password = AppSettings.ApiKey;
-            LoadModels();
+            ProviderCombo.SelectedIndex = Providers.All.FindIndex(p => p.Id == AppSettings.ProviderId);
+            ShowProvider(AppSettings.ProviderId);
             ThemeManager.SyncSelection(_swatches);
             ThemeToggle.IsOn = AppSettings.LightTheme;
             TextSizeCombo.ItemsSource = new List<string> { S.Small, S.Normal, S.Large };
@@ -42,16 +46,15 @@ namespace Lumen.Views
             TempSlider.Value = AppSettings.Temperature;
             TempValue.Text = AppSettings.Temperature.ToString("0.0");
             PromptBox.Text = AppSettings.CustomPrompt;
-            BaseUrlBox.Text = AppSettings.BaseUrl;
             LoadVoices();
             UpdateKeyState();
             _loading = false;
 
-            // Light entrance: just the title block.
-            for (int i = 0; i < Root.Children.Count && i < 3; i++) Fx.FadeInUp(Root.Children[i], i * 40, 14, 300);
+            ShowSection(e.Parameter as string, false);
 
             var bytes = await FileTools.UsageAsync();
             UsageText.Text = string.Format(S.StorageUsed, FormatSize(bytes));
+            UsageDetail.Text = UsageText.Text;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -68,20 +71,87 @@ namespace Lumen.Views
             return (b / (1024.0 * 1024)).ToString("0.#") + " MB";
         }
 
+        // ------------------------------------------------------------ sections (W10M Settings: list, then a page per category)
+
+        public bool HandleBack()
+        {
+            if (_section == null) return false;
+            ShowSection(null, true);
+            return true;
+        }
+
+        private void Category_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSection((string)((FrameworkElement)sender).Tag, true);
+        }
+
+        private void ShowSection(string id, bool animate)
+        {
+            SaveFields();
+            UpdateKeyState();
+            _section = id;
+            var map = new Dictionary<string, Tuple<FrameworkElement, string>>
+            {
+                { "ai", Tuple.Create<FrameworkElement, string>(AiSection, S.SecAi) },
+                { "look", Tuple.Create<FrameworkElement, string>(LookSection, S.SecLook) },
+                { "assistant", Tuple.Create<FrameworkElement, string>(AssistantSection, S.SecAssistant) },
+                { "storage", Tuple.Create<FrameworkElement, string>(StorageSection, S.SecStorage) },
+                { "about", Tuple.Create<FrameworkElement, string>(AboutSection, S.SecAbout) },
+            };
+            if (id != null && !map.ContainsKey(id)) id = _section = null;
+            Home.Visibility = id == null ? Visibility.Visible : Visibility.Collapsed;
+            foreach (var kv in map) kv.Value.Item1.Visibility = kv.Key == id ? Visibility.Visible : Visibility.Collapsed;
+            HeaderText.Text = (id == null ? S.SettingsTitle : map[id].Item2).ToUpperInvariant();
+            if (animate) Fx.FadeInUp(id == null ? (UIElement)Home : map[id].Item1, 0, 18, 260);
+        }
+
+        // ------------------------------------------------------------ AI service
+
         private void UpdateKeyState()
         {
             var ok = AppSettings.HasApiKey;
-            KeyStateIcon.UriSource = ok ? Icons.CheckCircle : Icons.Warning;
-            KeyStateText.Text = ok ? string.Format(S.KeyConnected, AppSettings.ModelDisplayName) : S.NoKeyYet;
-            ImageModelText.Text = string.IsNullOrEmpty(AppSettings.ImageModel)
-                ? S.ImageModelNone
-                : string.Format(S.ImageModelUses, AppSettings.ImageModel);
+            KeyStateText.Text = ok
+                ? AppSettings.Provider.Name + " · " + AppSettings.ModelDisplayName
+                : S.NoKeyYet;
+            var img = FileTools.ImageProvider;
+            ImageModelText.Text = img == null || string.IsNullOrEmpty(AppSettings.ImageModelFor(img))
+                ? (img == null ? S.ImageModelNone : "")
+                : string.Format(S.ImageModelUses, AppSettings.ImageModelFor(img));
+        }
+
+        /// <summary>Fills key, endpoint and models for one provider (and makes it the active one).</summary>
+        private void ShowProvider(string id)
+        {
+            var p = Providers.Find(id);
+            _shownProvider = id;
+            ApiKeyBox.Password = AppSettings.KeyFor(id);
+            ApiKeyBox.PlaceholderText = p.KeyPlaceholder;
+            BaseUrlBox.Text = AppSettings.BaseUrlFor(id);
+            BaseUrlBox.PlaceholderText = id == "custom" ? "https://openrouter.ai/api/v1" : p.DefaultBaseUrl;
+            EndpointHint.Text = id == "custom" ? S.EndpointCustomHint : S.EndpointHint;
+            GetKeyLink.Visibility = string.IsNullOrEmpty(p.KeyUrl) ? Visibility.Collapsed : Visibility.Visible;
+            ProviderHint.Text = id == "gemini" ? S.HintGemini : id == "anthropic" ? S.HintClaude : id == "openai" ? S.HintOpenAI : S.HintCustom;
+            VerifyStatus.Text = "";
+            LoadModels();
+        }
+
+        private void ProviderCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_loading) return;
+            var p = ProviderCombo.SelectedItem as Provider;
+            if (p == null || p.Id == _shownProvider) return;
+            SaveFields();
+            AppSettings.ProviderId = p.Id;
+            _loading = true;
+            ShowProvider(p.Id);
+            _loading = false;
+            UpdateKeyState();
         }
 
         private void LoadModels()
         {
-            var models = AppSettings.Models;
-            var current = AppSettings.Model;
+            var models = AppSettings.ModelsFor(_shownProvider);
+            var current = AppSettings.ModelFor(_shownProvider);
             if (!models.Any(m => m.Id == current)) models.Insert(0, new ModelInfo { Id = current, DisplayName = current });
             ModelsCombo.ItemsSource = models;
             ModelsCombo.SelectedIndex = models.FindIndex(m => m.Id == current);
@@ -121,14 +191,17 @@ namespace Lumen.Views
             }
             SaveFields();
             App.SetLanguage(code);
-            App.ReloadUi(typeof(SettingsPage));
+            App.ReloadUi(typeof(SettingsPage), "look");
         }
 
         private void SaveFields()
         {
-            AppSettings.ApiKey = ApiKeyBox.Password;
+            if (_shownProvider == null) return;
+            AppSettings.SetKeyFor(_shownProvider, ApiKeyBox.Password);
+            var url = BaseUrlBox.Text.Trim().TrimEnd('/');
+            // Saving the default as an override would pin it forever: store only real changes.
+            AppSettings.SetBaseUrlFor(_shownProvider, url == Providers.Find(_shownProvider).DefaultBaseUrl ? "" : url);
             AppSettings.CustomPrompt = PromptBox.Text.Trim();
-            AppSettings.BaseUrl = BaseUrlBox.Text;
         }
 
         private void ThemeToggle_Toggled(object sender, RoutedEventArgs e)
@@ -145,20 +218,26 @@ namespace Lumen.Views
             ThemeManager.Apply();
             SaveFields();
             // System controls follow RequestedTheme on the root frame: rebuild it.
-            App.ReloadUi(typeof(SettingsPage));
+            App.ReloadUi(typeof(SettingsPage), "look");
         }
 
         private async void GetKey_Click(object sender, RoutedEventArgs e)
         {
-            await Launcher.LaunchUriAsync(new Uri("https://aistudio.google.com/apikey"));
+            await Launcher.LaunchUriAsync(new Uri(Providers.Find(_shownProvider).KeyUrl));
         }
 
         private async void Verify_Click(object sender, RoutedEventArgs e)
         {
-            AppSettings.ApiKey = ApiKeyBox.Password;
-            if (!AppSettings.HasApiKey)
+            SaveFields();
+            var id = _shownProvider;
+            if (!AppSettings.HasKeyFor(id) && id != "custom")
             {
                 VerifyStatus.Text = S.KeyMissing;
+                return;
+            }
+            if (!AppSettings.HasBaseUrlFor(id))
+            {
+                VerifyStatus.Text = S.ErrNoEndpoint;
                 return;
             }
 
@@ -169,12 +248,11 @@ namespace Lumen.Views
             {
                 using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(25)))
                 {
-                    var baseUrl = BaseUrlBox.Text.Trim().Length > 0 ? BaseUrlBox.Text.Trim().TrimEnd('/') : AppSettings.BaseUrl;
-                    var models = await GeminiClient.Shared.ListModelsAsync(AppSettings.ApiKey, baseUrl, cts.Token);
+                    var models = await Ai.ListModelsAsync(id, AppSettings.KeyFor(id), AppSettings.BaseUrlFor(id), cts.Token);
                     if (models.Count > 0)
                     {
-                        AppSettings.Models = models;
-                        if (!models.Any(m => m.Id == AppSettings.Model)) AppSettings.Model = models[0].Id;
+                        AppSettings.SetModelsFor(id, models);
+                        if (!models.Any(m => m.Id == AppSettings.ModelFor(id))) AppSettings.SetModelFor(id, models[0].Id);
                     }
                     _loading = true;
                     LoadModels();
@@ -199,7 +277,7 @@ namespace Lumen.Views
         {
             if (_loading) return;
             var m = ModelsCombo.SelectedItem as ModelInfo;
-            if (m != null) { AppSettings.Model = m.Id; UpdateKeyState(); }
+            if (m != null) { AppSettings.SetModelFor(_shownProvider, m.Id); UpdateKeyState(); }
         }
 
         private void Swatches_ItemClick(object sender, ItemClickEventArgs e)

@@ -135,7 +135,8 @@ namespace Lumen.Core
         {
             if (Children.Count == 0)
             {
-                var brush = new SolidColorBrush(Windows.UI.Colors.White); // dots sit on the accent bubble
+                // Dots sit on the grey bubble: secondary text colour of the current theme.
+                var brush = new SolidColorBrush(AppSettings.LightTheme ? Windows.UI.Color.FromArgb(255, 0x76, 0x76, 0x76) : Windows.UI.Color.FromArgb(255, 0xA0, 0xA0, 0xA0));
                 for (int i = 0; i < 3; i++)
                 {
                     Children.Add(new Ellipse

@@ -7,45 +7,47 @@
 
     <Page.Resources>
         <DataTemplate x:Key="SwatchTemplate" x:DataType="core:AccentPalette">
-            <Grid Width="58" Height="58" Background="{x:Bind SwatchBrush}">
-                <TextBlock Text="{x:Bind Label}" FontSize="10" Foreground="White" VerticalAlignment="Bottom" Margin="4,0,2,3" TextWrapping="Wrap"/>
+            <Grid Width="50" Height="50" Background="{x:Bind SwatchBrush}">
+                <TextBlock Text="{x:Bind Label}" FontSize="9" Foreground="White" VerticalAlignment="Bottom" Margin="3,0,2,2" TextWrapping="Wrap"/>
                 <Border BorderBrush="{StaticResource TextPrimaryBrush}" BorderThickness="3" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
-                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="16" Height="16" Foreground="White"
+                <BitmapIcon UriSource="ms-appx:///Assets/Icons/Check.png" Width="14" Height="14" Foreground="White"
                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" Visibility="{x:Bind SelectedVisibility, Mode=OneWay}"/>
             </Grid>
         </DataTemplate>
         <Style x:Key="SwatchItem" TargetType="GridViewItem">
-            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="Margin" Value="0,0,4,4"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="MinWidth" Value="0"/>
             <Setter Property="MinHeight" Value="0"/>
         </Style>
+        <DataTemplate x:Key="ProviderTemplate" x:DataType="core:Provider">
+            <StackPanel Orientation="Horizontal">
+                <Border Width="24" Height="24" Background="{StaticResource AccentBrush}" Margin="0,0,10,0">
+                    <TextBlock Text="{x:Bind Initial}" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
         <Style x:Key="FeatureRow" TargetType="Grid">
-            <Setter Property="Margin" Value="0,0,0,22"/>
+            <Setter Property="Margin" Value="0,0,0,18"/>
         </Style>
     </Page.Resources>
 
-    <Page.BottomAppBar>
-        <CommandBar x:Name="BottomBar">
-            <AppBarButton x:Uid="XlSkipLabel" x:Name="SkipButton" Label="skip" Click="Skip_Click">
-                <AppBarButton.Icon><BitmapIcon UriSource="ms-appx:///Assets/Icons/Dismiss.png"/></AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarButton x:Uid="XlNextLabel" x:Name="NextButton" Label="next" Click="Next_Click">
-                <AppBarButton.Icon><BitmapIcon x:Name="NextIcon" UriSource="ms-appx:///Assets/Icons/ChevronRight.png"/></AppBarButton.Icon>
-            </AppBarButton>
-        </CommandBar>
-    </Page.BottomAppBar>
-
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
         <FlipView x:Name="Pages" Background="Transparent" SelectionChanged="Pages_SelectionChanged">
 
             <!-- 0. language -->
             <FlipViewItem>
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                    <StackPanel x:Name="LangPanel" Padding="12,14,12,24">
-                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}"/>
-                        <TextBlock x:Uid="XChooseYourLanguage" Text="Choose your language" Style="{StaticResource PageTitle}"/>
-                        <StackPanel x:Name="LangList" Margin="0,8,0,0"/>
+                    <StackPanel x:Name="LangPanel" Padding="0,18,0,24">
+                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="12,0,12,14"/>
+                        <TextBlock x:Uid="XChooseYourLanguage" Text="Choose your language" Style="{StaticResource PageTitle}" Margin="12,0,12,8"/>
+                        <StackPanel x:Name="LangList"/>
                     </StackPanel>
                 </ScrollViewer>
             </FlipViewItem>
@@ -59,11 +61,11 @@
                     </Grid.RowDefinitions>
                     <MediaElement x:Name="HeroVideo" Source="ms-appx:///Assets/Lumia735.mp4" AutoPlay="False" IsLooping="True"
                                   IsMuted="True" AreTransportControlsEnabled="False" Stretch="Uniform"/>
-                    <StackPanel x:Name="HeroText" Grid.Row="1" Padding="12,0,12,16">
-                        <TextBlock Text="lumen" FontSize="56" FontWeight="Light" Foreground="White" Margin="-3,-10,0,-4"/>
-                        <TextBlock x:Uid="XGoogleGeminiBackOnYourLumia" Text="Google Gemini, back on your Lumia." FontSize="20" FontWeight="SemiLight" TextWrapping="Wrap" Foreground="White"/>
+                    <StackPanel x:Name="HeroText" Grid.Row="1" Padding="12,0,12,12">
+                        <TextBlock Text="Lumen" FontSize="34" FontWeight="SemiLight" Foreground="White"/>
+                        <TextBlock x:Uid="XGeminiClaudeAndChatgptOnYourLumia" Text="Gemini, Claude and ChatGPT on your Lumia." FontSize="17" TextWrapping="Wrap" Foreground="White"/>
                         <TextBlock x:Uid="XChatTalkSnapPhotosCreateImagesAndFilesBu" Text="Chat, talk, snap photos, create images and files. Built for Windows 10 Mobile."
-                                   FontSize="14" TextWrapping="Wrap" Foreground="#FF9A9A9A" Margin="0,4,0,0"/>
+                                   FontSize="13" TextWrapping="Wrap" Foreground="#FFA0A0A0" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Grid>
             </FlipViewItem>
@@ -71,21 +73,29 @@
             <!-- 2. features -->
             <FlipViewItem>
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                    <StackPanel x:Name="FeaturesPanel" Padding="12,14,12,24">
-                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}"/>
-                        <TextBlock x:Uid="XEverythingGeminiCanDo" Text="Everything Gemini can do" Style="{StaticResource PageTitle}"/>
+                    <StackPanel x:Name="FeaturesPanel" Padding="12,18,12,24">
+                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="0,0,0,14"/>
+                        <TextBlock x:Uid="XOneAppEveryAssistant" Text="One app, every assistant" Style="{StaticResource PageTitle}"/>
 
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" Width="56" Height="56"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Chat.png" Width="28" Height="28" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Cloud.png" Width="20" Height="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
-                                <TextBlock x:Uid="XAskAnything" Text="Ask anything" Style="{StaticResource CardTitle}"/>
-                                <TextBlock x:Uid="XAnswersStreamInWordByWordAndGeminiChecks" Text="Answers stream in word by word, and Gemini checks Wikipedia for fresh facts." Style="{StaticResource HintText}"/>
+                                <TextBlock x:Uid="XPickYourAi" Text="Pick your AI" Style="{StaticResource CardTitle}"/>
+                                <TextBlock x:Uid="XGoogleGeminiFreeKeyAnthropicClaudeOpenai" Text="Google Gemini (free key), Anthropic Claude, OpenAI ChatGPT or any OpenAI compatible server. Switch from the top of a chat." Style="{StaticResource HintText}"/>
                             </StackPanel>
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" Width="56" Height="56"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Mic.png" Width="28" Height="28" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Chat.png" Width="20" Height="20" Foreground="White"/></Border>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Uid="XAskAnything" Text="Ask anything" Style="{StaticResource CardTitle}"/>
+                                <TextBlock x:Uid="XAnswersStreamInWordByWordWithFreeWikiped" Text="Answers stream in word by word, with free Wikipedia lookups for fresh facts." Style="{StaticResource HintText}"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Style="{StaticResource FeatureRow}">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Mic.png" Width="20" Height="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XJustTalk" Text="Just talk" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XSendAVoiceMessageAndHaveAnswersReadBackT" Text="Send a voice message, and have answers read back to you." Style="{StaticResource HintText}"/>
@@ -93,7 +103,7 @@
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" Width="56" Height="56"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Camera.png" Width="28" Height="28" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Camera.png" Width="20" Height="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XSnapOrPickAPhoto" Text="Snap or pick a photo" Style="{StaticResource CardTitle}"/>
                                 <TextBlock x:Uid="XShootWithTheCameraOrChooseFromYourGaller" Text="Shoot with the camera or choose from your gallery, then ask about it." Style="{StaticResource HintText}"/>
@@ -101,57 +111,47 @@
                         </Grid>
                         <Grid Style="{StaticResource FeatureRow}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" Width="56" Height="56"><BitmapIcon UriSource="ms-appx:///Assets/Icons/ImageSparkle.png" Width="28" Height="28" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/ImageSparkle.png" Width="20" Height="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XCreateImagesAndFiles" Text="Create images and files" Style="{StaticResource CardTitle}"/>
-                                <TextBlock x:Uid="XAskForAPictureOrADocumentLumenPicksTheRi" Text="Ask for a picture or a document: Lumen picks the right model and hands you the result to save or share." Style="{StaticResource HintText}"/>
+                                <TextBlock x:Uid="XAskForAPictureOrADocumentAndGetItInTheCh" Text="Ask for a picture or a document and get it in the chat, ready to save or share." Style="{StaticResource HintText}"/>
                             </StackPanel>
                         </Grid>
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource IconBadge}" Width="56" Height="56"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Lock.png" Width="28" Height="28" Foreground="White"/></Border>
+                            <Border Style="{StaticResource IconBadge}"><BitmapIcon UriSource="ms-appx:///Assets/Icons/Lock.png" Width="20" Height="20" Foreground="White"/></Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock x:Uid="XPrivateByDesign" Text="Private by design" Style="{StaticResource CardTitle}"/>
-                                <TextBlock x:Uid="XChatsStayOnThisPhoneYourKeySitsInTheWind" Text="Chats stay on this phone. Your key sits in the Windows credential locker." Style="{StaticResource HintText}"/>
+                                <TextBlock x:Uid="XChatsStayOnThisPhoneKeysSitInTheWindowsC" Text="Chats stay on this phone. Keys sit in the Windows credential locker and go only to the service you pick." Style="{StaticResource HintText}"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
             </FlipViewItem>
 
-            <!-- 3. key -->
+            <!-- 3. connect -->
             <FlipViewItem>
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                    <StackPanel x:Name="KeyPanel" Padding="12,14,12,24">
-                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}"/>
-                        <TextBlock x:Uid="XConnectGemini" Text="Connect Gemini" Style="{StaticResource PageTitle}"/>
-                        <TextBlock x:Uid="XLumenTalksToGoogleWithYourOwnGeminiApiKe" Text="Lumen talks to Google with your own Gemini API key. The free key takes a minute, no credit card. A paid key unlocks bigger models and image creation."
-                                   Style="{StaticResource HintText}" FontSize="15" Margin="0,0,0,16"/>
+                    <StackPanel x:Name="KeyPanel" Padding="12,18,12,24">
+                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="0,0,0,14"/>
+                        <TextBlock x:Uid="XConnectAnAiService" Text="Connect an AI service" Style="{StaticResource PageTitle}"/>
+                        <TextBlock x:Uid="XLumenTalksToTheServiceWithYourOwnApiKeyG" Text="Lumen talks to the service with your own API key. Gemini has a free key that takes a minute, no credit card."
+                                   Style="{StaticResource HintText}" FontSize="14" Margin="0,0,0,12"/>
 
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <TextBlock Text="1" FontSize="30" FontWeight="Light" Foreground="{StaticResource AccentBrush}" Width="30"/>
-                            <TextBlock x:Uid="XOpenGoogleAiStudioAndSignIn" Grid.Column="1" Text="Open Google AI Studio and sign in" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="16"/>
-                        </Grid>
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <TextBlock Text="2" FontSize="30" FontWeight="Light" Foreground="{StaticResource AccentBrush}" Width="30"/>
-                            <TextBlock x:Uid="XTapCreateApiKeyAndCopyIt" Grid.Column="1" Text="Tap Create API key and copy it" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="16"/>
-                        </Grid>
-                        <Grid Margin="0,0,0,14">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                            <TextBlock Text="3" FontSize="30" FontWeight="Light" Foreground="{StaticResource AccentBrush}" Width="30"/>
-                            <TextBlock x:Uid="XComeBackAndPasteItBelow" Grid.Column="1" Text="Come back and paste it below" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="16"/>
-                        </Grid>
-                        <Button x:Uid="XOpenGoogleAiStudioContent" Content="Open Google AI Studio" Click="OpenStudio_Click" Style="{StaticResource AccentButton}" Margin="0,0,0,18"/>
+                        <ComboBox x:Uid="XServiceHeader" x:Name="ProviderCombo" Header="Service" HorizontalAlignment="Stretch"
+                                  ItemTemplate="{StaticResource ProviderTemplate}" SelectionChanged="ProviderCombo_SelectionChanged"/>
+                        <TextBlock x:Name="ProviderHint" Style="{StaticResource HintText}" Margin="0,6,0,0"/>
+                        <Button x:Uid="XGetAKeyContent" x:Name="GetKeyButton" Content="Get a key" Click="OpenStudio_Click" Style="{StaticResource AccentButton}" Margin="0,6,0,14"/>
 
-                        <PasswordBox x:Uid="XPasteYourKeyAizaPlaceholderText" x:Name="KeyBox" PlaceholderText="Paste your key (AIza...)"/>
+                        <TextBox x:Uid="XApiEndpointHeader" x:Name="EndpointBox" Header="API endpoint" IsSpellCheckEnabled="False" InputScope="Url" Margin="0,0,0,12"
+                                 PlaceholderText="https://openrouter.ai/api/v1" Visibility="Collapsed"/>
+                        <PasswordBox x:Uid="XApiKeyHeader" x:Name="KeyBox" Header="API key"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <Button x:Uid="XCheckKeyContent" x:Name="VerifyButton" Content="Check key" Click="Verify_Click" Style="{StaticResource AccentButton}"/>
                             <ProgressRing x:Name="VerifyRing" Width="22" Height="22" Margin="14,0,0,0" Foreground="{StaticResource AccentBrush}"/>
                         </StackPanel>
-                        <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,12,0,0"/>
-                        <TextBlock x:Uid="XYouCanAlsoSkipThisAndAddTheKeyLaterInSet" Text="You can also skip this and add the key later in Settings." Style="{StaticResource HintText}"/>
+                        <TextBlock x:Name="VerifyStatus" Style="{StaticResource HintText}" Margin="0,10,0,0"/>
+                        <TextBlock x:Uid="XYouCanAlsoSkipThisAndAddKeysLaterInSetti" Text="You can also skip this and add keys later in Settings." Style="{StaticResource HintText}"/>
                     </StackPanel>
                 </ScrollViewer>
             </FlipViewItem>
@@ -159,11 +159,11 @@
             <!-- 4. theme -->
             <FlipViewItem>
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                    <StackPanel x:Name="ThemePanel" Padding="12,14,12,24">
-                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}"/>
+                    <StackPanel x:Name="ThemePanel" Padding="12,18,12,24">
+                        <TextBlock Text="LUMEN" Style="{StaticResource AppTitle}" Margin="0,0,0,14"/>
                         <TextBlock x:Uid="XMakeItYours" Text="Make it yours" Style="{StaticResource PageTitle}"/>
                         <ToggleSwitch x:Uid="XLightThemeHeader" x:Name="ThemeToggle" Header="Light theme" Toggled="ThemeToggle_Toggled"/>
-                        <TextBlock x:Uid="XAccentColor" Text="Accent color" Margin="0,12,0,8"/>
+                        <TextBlock x:Uid="XChooseYourAccentColor" Text="Choose your accent color" Style="{StaticResource SectionHeader}" Margin="0,12,0,8"/>
                         <GridView x:Name="Swatches" ItemTemplate="{StaticResource SwatchTemplate}" ItemContainerStyle="{StaticResource SwatchItem}"
                                   SelectionMode="None" IsItemClickEnabled="True" ItemClick="Swatches_ItemClick" Padding="0"
                                   ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
@@ -179,7 +179,7 @@
                             <StackPanel HorizontalAlignment="Left" Margin="0,0,60,0">
                                 <Polygon Points="0,0 0,12 16,12" Fill="{StaticResource ModelBubbleSolid}" HorizontalAlignment="Left" Margin="14,0,0,0"/>
                                 <Border Background="{StaticResource ModelBubbleSolid}" Padding="12,8">
-                                    <TextBlock x:Uid="XVeryLetSGo" Text="Very. Let's go!" Foreground="White"/>
+                                    <TextBlock x:Uid="XVeryLetSGo" Text="Very. Let's go!" Foreground="{StaticResource TextPrimaryBrush}"/>
                                 </Border>
                             </StackPanel>
                         </StackPanel>
@@ -188,13 +188,27 @@
             </FlipViewItem>
         </FlipView>
 
-        <!-- page dots: small squares, top right -->
-        <StackPanel x:Name="Dots" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,14,0">
-            <Border Height="6" Width="6" Margin="0,0,5,0" Background="{StaticResource AccentBrush}"/>
-            <Border Height="6" Width="6" Margin="0,0,5,0" Background="{StaticResource StrokeBrush}"/>
-            <Border Height="6" Width="6" Margin="0,0,5,0" Background="{StaticResource StrokeBrush}"/>
-            <Border Height="6" Width="6" Margin="0,0,5,0" Background="{StaticResource StrokeBrush}"/>
-            <Border Height="6" Width="6" Background="{StaticResource StrokeBrush}"/>
-        </StackPanel>
+        <!-- Bottom bar: page dots, skip, next (W10M setup style) -->
+        <Grid Grid.Row="1" Background="{StaticResource ChromeBrush}" Padding="12,8,12,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel x:Name="Dots" Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse Height="7" Width="7" Margin="0,0,6,0" Fill="{StaticResource AccentBrush}"/>
+                <Ellipse Height="7" Width="7" Margin="0,0,6,0" Fill="{StaticResource StrokeBrush}"/>
+                <Ellipse Height="7" Width="7" Margin="0,0,6,0" Fill="{StaticResource StrokeBrush}"/>
+                <Ellipse Height="7" Width="7" Margin="0,0,6,0" Fill="{StaticResource StrokeBrush}"/>
+                <Ellipse Height="7" Width="7" Fill="{StaticResource StrokeBrush}"/>
+            </StackPanel>
+            <Button x:Uid="XSkipContent" x:Name="SkipButton" Grid.Column="1" Content="Skip" Click="Skip_Click" Style="{StaticResource ChipButton}" MinHeight="34" Padding="14,6" Margin="0,0,8,0"/>
+            <Button x:Name="NextButton" Grid.Column="2" Click="Next_Click" Style="{StaticResource AccentButton}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Uid="XNext" x:Name="NextText" Text="Next"/>
+                    <BitmapIcon x:Name="NextIcon" UriSource="ms-appx:///Assets/Icons/ChevronRight.png" Width="14" Height="14" Margin="8,1,0,0" Foreground="White"/>
+                </StackPanel>
+            </Button>
+        </Grid>
     </Grid>
 </Page>

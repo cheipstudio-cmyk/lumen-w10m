@@ -26,7 +26,6 @@ namespace Lumen
 {
     public sealed partial class MainPage : Page, IBackAware
     {
-        private static GeminiClient Client { get { return GeminiClient.Shared; } }
 
         private readonly ObservableCollection<ConversationInfo> _conversations = new ObservableCollection<ConversationInfo>();
         private Conversation _conv;
@@ -52,7 +51,6 @@ namespace Lumen
         public MainPage()
         {
             InitializeComponent();
-            AppBar.RequestedTheme = ThemeManager.Theme;
             ConversationsList.ItemsSource = _conversations;
             _conversations.CollectionChanged += (s, e) => UpdateDrawerEmpty();
             // handledEventsToo: the multi-line TextBox would otherwise swallow Enter.
@@ -66,41 +64,31 @@ namespace Lumen
             // Subscribed only while on screen: pages rebuilt by a language/theme switch must not answer share requests.
             Loaded += (s, a) => DataTransferManager.GetForCurrentView().DataRequested += OnShareRequested;
             Unloaded += (s, a) => DataTransferManager.GetForCurrentView().DataRequested -= OnShareRequested;
-            SuggestionsPanel.SizeChanged += (s, a) =>
-            {
-                // Square live tiles.
-                var side = Math.Max(110, Math.Min(190, a.NewSize.Width / 2 - 8));
-                foreach (var child in SuggestionsPanel.Children) ((FrameworkElement)child).Height = side;
-            };
             StartNewConversation();
         }
 
         /// <summary>True while any MainPage is streaming an answer (language/theme switches wait for it).</summary>
         public static bool IsBusy { get; private set; }
 
-        /// <summary>Live tile content: icon top-left, text bottom-left, like the Start screen.</summary>
+        /// <summary>Suggestion row: accent icon in the 48 px icon column, text beside it (W10M list item).</summary>
         private static UIElement SuggestionContent(Uri icon, string text)
         {
             var g = new Grid();
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(36) });
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             g.Children.Add(new BitmapIcon
             {
                 UriSource = icon,
-                Width = 30,
-                Height = 30,
-                Foreground = new SolidColorBrush(Windows.UI.Colors.White),
+                Width = 20,
+                Height = 20,
+                Foreground = (Brush)Application.Current.Resources["AccentTextBrush"],
                 HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 1, 0, 0)
             });
-            g.Children.Add(new TextBlock
-            {
-                Text = text,
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Windows.UI.Colors.White),
-                VerticalAlignment = VerticalAlignment.Bottom,
-                MaxLines = 4,
-                TextTrimming = TextTrimming.CharacterEllipsis
-            });
+            var t = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, FontSize = 15 };
+            Grid.SetColumn(t, 1);
+            g.Children.Add(t);
             return g;
         }
 
@@ -143,7 +131,7 @@ namespace Lumen
 
         public bool HandleBack()
         {
-            if (MainPivot.SelectedIndex != 0) { MainPivot.SelectedIndex = 0; return true; }
+            if (Shell.IsPaneOpen) { Shell.IsPaneOpen = false; return true; }
             if (_recorder.IsRecording) { var t = FinishRecordingAsync(false); return true; }
             if (_share != null)
             {
@@ -159,6 +147,7 @@ namespace Lumen
             ModelLabel.Text = AppSettings.ModelDisplayName;
             NoKeyCard.Visibility = AppSettings.HasApiKey ? Visibility.Collapsed : Visibility.Visible;
             SuggestionsPanel.Visibility = AppSettings.HasApiKey ? Visibility.Visible : Visibility.Collapsed;
+            SuggestHeader.Visibility = SuggestionsPanel.Visibility;
             GreetingText.Text = Greeting();
             MessagesList.FontSize = ThemeManager.MessageFontSize;
             MessagesList.ItemContainerTransitions = Fx.Enabled
@@ -220,7 +209,7 @@ namespace Lumen
             var list = ConversationsList.ItemsSource as System.Collections.ICollection;
             var none = list == null || list.Count == 0;
             NoChats.Visibility = none ? Visibility.Visible : Visibility.Collapsed;
-            NoChatsText.Text = string.IsNullOrWhiteSpace(SearchBox.Text) ? S.NoChatsYet : S.NothingFound;
+            NoChats.Text = string.IsNullOrWhiteSpace(SearchBox.Text) ? S.NoChatsYet : S.NothingFound;
         }
 
         private async Task PersistAsync()
@@ -266,9 +255,10 @@ namespace Lumen
             text = (text ?? "").Trim();
             if (text.Length == 0 && _pendingImage == null && audioFile == null) return;
 
-            if (!AppSettings.HasApiKey)
+            if (!AppSettings.HasApiKey || string.IsNullOrEmpty(AppSettings.Model))
             {
-                Frame.Navigate(typeof(SettingsPage));
+                // No key yet, or a custom server whose models were never listed: open the AI service page.
+                Frame.Navigate(typeof(SettingsPage), "ai");
                 return;
             }
 
@@ -338,13 +328,13 @@ namespace Lumen
             timer.Tick += (s, e) => pump();
             timer.Start();
 
-            string apiKey = AppSettings.ApiKey, baseUrl = AppSettings.BaseUrl, model = AppSettings.Model, system = AppSettings.SystemPrompt;
+            string provider = AppSettings.ProviderId, apiKey = AppSettings.ApiKey, baseUrl = AppSettings.BaseUrl, model = AppSettings.Model, system = AppSettings.SystemPrompt;
             double temp = AppSettings.Temperature;
             var tools = new ToolOptions { Wikipedia = AppSettings.Wikipedia, Creative = AppSettings.Creative };
 
             try
             {
-                var result = await Task.Run(() => Client.StreamAsync(apiKey, baseUrl, model, system, temp, tools, history,
+                var result = await Task.Run(() => Ai.StreamAsync(provider, apiKey, baseUrl, model, system, temp, tools, history,
                     delta => { lock (gate) { buffer.Append(delta); dirty = true; } },
                     st => { lock (gate) { status = st; statusDirty = true; } },
                     art => { lock (gate) { artifacts.Add(art); } },
@@ -408,7 +398,6 @@ namespace Lumen
         {
             _busy = busy;
             IsBusy = busy;
-            ModelButton.IsEnabled = !busy;
             UpdateBarState();
             BusyBar.IsIndeterminate = busy;
             BusyBar.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
@@ -424,11 +413,7 @@ namespace Lumen
             else if (InputBox.Text.Trim().Length > 0 || _pendingImage != null) glyph = Icons.Send;
             else glyph = Icons.Mic;
 
-            if (SendGlyph.UriSource != glyph)
-            {
-                SendGlyph.UriSource = glyph;
-                SendButton.Label = _busy ? S.LabelStop : glyph == Icons.Mic ? S.LabelVoice : S.LabelSend;
-            }
+            if (SendGlyph.UriSource != glyph) SendGlyph.UriSource = glyph;
         }
 
         // ================================================================ voice
@@ -436,6 +421,12 @@ namespace Lumen
         private async Task StartRecordingAsync()
         {
             StopPlayback();
+            if (!AppSettings.Provider.Audio && !AppSettings.HasKeyFor("gemini"))
+            {
+                // Claude and ChatGPT can't hear audio here: a free Gemini key turns voice notes into text.
+                ShowToast(Icons.Mic, S.VoiceNeedsGemini, true);
+                return;
+            }
             try
             {
                 await _recorder.StartAsync();
@@ -482,7 +473,51 @@ namespace Lumen
             UpdateSendState();
             if (!send) return;
             if (result == null) { ShowToast(Icons.Mic, S.TooShort); return; }
-            await SendAsync(InputBox.Text, result.Item1, result.Item2);
+
+            var transcript = "";
+            if (!AppSettings.Provider.Audio)
+            {
+                transcript = await TranscribeAsync(result.Item1);
+                if (transcript == null)
+                {
+                    await AudioRecorder.DeleteAsync(new[] { result.Item1 });
+                    return;
+                }
+            }
+            // Read the box only now: the user may have typed while the voice was being transcribed.
+            var text = (InputBox.Text + " " + transcript).Trim();
+            await SendAsync(text, result.Item1, result.Item2);
+        }
+
+        /// <summary>
+        /// Claude and ChatGPT can't hear audio here: a free Gemini key turns the voice note into text.
+        /// Returns null when it failed (the user has already been told).
+        /// </summary>
+        private async Task<string> TranscribeAsync(string audioFile)
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            _cts = cts;
+            SetBusy(true);
+            ShowToast(Icons.Mic, S.Transcribing);
+            try
+            {
+                var b64 = await ImageHelper.ReadBase64Async("audio", audioFile);
+                string key = AppSettings.KeyFor("gemini"), url = AppSettings.BaseUrlFor("gemini");
+                var transcript = b64 == null ? "" : await Task.Run(() => GeminiClient.Shared.TranscribeAsync(key, url, b64, cts.Token));
+                if (transcript.Length == 0) throw new InvalidOperationException();
+                return transcript;
+            }
+            catch (Exception)
+            {
+                ShowToast(Icons.Warning, S.TranscribeFailed, true);
+                return null;
+            }
+            finally
+            {
+                if (_cts == cts) _cts = null;
+                cts.Dispose();
+                SetBusy(false);
+            }
         }
 
         private MediaPlayer Player
@@ -812,20 +847,14 @@ namespace Lumen
 
         // ================================================================ header & drawer
 
-        private void MainPivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Hamburger_Click(object sender, RoutedEventArgs e)
         {
-            if (Composer == null || SendButton == null) return;
-            var chat = MainPivot.SelectedIndex == 0;
-            Composer.Visibility = chat ? Visibility.Visible : Visibility.Collapsed;
-            UpdateBarState();
+            Shell.IsPaneOpen = !Shell.IsPaneOpen;
         }
 
-        /// <summary>Send/attach only make sense on the chat pivot, but Stop must stay reachable everywhere.</summary>
         private void UpdateBarState()
         {
-            var chat = MainPivot.SelectedIndex == 0;
-            SendButton.IsEnabled = chat || _busy;
-            AttachButton.IsEnabled = chat && !_busy;
+            AttachButton.IsEnabled = !_busy;
         }
 
         private void Tour_Click(object sender, RoutedEventArgs e)
@@ -836,26 +865,45 @@ namespace Lumen
 
         private void ModelButton_Click(object sender, RoutedEventArgs e)
         {
-            // Quick model switch without going to Settings.
+            if (_busy) return;
+            // Quick switch between every model of every connected service, without going to Settings.
             var flyout = ThemeManager.Themed(new MenuFlyout());
-            var current = AppSettings.Model;
-            foreach (var m in AppSettings.Models)
+            var connected = Providers.All.Where(p => p.Id == AppSettings.ProviderId || AppSettings.HasKeyFor(p.Id)
+                || (p.Id == "custom" && AppSettings.HasBaseUrlFor("custom"))).ToList();
+            foreach (var p in connected)
             {
-                var item = new ToggleMenuFlyoutItem { Text = m.DisplayName, IsChecked = m.Id == current, Tag = m.Id };
-                item.Click += (s, a) =>
+                if (connected.Count > 1)
                 {
-                    AppSettings.Model = (string)((FrameworkElement)s).Tag;
-                    ModelLabel.Text = AppSettings.ModelDisplayName;
-                    ShowToast(Icons.Model, string.Format(S.NowUsing, AppSettings.ModelDisplayName));
-                };
-                flyout.Items.Add(item);
+                    if (flyout.Items.Count > 0) flyout.Items.Add(new MenuFlyoutSeparator());
+                    flyout.Items.Add(new MenuFlyoutItem { Text = p.Name.ToUpperInvariant(), IsEnabled = false, FontSize = 12 });
+                }
+                var currentModel = AppSettings.ModelFor(p.Id);
+                foreach (var m in AppSettings.ModelsFor(p.Id))
+                {
+                    var item = new ToggleMenuFlyoutItem
+                    {
+                        Text = m.DisplayName,
+                        IsChecked = p.Id == AppSettings.ProviderId && m.Id == currentModel,
+                        Tag = p.Id + "\n" + m.Id
+                    };
+                    item.Click += (s, a) =>
+                    {
+                        var parts = ((string)((FrameworkElement)s).Tag).Split('\n');
+                        AppSettings.ProviderId = parts[0];
+                        AppSettings.Model = parts[1];
+                        ModelLabel.Text = AppSettings.ModelDisplayName;
+                        ShowToast(Icons.Model, string.Format(S.NowUsing, AppSettings.ModelDisplayName));
+                        ApplyPreferences();
+                    };
+                    flyout.Items.Add(item);
+                }
             }
             flyout.ShowAt(ModelButton);
         }
 
         private void NewChat_Click(object sender, RoutedEventArgs e)
         {
-            MainPivot.SelectedIndex = 0;
+            Shell.IsPaneOpen = false;
             if (_busy) return;
             StopPlayback();
             StartNewConversation();
@@ -863,12 +911,13 @@ namespace Lumen
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
+            Shell.IsPaneOpen = false;
             Frame.Navigate(typeof(SettingsPage));
         }
 
         private async void Conversation_ItemClick(object sender, ItemClickEventArgs e)
         {
-            MainPivot.SelectedIndex = 0;
+            Shell.IsPaneOpen = false;
             var info = e.ClickedItem as ConversationInfo;
             if (info != null) await OpenConversationAsync(info);
         }
@@ -1077,7 +1126,14 @@ namespace Lumen
             if (!string.IsNullOrEmpty(msg.AudioFile) && string.IsNullOrEmpty(msg.Text))
             {
                 if (!string.IsNullOrEmpty(msg.ImageFile)) SetPendingImage(msg.ImageFile);
-                await SendAsync("", msg.AudioFile, msg.AudioSeconds);
+                var transcript = "";
+                if (!AppSettings.Provider.Audio)
+                {
+                    if (!AppSettings.HasKeyFor("gemini")) { ShowToast(Icons.Mic, S.VoiceNeedsGemini, true); UpdateEmptyState(); return; }
+                    transcript = await TranscribeAsync(msg.AudioFile);
+                    if (transcript == null) { UpdateEmptyState(); return; }
+                }
+                await SendAsync(transcript, msg.AudioFile, msg.AudioSeconds);
                 return;
             }
 

@@ -26,15 +26,20 @@ namespace Lumen.Core
         // XAML objects are bound to the thread that created them; the share window runs on its own thread.
         [ThreadStatic] private static FontFamily _mono;
         [ThreadStatic] private static Brush _codeBrush, _quoteBrush, _linkBrush;
+        [ThreadStatic] private static string _brushKey;
 
         private static void EnsureBrushes()
         {
-            if (_mono != null) return;
+            // Text sits on the grey Messaging bubble: links and code in the accent, quotes in the secondary grey.
+            var accent = ThemeManager.Accent;
+            var light = AppSettings.LightTheme;
+            var key = accent.ToString() + light;
+            if (_mono != null && key == _brushKey) return;
+            _brushKey = key;
             _mono = new FontFamily("Consolas");
-            _codeBrush = new SolidColorBrush(Color.FromArgb(255, 0xFF, 0xE0, 0xA0));
-            _quoteBrush = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF));
-            // Text sits on the accent bubble: links are white and underlined, quotes a softer white.
-            _linkBrush = new SolidColorBrush(Color.FromArgb(255, 0xFF, 0xFF, 0xFF));
+            _linkBrush = new SolidColorBrush(light ? ThemeManager.Darken(accent, 0.15) : ThemeManager.Lighten(accent, 0.25));
+            _codeBrush = _linkBrush;
+            _quoteBrush = new SolidColorBrush(light ? Color.FromArgb(255, 0x5A, 0x5A, 0x5A) : Color.FromArgb(255, 0xB0, 0xB0, 0xB0));
         }
 
         private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

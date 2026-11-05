@@ -101,6 +101,9 @@
     <Compile Include="Core\WikipediaClient.cs" />
     <Compile Include="Core\ChatStore.cs" />
     <Compile Include="Core\GeminiClient.cs" />
+    <Compile Include="Core\Providers.cs" />
+    <Compile Include="Core\AnthropicClient.cs" />
+    <Compile Include="Core\OpenAIClient.cs" />
     <Compile Include="Core\ImageHelper.cs" />
     <Compile Include="Core\Markdown.cs" />
     <Compile Include="Core\Models.cs" />
